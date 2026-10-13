@@ -1,4 +1,8 @@
 using Futsal.Domain.Locations;
+using Futsal.Api.Contracts;
+using Futsal.Domain.Bookings;
+using Futsal.Api.Bookings;
+using Futsal.Application.Abstractions;
 using Futsal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +12,7 @@ namespace Futsal.Api.Controllers;
 public sealed record PublicVenueResult(Guid Id,string Name,string LocationPath,string Slug,double? DistanceKm,decimal? LowestPrice,string? PhotoPlaceholder,int CourtCount,string[] Surfaces,string[] AmenityCodes);
 
 [ApiController, Route("api/v1/public")]
-public sealed class PublicLocationsController(FutsalDbContext db) : ControllerBase
+public sealed class PublicLocationsController(FutsalDbContext db,IClock clock,BookingPricing pricing) : ControllerBase
 {
     [HttpGet("locations")]
     public async Task<IActionResult> Locations([FromQuery] Guid? parentId, [FromQuery] LocationType? type, CancellationToken ct)
@@ -49,7 +53,7 @@ public sealed class PublicLocationsController(FutsalDbContext db) : ControllerBa
                 return BadRequest(new { code="VALIDATION_FAILED", title="near must be latitude,longitude within Nepal." });
             point = (lat,lng);
         }
-        var query = db.Venues.IgnoreQueryFilters().AsNoTracking().Where(v => v.IsPublic && db.Locations.Any(l => l.Id == v.LocationId && l.IsActive));
+        var query = db.Venues.IgnoreQueryFilters().AsNoTracking().Where(v => v.IsPublic && v.IsActive && db.Locations.Any(l => l.Id == v.LocationId && l.IsActive));
         if (!string.IsNullOrWhiteSpace(city))
         {
             var cityId = Guid.TryParse(city, out var parsedCity) ? parsedCity : await db.Locations.Where(l=>l.IsActive && l.Type==LocationType.CITY && l.Slug==city).Select(l=>(Guid?)l.Id).SingleOrDefaultAsync(ct);
@@ -74,6 +78,37 @@ public sealed class PublicLocationsController(FutsalDbContext db) : ControllerBa
         if (point is { } p) items = items.Where(x => x.DistanceKm is not null && (radiusKm is null || x.DistanceKm <= radiusKm)).ToList();
         items = (sort?.ToLowerInvariant()) switch { "distance" when point is not null => items.OrderBy(x=>x.DistanceKm).ToList(), "price" => items.OrderBy(x=>x.LowestPrice).ToList(), "name" => items.OrderBy(x=>x.Name).ToList(), _ => items };
         return Ok(items);
+    }
+
+    [HttpGet("venues/{slug}/availability")]
+    public async Task<IActionResult> Availability(string slug,[FromQuery]DateOnly? date,CancellationToken ct)
+    {
+        if(date is null)throw new Futsal.Api.Identity.ApiException(400,"VALIDATION_FAILED","date is required in YYYY-MM-DD format.");
+        var day=date.Value;
+        var venue=await db.Venues.IgnoreQueryFilters().AsNoTracking().SingleOrDefaultAsync(v=>v.Slug==slug&&v.IsPublic&&v.IsActive&&db.Locations.Any(l=>l.Id==v.LocationId&&l.IsActive),ct);
+        if(venue is null)return NotFound();
+        var zone=TimeZoneInfo.FindSystemTimeZoneById(venue.Timezone);var weekday=(short)day.DayOfWeek;
+        var courts=await db.Courts.IgnoreQueryFilters().Where(c=>c.VenueId==venue.Id&&c.IsActive).ToListAsync(ct);
+        var output=new List<AvailabilitySlot>();
+        foreach(var court in courts)
+        {
+            var hours=await db.CourtHours.AsNoTracking().SingleOrDefaultAsync(x=>x.CourtId==court.Id&&x.Weekday==weekday,ct);if(hours is null)continue;
+            // TimeOnly values are wall times; construct them in the venue zone before converting to UTC.
+            var openUtc=new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(day.ToDateTime(hours.OpenTime),DateTimeKind.Unspecified),zone),TimeSpan.Zero);
+            var closeUtc=new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(day.ToDateTime(hours.CloseTime),DateTimeKind.Unspecified),zone),TimeSpan.Zero);
+            var bookings=await db.Bookings.IgnoreQueryFilters().Where(b=>b.CourtId==court.Id&&b.StartAt<closeUtc&&b.EndAt>openUtc&&b.Status!=BookingStatus.CANCELLED&&b.Status!=BookingStatus.EXPIRED)
+                .Select(b=>new{b.StartAt,b.EndAt,b.Status,b.HoldExpiresAt}).ToListAsync(ct);
+            var blocks=await db.BlockedPeriods.IgnoreQueryFilters().Where(b=>b.CourtId==court.Id&&b.StartAt<closeUtc&&b.EndAt>openUtc).Select(b=>new{b.StartAt,b.EndAt}).ToListAsync(ct);
+            for(var start=openUtc;start.AddMinutes(court.SlotMinutes)<=closeUtc;start=start.AddMinutes(court.SlotMinutes))
+            {
+                var end=start.AddMinutes(court.SlotMinutes);var status=blocks.Any(b=>b.StartAt<end&&b.EndAt>start)?"BLOCKED":"FREE";
+                var booking=bookings.FirstOrDefault(b=>b.StartAt<end&&b.EndAt>start&&(b.Status!=BookingStatus.HELD||b.HoldExpiresAt>clock.UtcNow));
+                if(booking is not null)status=booking.Status==BookingStatus.HELD?"HELD":"BOOKED";
+                var price=await pricing.CalculateAsync(court,start,end,venue,null,ct);
+                output.Add(new AvailabilitySlot(court.Id,court.Name,start,end,status,price.Total));
+            }
+        }
+        return Ok(output);
     }
 
     private static async Task<List<PublicVenueResult>> VenueResults(IQueryable<Venue> query, (double Lat,double Lng)? point, CancellationToken ct)

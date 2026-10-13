@@ -1,6 +1,7 @@
 using System.Text;
 using System.Threading.RateLimiting;
 using Futsal.Api.Authorization;
+using Futsal.Api.Bookings;
 using Futsal.Api.Identity;
 using Futsal.Api.Locations;
 using Futsal.Api.Middleware;
@@ -9,6 +10,7 @@ using Futsal.Domain.Identity;
 using Futsal.Infrastructure;
 using Futsal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +41,11 @@ builder.Services.AddSingleton<IOtpSender, FakeOtpSender>();
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DevelopmentSeeder>();
+builder.Services.AddScoped<BookingPricing>();
+builder.Services.AddScoped<BookingService>();
+builder.Services.AddSingleton<IBookingNotifier,NoopBookingNotifier>();
+builder.Services.AddHostedService<ExpireHoldsBackgroundService>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateHoldRequestValidator>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Futsal.Api.Identity;
+using Futsal.Domain.Bookings;
+using Microsoft.EntityFrameworkCore;
 
 namespace Futsal.Api.Middleware;
 
@@ -18,6 +20,8 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
             var (status, code, title) = exception switch
             {
                 ApiException apiException => (apiException.StatusCode, apiException.Code, apiException.Message),
+                BookingDomainException domainException => (StatusCodes.Status409Conflict, domainException.Code, domainException.Message),
+                DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "CONCURRENCY_CONFLICT", "This record was changed by another request. Reload and try again."),
                 UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "FORBIDDEN", "You are not allowed to perform this action."),
                 _ => (StatusCodes.Status500InternalServerError, "INTERNAL_ERROR", "An unexpected error occurred.")
             };

@@ -8,6 +8,7 @@ public sealed class Court
     public string Name { get; set; } = "";
     public string? Surface { get; set; }
     public decimal PricePerSlot { get; set; }
+    public int SlotMinutes { get; set; } = 60;
     public bool IsActive { get; set; } = true;
     public Venue Venue { get; set; } = null!;
 }

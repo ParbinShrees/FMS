@@ -21,11 +21,462 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                 .HasAnnotation("ProductVersion", "10.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking_source", new[] { "ONLINE", "STAFF", "RECURRING" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "booking_status", new[] { "HELD", "CONFIRMED", "COMPLETED", "CANCELLED", "EXPIRED", "NO_SHOW" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "member_role", new[] { "OWNER", "MANAGER", "CASHIER" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment_method", new[] { "CASH", "ESEWA", "KHALTI", "FONEPAY", "BANK", "OTHER" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment_status", new[] { "PENDING", "COMPLETED", "FAILED", "NEEDS_REFUND", "REFUNDED" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gist");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pgcrypto");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.BlockedPeriod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("CourtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("court_id");
+
+                    b.Property<DateTimeOffset>("EndAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_at");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTimeOffset>("StartAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourtId");
+
+                    b.ToTable("blocked_periods", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_blocked_periods_time", "end_at > start_at");
+                        });
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.Booking", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal>("AdvanceRequired")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("advance_required");
+
+                    b.Property<string>("BookingCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("booking_code");
+
+                    b.Property<string>("CancelReason")
+                        .HasColumnType("text")
+                        .HasColumnName("cancel_reason");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled_at");
+
+                    b.Property<Guid>("CourtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("court_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("discount_amount");
+
+                    b.Property<DateTimeOffset>("EndAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_at");
+
+                    b.Property<DateTimeOffset?>("HoldExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("hold_expires_at");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<decimal>("PaidAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("paid_amount");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("booking_source")
+                        .HasColumnName("source");
+
+                    b.Property<DateTimeOffset>("StartAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_at");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("booking_status")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("total_amount");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingCode")
+                        .IsUnique();
+
+                    b.HasIndex("CourtId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_bookings_customer");
+
+                    b.HasIndex("HoldExpiresAt")
+                        .HasDatabaseName("ix_bookings_hold")
+                        .HasFilter("status = 'HELD'");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("VenueId", "StartAt")
+                        .HasDatabaseName("ix_bookings_venue_start");
+
+                    b.ToTable("bookings", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_bookings_paid", "paid_amount >= 0");
+
+                            t.HasCheckConstraint("ck_bookings_time", "end_at > start_at");
+                        });
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.CourtHour", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<TimeOnly>("CloseTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("close_time");
+
+                    b.Property<Guid>("CourtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("court_id");
+
+                    b.Property<TimeOnly>("OpenTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("open_time");
+
+                    b.Property<short>("Weekday")
+                        .HasColumnType("smallint")
+                        .HasColumnName("weekday");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourtId", "Weekday")
+                        .IsUnique();
+
+                    b.ToTable("court_hours", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_court_hours_weekday", "weekday between 0 and 6");
+                        });
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.Customer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("discount_percent");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("full_name");
+
+                    b.Property<bool>("IsRegular")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_regular");
+
+                    b.Property<int>("NoShowCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("no_show_count");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phone");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("OrganizationId", "Phone")
+                        .IsUnique();
+
+                    b.ToTable("customers", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_customers_discount", "discount_percent >= 0 AND discount_percent <= 100");
+                        });
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.IdempotencyKey", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Endpoint")
+                        .HasColumnType("text")
+                        .HasColumnName("endpoint");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("request_hash");
+
+                    b.Property<string>("ResponseBody")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("response_body");
+
+                    b.Property<int?>("ResponseStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("response_status");
+
+                    b.HasKey("Key", "UserId", "Endpoint");
+
+                    b.ToTable("idempotency_keys", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("GatewayRef")
+                        .HasColumnType("text")
+                        .HasColumnName("gateway_ref");
+
+                    b.Property<string>("GatewayTxnUuid")
+                        .HasColumnType("text")
+                        .HasColumnName("gateway_txn_uuid");
+
+                    b.Property<int>("Method")
+                        .HasColumnType("payment_method")
+                        .HasColumnName("method");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("RawResponse")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("raw_response");
+
+                    b.Property<Guid?>("ReceivedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("received_by");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("payment_status")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("GatewayTxnUuid")
+                        .IsUnique();
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("ReceivedBy");
+
+                    b.ToTable("payments", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_payments_nonzero", "amount <> 0");
+                        });
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.PricingRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("CourtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("court_id");
+
+                    b.Property<TimeOnly>("FromTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("from_time");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<decimal>("PricePerSlot")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("price_per_slot");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("priority");
+
+                    b.Property<TimeOnly>("ToTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("to_time");
+
+                    b.Property<DateOnly?>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.PrimitiveCollection<short[]>("Weekdays")
+                        .IsRequired()
+                        .HasColumnType("smallint[]")
+                        .HasColumnName("weekdays");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourtId");
+
+                    b.ToTable("pricing_rules", (string)null);
+                });
 
             modelBuilder.Entity("Futsal.Domain.Identity.AppUser", b =>
                 {
@@ -366,6 +817,12 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasColumnType("numeric(12,2)")
                         .HasColumnName("price_per_slot");
 
+                    b.Property<int>("SlotMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(60)
+                        .HasColumnName("slot_minutes");
+
                     b.Property<string>("Surface")
                         .HasColumnType("text")
                         .HasColumnName("surface");
@@ -463,9 +920,41 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address");
 
+                    b.Property<string>("AdvanceType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("PERCENT")
+                        .HasColumnName("advance_type");
+
+                    b.Property<decimal>("AdvanceValue")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(30m)
+                        .HasColumnName("advance_value");
+
                     b.Property<Guid>("CityId")
                         .HasColumnType("uuid")
                         .HasColumnName("city_id");
+
+                    b.Property<int>("FreeCancelHours")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(6)
+                        .HasColumnName("free_cancel_hours");
+
+                    b.Property<int>("HoldMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(10)
+                        .HasColumnName("hold_minutes");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean")
@@ -501,6 +990,13 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("slug");
 
+                    b.Property<string>("Timezone")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Asia/Kathmandu")
+                        .HasColumnName("timezone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LocationId");
@@ -530,6 +1026,97 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.HasIndex("AmenityId");
 
                     b.ToTable("venue_amenities", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.BlockedPeriod", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Court", null)
+                        .WithMany()
+                        .HasForeignKey("CourtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.Booking", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Court", null)
+                        .WithMany()
+                        .HasForeignKey("CourtId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Futsal.Domain.Bookings.Customer", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", null)
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.CourtHour", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Court", null)
+                        .WithMany()
+                        .HasForeignKey("CourtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.Customer", b =>
+                {
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.Payment", b =>
+                {
+                    b.HasOne("Futsal.Domain.Bookings.Booking", null)
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReceivedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Bookings.PricingRule", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Court", null)
+                        .WithMany()
+                        .HasForeignKey("CourtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Futsal.Domain.Identity.Membership", b =>

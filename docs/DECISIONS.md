@@ -39,3 +39,12 @@
 - Near-me distance uses a server-side Haversine calculation after public and structured filters. The requested `radiusKm` is applied in memory; PostGIS indexing is deferred.
 - Lowest price uses the minimum active court `price_per_slot`, since a pricing-rule calculator was absent from this checkout. Photo output is a placeholder field.
 - The generated migration could not be checked against the local PostgreSQL database because the existing User Secrets did not provide a PostgreSQL password. `dotnet ef migrations remove` reported the connection error while safely removing the un-applied draft; the finalized migration was regenerated. Apply it after configuring the local connection secret.
+
+## Milestone 4: booking engine
+
+- The checkout did not contain the previously completed Milestone 3 operating-hours, blocked-period, pricing-rule calculator, or public availability pieces. Milestone 4 adds the minimum schedule and pricing-rule support needed by booking validation and price calculation, while retaining the existing venue/location implementation. This does not start SignalR or Milestone 5.
+- Slot correctness is enforced by PostgreSQL GiST exclusion constraints for bookings and blocked periods. Application transactions also serialize writes per court with transaction-scoped advisory locks, expire overlapping stale holds, and translate PostgreSQL exclusion violations to HTTP 409 `SLOT_UNAVAILABLE`.
+- Booking actions use an `IBookingNotifier` abstraction. The current implementation is intentionally a no-op because SignalR belongs to Milestone 5; persisted database state remains authoritative.
+- Public availability returns court slot status and server-calculated price without customer information. Times are persisted as UTC and validated against venue-local hours in `Asia/Kathmandu` by default.
+- Existing pricing did not include a rule calculator. The new calculator supports the specified weekday/time/date range and priority matching, and falls back to the existing flat `Court.PricePerSlot` when no rule matches.
+- PostgreSQL integration and concurrency verification require `ConnectionStrings:FutsalPro` in API User Secrets and a separate local database named `futsalpro_test`; tests must never clean or migrate a database named `futsalpro` beyond the requested application migration.

@@ -15,6 +15,12 @@ public sealed class Venue : IOrganizationScoped
     public decimal? Longitude { get; set; }
     public string? PhotoPlaceholder { get; set; }
     public bool IsPublic { get; set; } = true;
+    public bool IsActive { get; set; } = true;
+    public string Timezone { get; set; } = "Asia/Kathmandu";
+    public int HoldMinutes { get; set; } = 10;
+    public int FreeCancelHours { get; set; } = 6;
+    public string AdvanceType { get; set; } = "PERCENT";
+    public decimal AdvanceValue { get; set; } = 30;
     public Location Location { get; set; } = null!;
     public ICollection<Court> Courts { get; set; } = new List<Court>();
     public ICollection<VenueAmenity> VenueAmenities { get; set; } = new List<VenueAmenity>();
