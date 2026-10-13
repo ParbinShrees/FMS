@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Futsal.Api/Futsal.Api.csproj" />
+    <Project Path="src/Futsal.Application/Futsal.Application.csproj" />
+    <Project Path="src/Futsal.Contracts/Futsal.Contracts.csproj" />
+    <Project Path="src/Futsal.Domain/Futsal.Domain.csproj" />
+    <Project Path="src/Futsal.Infrastructure/Futsal.Infrastructure.csproj" />
+    <Project Path="src/Futsal.Web/Futsal.Web.csproj" />
+  </Folder>
+</Solution>
