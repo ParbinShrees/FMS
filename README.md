@@ -57,6 +57,22 @@ dotnet run --project src/Futsal.Api/Futsal.Api.csproj
 
 Liveness is available at `http://localhost:8080/health/live`; database readiness is at `http://localhost:8080/health/ready`.
 
+## Locations and public venue discovery
+
+Development startup seeds editable Nepal locations (provinces, districts, cities, sample areas) and the amenity catalog. Seeded locations have `is_seeded=true`; edits through the location management API keep this marker so imported rows are identifiable. Location data is global and has no organization tenant filter.
+
+Public endpoints:
+
+- `GET /api/v1/public/locations?parentId=&type=` returns one level of active locations (omit `parentId` for provinces).
+- `GET /api/v1/public/locations/search?q=` searches English and Nepali names.
+- `GET /api/v1/public/locations/{slug}/venues` returns public venues in that location and descendants.
+- `GET /api/v1/public/venues?city=kathmandu&area=baneshwor&near=27.7,85.3&radiusKm=5&surface=Artificial%20Grass&minPrice=1000&maxPrice=2500&amenities=parking,wifi&sort=distance` supports optional filters. `city` and `area` accept location slugs or UUIDs; sort accepts `distance`, `price`, or `name`.
+- `POST /api/v1/admin/locations` lets SuperAdmin add location levels; an Owner can add an Area only under a City where their organization operates.
+- `PUT /api/v1/admin/locations/{id}` and `DELETE /api/v1/admin/locations/{id}` are SuperAdmin-only (delete deactivates).
+- `PUT /api/v1/admin/venues/{venueId}/amenities` lets an Owner replace the venue's amenity codes.
+
+Public results include the venue name, materialized location path, distance when requested, lowest active-court price, photo placeholder, court count, surfaces, and amenities. The photo field remains a placeholder until venue image management is implemented. PostgreSQL migration `LocationsAndAmenities` creates the location, venue/court listing and amenity tables; the location and amenity catalog rows are inserted idempotently by the development seeder.
+
 ## Projects
 
 - `Futsal.Domain`: domain model and rules

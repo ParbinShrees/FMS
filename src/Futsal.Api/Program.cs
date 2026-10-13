@@ -2,6 +2,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using Futsal.Api.Authorization;
 using Futsal.Api.Identity;
+using Futsal.Api.Locations;
 using Futsal.Api.Middleware;
 using Futsal.Application.Abstractions;
 using Futsal.Domain.Identity;
@@ -68,6 +69,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
+    options.AddPolicy("SuperAdmin", policy => policy.RequireAuthenticatedUser().RequireClaim("superadmin", "true"));
     options.AddPolicy("StaffAccess", policy => policy.RequireAuthenticatedUser().Requirements.Add(new OrganizationRoleRequirement(OrganizationRole.OWNER, OrganizationRole.MANAGER, OrganizationRole.CASHIER)));
     options.AddPolicy("CanManageStaff", policy => policy.RequireAuthenticatedUser().Requirements.Add(new OrganizationRoleRequirement(OrganizationRole.OWNER, OrganizationRole.MANAGER)));
     options.AddPolicy("CanViewReports", policy => policy.RequireAuthenticatedUser().Requirements.Add(new OrganizationRoleRequirement(OrganizationRole.OWNER, OrganizationRole.MANAGER)));
@@ -116,7 +118,10 @@ await using (var scope = app.Services.CreateAsyncScope())
     var database = scope.ServiceProvider.GetRequiredService<FutsalDbContext>();
     await database.Database.MigrateAsync();
     if (app.Environment.IsDevelopment())
+    {
+        await LocationCatalog.SeedAsync(database, CancellationToken.None);
         await scope.ServiceProvider.GetRequiredService<DevelopmentSeeder>().SeedAsync(CancellationToken.None);
+    }
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();

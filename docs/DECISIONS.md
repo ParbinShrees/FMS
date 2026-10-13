@@ -27,3 +27,15 @@
 - There is no membership-management HTTP endpoint in this milestone. EF records `ROLE_CHANGED` audit entries when a membership role is changed by an authorized application operation; the seed Owner assignment is recorded as `ROLE_ASSIGNED`.
 - Authentication and tenant tests use EF Core InMemory for repeatable local runs. Applying the generated migration and running database-backed integration tests require the machine-specific `ConnectionStrings:FutsalPro` User Secret.
 - `Microsoft.AspNetCore.Authentication.JwtBearer` enables JWT validation; EF Design and Configuration provider packages support migration tooling and loading the API User Secrets for EF CLI commands; EF InMemory is limited to the xUnit test project.
+
+## Locations and venue discovery
+
+- The checked-out repository had no Milestone 3 venue, court, pricing, or public venue code despite the task stating that Milestone 3 was complete. To support this feature without touching booking scope, the implementation adds only the minimal venue/court listing data needed for location filters (including a per-slot price field); it does not implement bookings or Milestone 4.
+- Location and amenity seed rows are inserted idempotently during Development startup. `is_seeded` is retained on location rows as a visible provenance flag; seeded names and Nepali spellings are initial editable catalog values.
+- District rows are included to preserve the requested Province → District → City → Area hierarchy. Each requested major city is assigned to its commonly associated district and province; review/correct these editable mappings before public launch.
+- An Owner may add an Area only beneath a City already referenced by one of that Owner's organization venues. This is the available project-level definition of “their own neighborhood”; location rows themselves stay global.
+- Public city and area filters accept either the global location UUID or its slug. Public listing ignores tenant filters only for the venue query, then explicitly requires `is_public` and an active linked location; response projection contains no organization/customer fields.
+- Venue coordinates are optional as a pair. If supplied, both must be inside Nepal bounds; missing coordinates are excluded from near/radius results.
+- Near-me distance uses a server-side Haversine calculation after public and structured filters. The requested `radiusKm` is applied in memory; PostGIS indexing is deferred.
+- Lowest price uses the minimum active court `price_per_slot`, since a pricing-rule calculator was absent from this checkout. Photo output is a placeholder field.
+- The generated migration could not be checked against the local PostgreSQL database because the existing User Secrets did not provide a PostgreSQL password. `dotnet ef migrations remove` reported the connection error while safely removing the un-applied draft; the finalized migration was regenerated. Apply it after configuring the local connection secret.

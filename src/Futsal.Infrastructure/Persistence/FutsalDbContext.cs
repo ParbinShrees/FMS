@@ -1,5 +1,6 @@
 using Futsal.Application.Abstractions;
 using Futsal.Domain.Identity;
+using Futsal.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Npgsql.NameTranslation;
@@ -14,6 +15,11 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<Location> Locations => Set<Location>();
+    public DbSet<Venue> Venues => Set<Venue>();
+    public DbSet<Court> Courts => Set<Court>();
+    public DbSet<Amenity> Amenities => Set<Amenity>();
+    public DbSet<VenueAmenity> VenueAmenities => Set<VenueAmenity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,6 +27,59 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
         modelBuilder.HasPostgresExtension("citext");
         modelBuilder.HasPostgresExtension("pgcrypto");
         modelBuilder.HasPostgresEnum<OrganizationRole>(name: "member_role", nameTranslator: new NpgsqlNullNameTranslator());
+
+        modelBuilder.Entity<Location>(e =>
+        {
+            e.ToTable("locations"); e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.ParentId).HasColumnName("parent_id");
+            e.Property(x => x.Type).HasColumnName("type").HasConversion<string>();
+            e.Property(x => x.NameEn).HasColumnName("name_en").IsRequired();
+            e.Property(x => x.NameNe).HasColumnName("name_ne").IsRequired();
+            e.Property(x => x.Slug).HasColumnName("slug").IsRequired();
+            e.Property(x => x.Latitude).HasColumnName("latitude"); e.Property(x => x.Longitude).HasColumnName("longitude");
+            e.Property(x => x.Path).HasColumnName("path").IsRequired(); e.Property(x => x.IsActive).HasColumnName("is_active");
+            e.Property(x => x.IsSeeded).HasColumnName("is_seeded"); e.Property(x => x.SortOrder).HasColumnName("sort_order");
+            e.HasIndex(x => x.Slug).IsUnique(); e.HasIndex(x => new { x.ParentId, x.Slug }).IsUnique();
+            e.HasOne(x => x.Parent).WithMany(x => x.Children).HasForeignKey(x => x.ParentId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<Venue>(e =>
+        {
+            e.ToTable("venues"); e.HasKey(x => x.Id); e.Property(x => x.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.OrganizationId).HasColumnName("organization_id"); e.Property(x => x.LocationId).HasColumnName("location_id");
+            e.Property(x => x.CityId).HasColumnName("city_id"); e.Property(x => x.Name).HasColumnName("name").IsRequired();
+            e.Property(x => x.Slug).HasColumnName("slug").IsRequired(); e.Property(x => x.Address).HasColumnName("address");
+            e.Property(x => x.Latitude).HasColumnName("latitude"); e.Property(x => x.Longitude).HasColumnName("longitude");
+            e.Property(x => x.PhotoPlaceholder).HasColumnName("photo_placeholder"); e.Property(x => x.IsPublic).HasColumnName("is_public");
+            e.HasIndex(x => x.Slug).IsUnique(); e.HasIndex(x => new { x.CityId, x.LocationId });
+            e.HasOne(x => x.Location).WithMany().HasForeignKey(x => x.LocationId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Organization>().WithMany().HasForeignKey(x => x.OrganizationId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<Location>().WithMany().HasForeignKey(x => x.CityId).OnDelete(DeleteBehavior.Restrict);
+            e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId));
+        });
+        modelBuilder.Entity<Court>(e =>
+        {
+            e.ToTable("courts"); e.HasKey(x => x.Id); e.Property(x => x.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.OrganizationId).HasColumnName("organization_id"); e.Property(x => x.VenueId).HasColumnName("venue_id");
+            e.Property(x => x.Name).HasColumnName("name").IsRequired(); e.Property(x => x.Surface).HasColumnName("surface");
+            e.Property(x => x.PricePerSlot).HasColumnName("price_per_slot").HasPrecision(12, 2); e.Property(x => x.IsActive).HasColumnName("is_active");
+            e.HasOne(x => x.Venue).WithMany(x => x.Courts).HasForeignKey(x => x.VenueId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<Organization>().WithMany().HasForeignKey(x => x.OrganizationId).OnDelete(DeleteBehavior.Cascade);
+            e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId));
+        });
+        modelBuilder.Entity<Amenity>(e =>
+        {
+            e.ToTable("amenities"); e.HasKey(x => x.Id); e.Property(x => x.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.Code).HasColumnName("code").IsRequired(); e.Property(x => x.NameEn).HasColumnName("name_en").IsRequired();
+            e.Property(x => x.IsActive).HasColumnName("is_active"); e.HasIndex(x => x.Code).IsUnique();
+        });
+        modelBuilder.Entity<VenueAmenity>(e =>
+        {
+            e.ToTable("venue_amenities"); e.HasKey(x => new { x.VenueId, x.AmenityId });
+            e.Property(x => x.VenueId).HasColumnName("venue_id"); e.Property(x => x.AmenityId).HasColumnName("amenity_id");
+            e.HasOne(x => x.Venue).WithMany(x => x.VenueAmenities).HasForeignKey(x => x.VenueId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Amenity).WithMany().HasForeignKey(x => x.AmenityId).OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<AppUser>(entity =>
         {
@@ -122,14 +181,41 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
     {
         RecordRoleChanges();
         EnforceTenantWriteScope();
+        ValidateVenuesAsync(CancellationToken.None).GetAwaiter().GetResult();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
-    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         RecordRoleChanges();
         EnforceTenantWriteScope();
-        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        await ValidateVenuesAsync(cancellationToken);
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private async Task ValidateVenuesAsync(CancellationToken cancellationToken)
+    {
+        foreach (var entry in ChangeTracker.Entries<Location>().Where(x => x.State == EntityState.Added))
+        {
+            if (currentUser.IsSuperAdmin || entry.Entity.IsSeeded) continue;
+            if (entry.Entity.ParentId is not Guid parentId
+                || !await Locations.AnyAsync(x => x.Id == parentId && x.Type == LocationType.CITY && x.IsActive, cancellationToken)
+                || currentUser.OrganizationId is not Guid orgId
+                || !await Venues.AnyAsync(x => x.OrganizationId == orgId && x.CityId == parentId, cancellationToken))
+                throw new UnauthorizedAccessException("Owners may add Areas only under a City used by their organization.");
+        }
+        foreach (var entry in ChangeTracker.Entries<Venue>().Where(x => x.State is EntityState.Added or EntityState.Modified))
+        {
+            var venue = entry.Entity;
+            if ((venue.Latitude is null) != (venue.Longitude is null) || venue.Latitude is < 26 or > 31 || venue.Longitude is < 80 or > 89)
+                throw new InvalidOperationException("Venue coordinates must be within Nepal (latitude 26–31, longitude 80–89).");
+            var location = await Locations.IgnoreQueryFilters().Include(x => x.Parent).SingleOrDefaultAsync(x => x.Id == venue.LocationId, cancellationToken);
+            if (location is null || location.Type is not (LocationType.CITY or LocationType.AREA))
+                throw new InvalidOperationException("A venue must belong to a City or Area.");
+            var cityId = location.Type == LocationType.CITY ? location.Id : location.ParentId;
+            if (cityId is null || venue.CityId != cityId)
+                throw new InvalidOperationException("Venue city_id must match its City location or the parent City of its Area.");
+        }
     }
 
     private void EnforceTenantWriteScope()
@@ -140,7 +226,16 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
                 throw new InvalidOperationException("Audit entries are immutable.");
         }
 
-        if (!currentUser.IsAuthenticated || currentUser.IsSuperAdmin) return;
+        if (currentUser.IsSuperAdmin) return;
+
+        foreach (var entry in ChangeTracker.Entries<Location>().Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted))
+        {
+            if (entry.Entity.IsSeeded && entry.State == EntityState.Added) continue;
+            if (!currentUser.IsAuthenticated || entry.State != EntityState.Added || entry.Entity.Type != LocationType.AREA || currentUser.Role != "Owner")
+                throw new UnauthorizedAccessException("Only a SuperAdmin can edit global locations; Owners may add Areas.");
+        }
+
+        if (!currentUser.IsAuthenticated) return;
 
         foreach (var entry in ChangeTracker.Entries<IOrganizationScoped>().Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted))
         {

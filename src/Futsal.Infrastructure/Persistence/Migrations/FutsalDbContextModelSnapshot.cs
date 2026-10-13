@@ -310,6 +310,228 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("Futsal.Domain.Locations.Amenity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name_en");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("amenities", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.Court", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<decimal>("PricePerSlot")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("price_per_slot");
+
+                    b.Property<string>("Surface")
+                        .HasColumnType("text")
+                        .HasColumnName("surface");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("VenueId");
+
+                    b.ToTable("courts", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.Location", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsSeeded")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_seeded");
+
+                    b.Property<decimal?>("Latitude")
+                        .HasColumnType("numeric")
+                        .HasColumnName("latitude");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasColumnType("numeric")
+                        .HasColumnName("longitude");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name_en");
+
+                    b.Property<string>("NameNe")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name_ne");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("path");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("ParentId", "Slug")
+                        .IsUnique();
+
+                    b.ToTable("locations", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.Venue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text")
+                        .HasColumnName("address");
+
+                    b.Property<Guid>("CityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("city_id");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_public");
+
+                    b.Property<decimal?>("Latitude")
+                        .HasColumnType("numeric")
+                        .HasColumnName("latitude");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("location_id");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasColumnType("numeric")
+                        .HasColumnName("longitude");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("PhotoPlaceholder")
+                        .HasColumnType("text")
+                        .HasColumnName("photo_placeholder");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("CityId", "LocationId");
+
+                    b.ToTable("venues", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.VenueAmenity", b =>
+                {
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.Property<Guid>("AmenityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("amenity_id");
+
+                    b.HasKey("VenueId", "AmenityId");
+
+                    b.HasIndex("AmenityId");
+
+                    b.ToTable("venue_amenities", (string)null);
+                });
+
             modelBuilder.Entity("Futsal.Domain.Identity.Membership", b =>
                 {
                     b.HasOne("Futsal.Domain.Identity.Organization", null)
@@ -337,6 +559,87 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.Court", b =>
+                {
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", "Venue")
+                        .WithMany("Courts")
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.Location", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Location", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.Venue", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Location", null)
+                        .WithMany()
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.VenueAmenity", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Amenity", "Amenity")
+                        .WithMany()
+                        .HasForeignKey("AmenityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", "Venue")
+                        .WithMany("VenueAmenities")
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Amenity");
+
+                    b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.Location", b =>
+                {
+                    b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Locations.Venue", b =>
+                {
+                    b.Navigation("Courts");
+
+                    b.Navigation("VenueAmenities");
                 });
 #pragma warning restore 612, 618
         }
