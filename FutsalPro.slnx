@@ -7,4 +7,7 @@
     <Project Path="src/Futsal.Infrastructure/Futsal.Infrastructure.csproj" />
     <Project Path="src/Futsal.Web/Futsal.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Futsal.Tests/Futsal.Tests.csproj" />
+  </Folder>
 </Solution>

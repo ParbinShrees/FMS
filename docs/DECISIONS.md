@@ -14,3 +14,16 @@
 - `Npgsql.EntityFrameworkCore.PostgreSQL` provides EF Core's PostgreSQL provider and database connectivity required by the architecture.
 - `Serilog.AspNetCore` integrates request and application logging; `Serilog.Sinks.File` adds the requested rolling local log output alongside console output.
 - `Microsoft.Extensions.Diagnostics.HealthChecks` supplies the health check interfaces and registration used for PostgreSQL readiness.
+
+## Milestone 2: Identity and tenancy
+
+- Keep the user and membership tables aligned with the Section 8 schema. Organization roles are a PostgreSQL enum (`OWNER`, `MANAGER`, `CASHIER`) and use display casing in JWT/API responses.
+- Passwords use ASP.NET Core Identity's `PasswordHasher<TUser>` without adding the full Identity user store; the requested schema uses its own UUID `users` table and membership model.
+- Access tokens last 15 minutes and refresh tokens last 14 days. Refresh token plaintext is returned once; only its SHA-256 digest is persisted. Detecting a revoked token reuse revokes all remaining active refresh tokens for that user.
+- Refresh requests accept an optional `organizationId`. Users with more than one membership must supply it at login or refresh so the tenant scope cannot silently change.
+- OTPs use Identity's salted password hasher in the database. The development sender logs a masked phone number and the OTP to the console; it is not a real SMS integration.
+- In addition to query filters, `FutsalDbContext.SaveChanges` rejects organization-scoped writes whose organization differs from the authenticated scope. Audit rows are immutable through EF updates/deletes.
+- Development seeding runs only under `Development` and is skipped unless both seed passwords are configured in User Secrets. Default seed emails are non-secret local-only identifiers.
+- There is no membership-management HTTP endpoint in this milestone. EF records `ROLE_CHANGED` audit entries when a membership role is changed by an authorized application operation; the seed Owner assignment is recorded as `ROLE_ASSIGNED`.
+- Authentication and tenant tests use EF Core InMemory for repeatable local runs. Applying the generated migration and running database-backed integration tests require the machine-specific `ConnectionStrings:FutsalPro` User Secret.
+- `Microsoft.AspNetCore.Authentication.JwtBearer` enables JWT validation; EF Design and Configuration provider packages support migration tooling and loading the API User Secrets for EF CLI commands; EF InMemory is limited to the xUnit test project.

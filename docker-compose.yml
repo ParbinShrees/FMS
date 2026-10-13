@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: futsalpro
       POSTGRES_USER: futsalpro
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-only}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for Compose}
     ports:
       - "5432:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__FutsalPro: Host=postgres;Port=5432;Database=futsalpro;Username=futsalpro;Password=${POSTGRES_PASSWORD:-local-dev-only}
+      ConnectionStrings__FutsalPro: Host=postgres;Port=5432;Database=futsalpro;Username=futsalpro;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for Compose}
     ports:
       - "8080:8080"
     depends_on:
