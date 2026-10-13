@@ -5,6 +5,7 @@ using Futsal.Api.Bookings;
 using Futsal.Api.Identity;
 using Futsal.Api.Locations;
 using Futsal.Api.Middleware;
+using Futsal.Api.Realtime;
 using Futsal.Application.Abstractions;
 using Futsal.Domain.Identity;
 using Futsal.Infrastructure;
@@ -43,9 +44,12 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DevelopmentSeeder>();
 builder.Services.AddScoped<BookingPricing>();
 builder.Services.AddScoped<BookingService>();
-builder.Services.AddSingleton<IBookingNotifier,NoopBookingNotifier>();
+builder.Services.AddScoped<IBookingNotifier,SignalRBookingNotifier>();
 builder.Services.AddHostedService<ExpireHoldsBackgroundService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateHoldRequestValidator>();
+var signalR = builder.Services.AddSignalR();
+var redisConnection = builder.Configuration["Redis:ConnectionString"];
+if (!string.IsNullOrWhiteSpace(redisConnection)) signalR.AddStackExchangeRedis(redisConnection);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -65,6 +69,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
         options.Events = new JwtBearerEvents
         {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments("/hubs/availability"))
+                    context.Token = accessToken;
+                return Task.CompletedTask;
+            },
             OnChallenge = async context =>
             {
                 context.HandleResponse();
@@ -140,6 +151,7 @@ app.UseAuthorization();
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Name == "database" });
 app.MapControllers();
+app.MapHub<AvailabilityHub>("/hubs/availability");
 
 app.Run();
 

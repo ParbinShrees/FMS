@@ -6,6 +6,8 @@ using Futsal.Application.Abstractions;
 using Futsal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace Futsal.Api.Controllers;
 
@@ -109,6 +111,24 @@ public sealed class PublicLocationsController(FutsalDbContext db,IClock clock,Bo
             }
         }
         return Ok(output);
+    }
+
+    [HttpGet("venues/{slug}/availability/version")]
+    public async Task<IActionResult> AvailabilityVersion(string slug,[FromQuery]DateOnly? date,CancellationToken ct)
+    {
+        if(date is null)throw new Futsal.Api.Identity.ApiException(400,"VALIDATION_FAILED","date is required in YYYY-MM-DD format.");
+        var venue=await db.Venues.IgnoreQueryFilters().AsNoTracking().SingleOrDefaultAsync(v=>v.Slug==slug&&v.IsPublic&&v.IsActive&&db.Locations.Any(l=>l.Id==v.LocationId&&l.IsActive),ct);
+        if(venue is null)return NotFound();
+        var zone=TimeZoneInfo.FindSystemTimeZoneById(venue.Timezone);var localStart=date.Value.ToDateTime(TimeOnly.MinValue,DateTimeKind.Unspecified);var localEnd=date.Value.AddDays(1).ToDateTime(TimeOnly.MinValue,DateTimeKind.Unspecified);
+        var start=new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(localStart,zone),TimeSpan.Zero);var end=new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(localEnd,zone),TimeSpan.Zero);
+        var courts=await db.Courts.IgnoreQueryFilters().Where(c=>c.VenueId==venue.Id&&c.IsActive).Select(c=>c.Id).ToArrayAsync(ct);
+        var bookings=await db.Bookings.IgnoreQueryFilters().AsNoTracking().Where(b=>courts.Contains(b.CourtId)&&b.StartAt<end&&b.EndAt>start&&b.Status!=BookingStatus.CANCELLED&&b.Status!=BookingStatus.EXPIRED)
+            .OrderBy(b=>b.CourtId).ThenBy(b=>b.StartAt).Select(b=>new{b.Id,b.CourtId,b.StartAt,b.EndAt,b.Status,b.HoldExpiresAt,b.UpdatedAt}).ToListAsync(ct);
+        var blocks=await db.BlockedPeriods.IgnoreQueryFilters().AsNoTracking().Where(b=>courts.Contains(b.CourtId)&&b.StartAt<end&&b.EndAt>start)
+            .OrderBy(b=>b.CourtId).ThenBy(b=>b.StartAt).Select(b=>new{b.Id,b.CourtId,b.StartAt,b.EndAt}).ToListAsync(ct);
+        var versionBookings=bookings.Select(b=>new{b.Id,b.CourtId,b.StartAt,b.EndAt,Status=b.Status==BookingStatus.HELD&&b.HoldExpiresAt<=clock.UtcNow?BookingStatus.EXPIRED:b.Status,b.HoldExpiresAt,b.UpdatedAt});
+        var stamp=Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new{bookings=versionBookings,blocks})));
+        return Ok(new{date=date.Value,version=stamp});
     }
 
     private static async Task<List<PublicVenueResult>> VenueResults(IQueryable<Venue> query, (double Lat,double Lng)? point, CancellationToken ct)

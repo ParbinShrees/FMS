@@ -58,7 +58,7 @@ public sealed class BookingService(
             AddAudit(venue.OrganizationId,userId,"BOOKING_HELD",booking.Id,null,response,ip);
             await db.SaveChangesAsync(ct);await transaction.CommitAsync(ct);
             foreach(var evt in expiredEvents)await notifier.PublishAsync(evt,ct);
-            await notifier.PublishAsync(new BookingEvent("SlotHeld",venue.Id,court.Id,times.Start,times.End,holdExpiry),ct);
+            await notifier.PublishAsync(new BookingEvent("SlotHeld",venue.Id,court.Id,times.Start,times.End,holdExpiry,booking.Id),ct);
             return response;
         }
         catch(Exception ex) when(IsExclusionViolation(ex)){await transaction.RollbackAsync(ct);throw SlotUnavailable();}
@@ -92,7 +92,7 @@ public sealed class BookingService(
             AddAudit(orgId,userId,"BOOKING_CREATED",booking.Id,null,response,ip);
             await db.SaveChangesAsync(ct);await transaction.CommitAsync(ct);
             foreach(var evt in expiredEvents)await notifier.PublishAsync(evt,ct);
-            await notifier.PublishAsync(new BookingEvent("SlotBooked",venue.Id,court.Id,times.Start,times.End),ct);return response;
+            await notifier.PublishAsync(new BookingEvent("SlotBooked",venue.Id,court.Id,times.Start,times.End,null,booking.Id),ct);return response;
         }
         catch(Exception ex) when(IsExclusionViolation(ex)){await transaction.RollbackAsync(ct);throw SlotUnavailable();}
         catch{await transaction.RollbackAsync(ct);throw;}
@@ -103,7 +103,7 @@ public sealed class BookingService(
         var uid=RequireCustomer();var owned=await GetOwnedBookingAsync(id,uid,ct);var booking=owned.Booking;
         if(booking.Status!=BookingStatus.HELD||booking.HoldExpiresAt<=clock.UtcNow)throw new ApiException(409,"HOLD_EXPIRED","The booking hold has expired.");
         booking.Cancel(clock.UtcNow,"Customer released hold");AddAudit(booking.OrganizationId,uid,"BOOKING_RELEASED",id,new{status="HELD"},new{status="CANCELLED"},ip);
-        await db.SaveChangesAsync(ct);await notifier.PublishAsync(new BookingEvent("SlotReleased",booking.VenueId,booking.CourtId,booking.StartAt,booking.EndAt),ct);
+        await db.SaveChangesAsync(ct);await notifier.PublishAsync(new BookingEvent("SlotReleased",booking.VenueId,booking.CourtId,booking.StartAt,booking.EndAt,null,booking.Id),ct);
     }
 
     public async Task<List<BookingResponse>> MyBookingsAsync(CancellationToken ct)
@@ -115,9 +115,9 @@ public sealed class BookingService(
     public async Task CancelCustomerAsync(Guid id,string? reason,IPAddress? ip,CancellationToken ct)
     {
         var uid=RequireCustomer();var owned=await GetOwnedBookingAsync(id,uid,ct);var booking=owned.Booking;
-        var venue=await db.Venues.IgnoreQueryFilters().SingleAsync(x=>x.Id==booking.VenueId,ct);var before=new{status=booking.Status.ToString()};var forfeited=CancelWithPolicy(booking,venue,reason);
+        var venue=await db.Venues.IgnoreQueryFilters().SingleAsync(x=>x.Id==booking.VenueId,ct);var wasHold=booking.Status==BookingStatus.HELD;var before=new{status=booking.Status.ToString()};var forfeited=CancelWithPolicy(booking,venue,reason);
         AddAudit(booking.OrganizationId,uid,"BOOKING_CANCELLED",id,before,new{status="CANCELLED",forfeited},ip);
-        await db.SaveChangesAsync(ct);await notifier.PublishAsync(new BookingEvent("SlotReleased",venue.Id,booking.CourtId,booking.StartAt,booking.EndAt),ct);
+        await db.SaveChangesAsync(ct);await notifier.PublishAsync(new BookingEvent(wasHold?"SlotReleased":"SlotCancelled",venue.Id,booking.CourtId,booking.StartAt,booking.EndAt,null,booking.Id),ct);
     }
 
     public async Task RescheduleAsync(Guid id,RescheduleBookingRequest request,IPAddress? ip,CancellationToken ct)
@@ -131,14 +131,16 @@ public sealed class BookingService(
         try{await AdvisoryLockAsync("court:"+court.Id,ct);times=await ValidateSlot(request.StartAt,request.EndAt,court,venue,ct);expiredEvents=await ExpireOverlappingHoldsAsync(court.Id,times.Start,times.End,ct);booking.Reschedule(times.Start,times.End,clock.UtcNow);AddAudit(booking.OrganizationId,current.UserId,"BOOKING_RESCHEDULED",id,before,new{booking.StartAt,booking.EndAt},ip);await db.SaveChangesAsync(ct);await transaction.CommitAsync(ct);}
         catch(Exception ex)when(IsExclusionViolation(ex)){await transaction.RollbackAsync(ct);throw SlotUnavailable();}
         catch{await transaction.RollbackAsync(ct);throw;}
-        foreach(var evt in expiredEvents)await notifier.PublishAsync(evt,ct);await notifier.PublishAsync(new BookingEvent("SlotBooked",venue.Id,court.Id,times.Start,times.End),ct);
+        foreach(var evt in expiredEvents)await notifier.PublishAsync(evt,ct);
+        await notifier.PublishAsync(new BookingEvent("SlotReleased",venue.Id,court.Id,before.StartAt,before.EndAt,null,booking.Id),ct);
+        await notifier.PublishAsync(new BookingEvent("SlotBooked",venue.Id,court.Id,times.Start,times.End,null,booking.Id),ct);
     }
 
     public async Task CancelStaffAsync(Guid id,string? reason,IPAddress? ip,CancellationToken ct)
     {
         var booking=await db.Bookings.SingleOrDefaultAsync(x=>x.Id==id,ct)??throw new ApiException(404,"NOT_FOUND","Booking was not found.");var venue=await db.Venues.SingleAsync(x=>x.Id==booking.VenueId,ct);
-        var before=new{status=booking.Status.ToString()};var forfeited=CancelWithPolicy(booking,venue,reason);AddAudit(booking.OrganizationId,current.UserId,"BOOKING_CANCELLED",id,before,new{status="CANCELLED",forfeited},ip);
-        await db.SaveChangesAsync(ct);await notifier.PublishAsync(new BookingEvent("SlotReleased",venue.Id,booking.CourtId,booking.StartAt,booking.EndAt),ct);
+        var wasHold=booking.Status==BookingStatus.HELD;var before=new{status=booking.Status.ToString()};var forfeited=CancelWithPolicy(booking,venue,reason);AddAudit(booking.OrganizationId,current.UserId,"BOOKING_CANCELLED",id,before,new{status="CANCELLED",forfeited},ip);
+        await db.SaveChangesAsync(ct);await notifier.PublishAsync(new BookingEvent(wasHold?"SlotReleased":"SlotCancelled",venue.Id,booking.CourtId,booking.StartAt,booking.EndAt,null,booking.Id),ct);
     }
 
     public async Task MarkNoShowAsync(Guid id,IPAddress? ip,CancellationToken ct)
@@ -187,7 +189,7 @@ public sealed class BookingService(
     {
         var now=clock.UtcNow;var holds=await db.Bookings.IgnoreQueryFilters().Where(x=>x.Status==BookingStatus.HELD&&x.HoldExpiresAt<=now).ToListAsync(ct);if(holds.Count==0)return;
         foreach(var booking in holds)booking.Expire();await db.SaveChangesAsync(ct);
-        foreach(var booking in holds)await notifier.PublishAsync(new BookingEvent("SlotReleased",booking.VenueId,booking.CourtId,booking.StartAt,booking.EndAt),ct);
+        foreach(var booking in holds)await notifier.PublishAsync(new BookingEvent("SlotReleased",booking.VenueId,booking.CourtId,booking.StartAt,booking.EndAt,null,booking.Id),ct);
     }
 
     private async Task<(DateTimeOffset Start,DateTimeOffset End)> ValidateSlot(DateTimeOffset startInput,DateTimeOffset endInput,Court court,Venue venue,CancellationToken ct)
@@ -211,7 +213,7 @@ public sealed class BookingService(
     private async Task<IReadOnlyList<BookingEvent>> ExpireOverlappingHoldsAsync(Guid courtId,DateTimeOffset start,DateTimeOffset end,CancellationToken ct)
     {
         var query=db.Bookings.IgnoreQueryFilters().Where(x=>x.CourtId==courtId&&x.Status==BookingStatus.HELD&&x.HoldExpiresAt<clock.UtcNow&&x.StartAt<end&&x.EndAt>start);
-        var events=await query.Select(x=>new BookingEvent("SlotReleased",x.VenueId,x.CourtId,x.StartAt,x.EndAt)).ToListAsync(ct);
+        var events=await query.Select(x=>new BookingEvent("SlotReleased",x.VenueId,x.CourtId,x.StartAt,x.EndAt,null,x.Id)).ToListAsync(ct);
         await query.ExecuteUpdateAsync(s=>s.SetProperty(x=>x.Status,BookingStatus.EXPIRED).SetProperty(x=>x.HoldExpiresAt,(DateTimeOffset?)null).SetProperty(x=>x.UpdatedAt,clock.UtcNow),ct);
         return events;
     }

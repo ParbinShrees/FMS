@@ -48,3 +48,11 @@
 - Public availability returns court slot status and server-calculated price without customer information. Times are persisted as UTC and validated against venue-local hours in `Asia/Kathmandu` by default.
 - Existing pricing did not include a rule calculator. The new calculator supports the specified weekday/time/date range and priority matching, and falls back to the existing flat `Court.PricePerSlot` when no rule matches.
 - PostgreSQL integration and concurrency verification require `ConnectionStrings:FutsalPro` in API User Secrets and a separate local database named `futsalpro_test`; tests must never clean or migrate a database named `futsalpro` beyond the requested application migration.
+
+## Milestone 5: real-time availability
+
+- SignalR emits privacy-safe availability payloads to venue/date groups. Staff can join a separate group after the hub verifies JWT role claims and an active membership scoped to the venue organization and venue. Staff also receive a minimal `StaffBookingChanged` payload containing booking ID and slot state only; customer identity, booking code, and payment information remain excluded.
+- Availability version stamps are SHA-256 hashes of the day’s active booking and block state, including the effective expiry of holds. This avoids another migration or mutable per-venue counter while giving clients a stable change detector.
+- SignalR publishing is best effort and occurs after persistence. A durable outbox is not added in this milestone; clients recover missed messages with the version endpoint and periodic grid refetch.
+- The prior checkout contained a blocked-period entity and availability reads but no write endpoints. Minimal Owner/Manager create/remove endpoints were added so blocked-period creation/removal can publish the required real-time events.
+- Redis scale-out is optional and activates only when `Redis:ConnectionString` is configured. Without it, SignalR uses its default single-process lifetime manager.
