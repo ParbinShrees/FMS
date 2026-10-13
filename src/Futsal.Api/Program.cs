@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Futsal.Api.Authorization;
 using Futsal.Api.Bookings;
@@ -92,6 +93,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("CanManageStaff", policy => policy.RequireAuthenticatedUser().Requirements.Add(new OrganizationRoleRequirement(OrganizationRole.OWNER, OrganizationRole.MANAGER)));
     options.AddPolicy("CanViewReports", policy => policy.RequireAuthenticatedUser().Requirements.Add(new OrganizationRoleRequirement(OrganizationRole.OWNER, OrganizationRole.MANAGER)));
 });
+var webOrigins = builder.Configuration.GetSection("Cors:WebOrigins").Get<string[]>() ?? ["http://localhost:5054", "https://localhost:7126"];
+builder.Services.AddCors(options => options.AddPolicy("web", policy => policy.WithOrigins(webOrigins)
+    .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, OrganizationRoleHandler>();
 
 builder.Services.AddRateLimiter(options =>
@@ -110,7 +114,8 @@ builder.Services.AddRateLimiter(options =>
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
 });
 
-builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+builder.Services.AddControllers().AddJsonOptions(options =>
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())).ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
@@ -145,6 +150,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 app.UseRouting();
+app.UseCors("web");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();

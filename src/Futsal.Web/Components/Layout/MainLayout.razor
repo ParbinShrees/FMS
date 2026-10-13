@@ -1,23 +1,3 @@
-﻿@inherits LayoutComponentBase
-
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+@inherits LayoutComponentBase
+<MudThemeProvider /><MudPopoverProvider /><MudDialogProvider /><MudSnackbarProvider />
+<MudLayout><MudAppBar Elevation="1"><MudText Typo="Typo.h6">FutsalPro</MudText><MudSpacer /><MudButton Href="/admin">Schedule</MudButton><MudButton Href="/login">Sign in</MudButton></MudAppBar><MudDrawer Open="true" Variant="DrawerVariant.Responsive" Elevation="1"><MudNavMenu><MudNavLink Href="/admin" Match="NavLinkMatch.All">Schedule</MudNavLink><MudNavLink Href="/admin/bookings">Bookings</MudNavLink><MudNavLink Href="/admin/customers">Customers</MudNavLink><MudNavLink Href="/admin/payments">Payments</MudNavLink><MudNavLink Href="/admin/venues">Venue settings</MudNavLink><MudNavLink Href="/admin/courts">Courts</MudNavLink><MudNavLink Href="/admin/pricing">Pricing</MudNavLink><MudNavLink Href="/admin/staff">Staff</MudNavLink><MudNavLink Href="/admin/reports">Reports</MudNavLink></MudNavMenu></MudDrawer><MudMainContent Class="pa-4">@Body</MudMainContent></MudLayout>
