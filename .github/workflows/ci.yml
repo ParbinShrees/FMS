@@ -20,7 +20,7 @@ jobs:
       - run: dotnet test -c Release --no-build --logger trx
       - shell: pwsh
         run: ./scripts/audit-dependencies.ps1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with: {name: tests, path: '**/TestResults/*.trx'}
   images:
