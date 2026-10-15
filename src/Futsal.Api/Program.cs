@@ -1,3 +1,5 @@
+using Futsal.Api.Notifications;
+using Futsal.Infrastructure.Notifications;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -42,13 +44,21 @@ builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddSingleton<PasswordHasher<AppUser>>();
 builder.Services.AddSingleton<PasswordHasher<OtpCode>>();
-builder.Services.AddSingleton<IOtpSender, FakeOtpSender>();
+builder.Services.AddScoped<IOtpSender, QueuedOtpSender>();
+builder.Services.AddScoped<NotificationQueue>();
+builder.Services.AddScoped<NotificationEvents>();
+builder.Services.AddScoped<Futsal.Infrastructure.Reports.ReportQueries>();
+QuestPDF.Settings.License = Enum.Parse<QuestPDF.Infrastructure.LicenseType>(builder.Configuration["Reports:PdfLicense"] ?? "Community");
+builder.Services.AddHttpClient<HttpSmsSender>(client => client.Timeout = TimeSpan.FromSeconds(10));
+builder.Services.AddScoped<ConsoleSender>();
+builder.Services.AddScoped<INotificationSender>(sp => (builder.Configuration["Sms:Sender"] ?? (builder.Environment.IsDevelopment() ? "Console" : "Http")) == "Console" ? sp.GetRequiredService<ConsoleSender>() : sp.GetRequiredService<HttpSmsSender>());
+builder.Services.AddHostedService<NotificationJobs>();
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DevelopmentSeeder>();
 builder.Services.AddScoped<BookingPricing>();
 builder.Services.AddScoped<BookingService>();
-builder.Services.AddScoped<IBookingNotifier,SignalRBookingNotifier>();
+builder.Services.AddScoped<IBookingNotifier, SignalRBookingNotifier>();
 builder.Services.AddHostedService<ExpireHoldsBackgroundService>();
 builder.Services.AddDataProtection();
 builder.Services.AddSingleton<IVenuePaymentProtector, VenuePaymentProtector>();
@@ -165,6 +175,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
+app.UseRequestLocalization(new RequestLocalizationOptions().SetDefaultCulture("en").AddSupportedCultures("en", "ne").AddSupportedUICultures("en", "ne"));
 app.UseRouting();
 app.UseCors("web");
 app.UseRateLimiter();

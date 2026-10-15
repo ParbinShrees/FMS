@@ -4,6 +4,10 @@
     <ProjectReference Include="..\Futsal.Domain\Futsal.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NepDate" Version="2.0.7" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

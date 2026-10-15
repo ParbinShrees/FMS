@@ -25,7 +25,7 @@ public static class NepaliPhone
         if(digits.StartsWith("977")&&digits.Length==13)digits=digits[3..];
         if(digits.Length==10&&digits[0]=='9')digits="+977"+digits;
         else if(value.TrimStart().StartsWith('+')&&digits.Length==13&&digits.StartsWith("977"))digits="+"+digits;
-        if(!Regex.IsMatch(digits,@"^\+9779\d{9}$"))throw new Futsal.Api.Identity.ApiException(400,"VALIDATION_FAILED","Phone must be a Nepal mobile number in E.164 format.");
+        if (!Futsal.Application.Notifications.SmsText.ValidPhone(digits)) throw new Futsal.Api.Identity.ApiException(400, "VALIDATION_FAILED", "Phone must be a Nepal mobile number in E.164 format.");
         return digits;
     }
 }

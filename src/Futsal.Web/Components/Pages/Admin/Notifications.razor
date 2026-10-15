@@ -1,0 +1,39 @@
+@page "/admin/notifications"
+@layout Futsal.Web.Components.Layout.MainLayout
+@using Futsal.Contracts
+@using Futsal.Web.Services
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Futsal.Web.Milestone8> L
+@inject ApiClient Api
+<MudText Typo="Typo.h4">@L["Notifications"]</MudText>
+<MudSelect T="Guid" Label="@L["Venue"]" @bind-Value="venue">@foreach(var v in venues){<MudSelectItem T="Guid" Value="v.Id">@v.Name</MudSelectItem>}</MudSelect>
+<MudButton OnClick="Load" Disabled="busy">@L["Load"]</MudButton>
+@if(error!=null){<MudAlert Severity="Severity.Error">@error</MudAlert>}
+@if(busy){<MudProgressLinear Indeterminate="true" />}
+@if(settings!=null){
+@if(settings.Alert!=null){<MudAlert Severity="Severity.Warning">@L[settings.Alert]</MudAlert>}
+<MudSwitch T="bool" @bind-Value="confirmation" Label="@L["confirmation"]"/><MudSwitch T="bool" @bind-Value="payment" Label="@L["payment"]"/><MudSwitch T="bool" @bind-Value="cancellation" Label="@L["cancellation"]"/><MudSwitch T="bool" @bind-Value="reminder" Label="@L["reminder"]"/><MudSwitch T="bool" @bind-Value="due" Label="@L["due"]"/>
+<MudNumericField T="int" @bind-Value="hours" Label="@L["Hours"]" Min="1" Max="168"/><MudNumericField T="int" @bind-Value="daily" Label="@L["DailyLimit"]" Min="0"/><MudNumericField T="int" @bind-Value="monthly" Label="@L["MonthlyLimit"]" Min="0"/>
+<MudSelect T="string" Label="@L["Language"]" @bind-Value="language"><MudSelectItem T="string" Value='@("en")'>@L["English"]</MudSelectItem><MudSelectItem T="string" Value='@("ne")'>@L["Nepali"]</MudSelectItem></MudSelect>
+<MudSwitch T="bool" @bind-Value="bsDate" Label="@L["BsDate"]"/><MudButton OnClick="SaveSettings">@L["Save"]</MudButton>
+<MudSelect T="int" Label="@L["Template"]" Value="selected" ValueChanged="SelectTemplate">@for(int i=0;i<templates.Count;i++){var index=i;<MudSelectItem T="int" Value="index">@L[templates[i].Name] (@templates[i].Language)</MudSelectItem>}</MudSelect>
+<MudTextField T="string" Label="@L["Template"]" Lines="4" Value="text" ValueChanged="TextChanged" Immediate="true" />
+<MudButton OnClick="SaveTemplate">@L["Save"]</MudButton>
+@if(preview!=null){<MudText>@L["Preview"]: @preview.Text</MudText><MudText>@L["Segments"]: @preview.Segments (@preview.Characters / @preview.Units)</MudText>@if(preview.Segments>1){<MudAlert Severity="Severity.Warning">@L["LongSms"]</MudAlert>}}
+<MudText Typo="Typo.h5">@L["Usage"]</MudText>
+<MudTable Items="usage" Dense="true"><HeaderContent><MudTh>@L["Month"]</MudTh><MudTh>@L["Reserved"]</MudTh><MudTh>@L["Delivered"]</MudTh></HeaderContent><RowTemplate><MudTd>@($"{context.Year}-{context.Month:D2}")</MudTd><MudTd>@context.Segments</MudTd><MudTd>@context.DeliveredSegments</MudTd></RowTemplate></MudTable>
+<MudText Typo="Typo.h5">@L["Logs"]</MudText>
+@if(logs.Count==0){<MudAlert>@L["Empty"]</MudAlert>}
+<MudTable Items="logs" Dense="true"><HeaderContent><MudTh>@L["Status"]</MudTh><MudTh>@L["Recipient"]</MudTh><MudTh>@L["Template"]</MudTh><MudTh>@L["Attempts"]</MudTh><MudTh>@L["Error"]</MudTh><MudTh>@L["Time"]</MudTh><MudTh>@L["Resend"]</MudTh></HeaderContent><RowTemplate><MudTd>@L[context.Status]</MudTd><MudTd>@context.Recipient</MudTd><MudTd>@L[context.Template]</MudTd><MudTd>@context.Attempts</MudTd><MudTd>@(context.Error==null?"":L[context.Error].Value)</MudTd><MudTd>@TimeZoneInfo.ConvertTimeBySystemTimeZoneId(context.ScheduledFor,"Asia/Kathmandu").ToString("g")</MudTd><MudTd>@if(context.Status=="FAILED"){<MudButton OnClick="()=>Resend(context.Id)">@L["Resend"]</MudButton>}</MudTd></RowTemplate></MudTable>
+}
+@code {
+ Guid venue;List<VenueDto> venues=[];bool busy;string? error;NotificationSettingsDto? settings;List<TemplateDto> templates=[];List<NotificationLogDto> logs=[];List<SmsUsageDto> usage=[];int selected;string text="";SmsPreviewDto? preview;
+ bool confirmation,payment,cancellation,reminder,due,bsDate;int hours,daily,monthly;string language="en";
+ protected override async Task OnInitializedAsync(){try{venues=(await Api.GetVenuesAsync()).ToList();venue=venues.FirstOrDefault()?.Id??Guid.Empty;}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}}
+ async Task Load(){busy=true;error=null;try{settings=await Api.NotificationSettingsAsync(venue);if(settings!=null){bsDate=settings.IncludeBsDate;confirmation=settings.ConfirmationEnabled;payment=settings.PaymentEnabled;cancellation=settings.CancellationEnabled;reminder=settings.ReminderEnabled;due=settings.DueEnabled;hours=settings.ReminderHours;daily=settings.DailyLimit;monthly=settings.MonthlyLimit;language=settings.Language;}templates=await Api.TemplatesAsync(venue)??[];logs=await Api.NotificationLogsAsync(venue)??[];usage=await Api.SmsUsageAsync(venue)??[];await SelectTemplate(0);}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}finally{busy=false;}}
+ async Task SelectTemplate(int i){selected=i;if(templates.Count>i){text=templates[i].Text;await TextChanged(text);}}
+ async Task TextChanged(string value){text=value;try{if(templates.Count>selected)preview=await Api.PreviewSmsAsync(venue,templates[selected] with{Text=text});}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}}
+ async Task SaveSettings(){try{await Api.SaveNotificationSettingsAsync(venue,new(confirmation,payment,cancellation,reminder,due,bsDate,hours,daily,monthly,language,null));await Load();}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}}
+ async Task SaveTemplate(){try{await Api.SaveTemplateAsync(venue,templates[selected] with{Text=text});await Load();}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}}
+ async Task Resend(Guid id){try{await Api.ResendNotificationAsync(venue,id);await Load();}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}}
+}

@@ -304,7 +304,7 @@
         // If player is not authenticated, prompt OTP login dialog
         if (!AuthState.IsAuthenticated)
         {
-            var dialog = await DialogService.ShowAsync<OtpDialog>("Player Login");
+            var dialog = await DialogService.ShowAsync<OtpDialog>("Player Login", new DialogParameters { [nameof(OtpDialog.VenueId)] = Venue?.Id });
             var result = await dialog.Result;
             if (result == null || result.Canceled)
             {

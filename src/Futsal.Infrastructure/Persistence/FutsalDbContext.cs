@@ -1,3 +1,4 @@
+using Futsal.Domain.Notifications;
 using Futsal.Application.Abstractions;
 using Futsal.Domain.Identity;
 using Futsal.Domain.Locations;
@@ -10,6 +11,15 @@ namespace Futsal.Infrastructure.Persistence;
 
 public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, ICurrentUser currentUser, IClock clock) : DbContext(options)
 {
+    public static void ConfigurePostgres(Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.NpgsqlDbContextOptionsBuilder options)
+    {
+        var translator = new NpgsqlNullNameTranslator();
+        options.MapEnum<OrganizationRole>("member_role", nameTranslator: translator);
+        options.MapEnum<BookingStatus>("booking_status", nameTranslator: translator);
+        options.MapEnum<BookingSource>("booking_source", nameTranslator: translator);
+        options.MapEnum<PaymentMethod>("payment_method", nameTranslator: translator);
+        options.MapEnum<PaymentStatus>("payment_status", nameTranslator: translator);
+    }
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<Membership> Memberships => Set<Membership>();
@@ -30,8 +40,14 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
     public DbSet<PricingRule> PricingRules => Set<PricingRule>();
     public DbSet<VenuePaymentSettings> VenuePaymentSettings => Set<VenuePaymentSettings>();
 
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<NotificationSettings> NotificationSettings => Set<NotificationSettings>();
+    public DbSet<NotificationTemplate> NotificationTemplates => Set<NotificationTemplate>();
+    public DbSet<SmsUsage> SmsUsage => Set<SmsUsage>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ConfigureNotifications(modelBuilder);
+        modelBuilder.Entity<Customer>().Property(x => x.OptOut).HasColumnName("opt_out");
         modelBuilder.HasPostgresExtension("btree_gist");
         modelBuilder.HasPostgresExtension("citext");
         modelBuilder.HasPostgresExtension("pgcrypto");
@@ -397,6 +413,17 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
                 CreatedAt = clock.UtcNow
             });
         }
+    }
+
+    private void ConfigureNotifications(ModelBuilder model)
+    {
+        model.Entity<NotificationJobRun>(e => { e.ToTable("notification_job_runs"); e.HasKey(x => x.Name); e.Property(x => x.Name).HasColumnName("name"); e.Property(x => x.NextRun).HasColumnName("next_run"); });
+        model.Entity<Notification>(e => { e.ToTable("notifications"); e.HasKey(x => x.Id); e.HasIndex(x => x.UniqueKey).IsUnique(); e.HasIndex(x => new { x.Status, x.ScheduledFor }); e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId)); });
+        model.Entity<NotificationSettings>(e => { e.ToTable("notification_settings"); e.HasKey(x => x.Id); e.HasIndex(x => x.VenueId).IsUnique(); e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId)); });
+        model.Entity<NotificationTemplate>(e => { e.ToTable("notification_templates"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.VenueId, x.Name, x.Language }).IsUnique(); e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId)); });
+        model.Entity<SmsUsage>(e => { e.ToTable("sms_usage"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.VenueId, x.Day }).IsUnique(); e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId)); });
+        foreach (var type in new[] { typeof(Notification), typeof(NotificationSettings), typeof(NotificationTemplate), typeof(SmsUsage) })
+            foreach (var property in model.Entity(type).Metadata.GetProperties()) property.SetColumnName(new NpgsqlSnakeCaseNameTranslator().TranslateMemberName(property.Name));
     }
 
     private static string RoleName(OrganizationRole role) => role switch

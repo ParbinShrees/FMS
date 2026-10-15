@@ -18,7 +18,7 @@ public sealed class FutsalDbContextFactory : IDesignTimeDbContextFactory<FutsalD
             .Build();
         var connectionString = configuration.GetConnectionString("FutsalPro")
             ?? "Host=localhost;Port=5432;Database=futsalpro;Username=postgres";
-        var options = new DbContextOptionsBuilder<FutsalDbContext>().UseNpgsql(connectionString).Options;
+        var options = new DbContextOptionsBuilder<FutsalDbContext>().UseNpgsql(connectionString, FutsalDbContext.ConfigurePostgres).Options;
         return new FutsalDbContext(options, DesignTimeCurrentUser.Instance, DesignTimeClock.Instance);
     }
 

@@ -152,6 +152,10 @@ public sealed class AuthService(
     public async Task RequestOtpAsync(OtpRequest request, CancellationToken cancellationToken)
     {
         var phone = NormalizePhone(request.Phone);
+        if (request.VenueId != null && !await database.Venues.IgnoreQueryFilters().AnyAsync(x => x.Id == request.VenueId && x.IsActive && x.IsPublic, cancellationToken)) throw new ApiException(404, "NOT_FOUND", "Venue unavailable.");
+
+        await using var transaction = database.Database.IsRelational() ? await database.Database.BeginTransactionAsync(cancellationToken) : null;
+        if (transaction != null) await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtext({"otp:" + phone}))", cancellationToken);
         var now = clock.UtcNow;
         var sendCount = await database.OtpCodes.CountAsync(x => x.Phone == phone && x.CreatedAt > now.Subtract(OtpSendWindow), cancellationToken);
         if (sendCount >= MaxOtpSendsPerHour)
@@ -171,7 +175,8 @@ public sealed class AuthService(
         otp.CodeHash = otpHasher.HashPassword(otp, code);
         database.OtpCodes.Add(otp);
         await database.SaveChangesAsync(cancellationToken);
-        await otpSender.SendAsync(phone, code, cancellationToken);
+        await otpSender.SendForVenueAsync(phone, code, request.VenueId, request.Language, cancellationToken);
+        if (transaction != null) await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task<TokenResponse> VerifyOtpAsync(OtpVerifyRequest request, IPAddress? ip, CancellationToken cancellationToken)
@@ -272,7 +277,7 @@ public sealed class AuthService(
     private static string NormalizePhone(string phone)
     {
         var normalized = phone.Trim();
-        if (normalized.Length is < 9 or > 16 || normalized[0] != '+' || normalized.Skip(1).Any(x => !char.IsAsciiDigit(x)))
+        if (!Futsal.Application.Notifications.SmsText.ValidPhone(normalized))
             throw new ApiException(StatusCodes.Status400BadRequest, "VALIDATION_FAILED", "Phone number must be in E.164 format.");
         return normalized;
     }

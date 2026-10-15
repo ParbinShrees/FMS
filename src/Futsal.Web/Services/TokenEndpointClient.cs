@@ -13,9 +13,9 @@ public sealed class TokenEndpointClient(IHttpClientFactory factory)
     public async Task LogoutAsync(TokenDto token, CancellationToken ct) =>
         await factory.CreateClient("FutsalApi").PostAsJsonAsync("api/v1/auth/logout", new LogoutDto(token.RefreshToken), ct);
 
-    public async Task<bool> RequestOtpAsync(string phone, CancellationToken ct)
+    public async Task<bool> RequestOtpAsync(string phone, CancellationToken ct, Guid? venueId = null)
     {
-        var response = await factory.CreateClient("FutsalApi").PostAsJsonAsync("api/v1/auth/otp/request", new { phone }, ct);
+        var response = await factory.CreateClient("FutsalApi").PostAsJsonAsync("api/v1/auth/otp/request", new { phone, venueId, language = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName }, ct);
         return response.IsSuccessStatusCode;
     }
 

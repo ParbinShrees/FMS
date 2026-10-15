@@ -4,6 +4,7 @@ namespace Futsal.Domain.Bookings;
 
 public sealed class Customer : IOrganizationScoped
 {
+    public bool OptOut { get; set; }
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid OrganizationId { get; set; }
     public Guid? UserId { get; set; }

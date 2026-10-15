@@ -42,6 +42,7 @@ public sealed class ApiClient(IHttpClientFactory factory, BffAuthState auth)
     private HttpClient Client()
     {
         var client = factory.CreateClient("FutsalApi");
+        client.DefaultRequestHeaders.AcceptLanguage.ParseAdd(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
         if (auth.Token is { } token) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
         return client;
     }
@@ -128,6 +129,21 @@ public sealed class ApiClient(IHttpClientFactory factory, BffAuthState auth)
 
     public async Task RecordPaymentRefundAsync(Guid paymentId, decimal amount, string method, string? reference, CancellationToken ct = default) =>
         await PostAsync<object, object>($"api/v1/staff/payments/{paymentId}/refund", new { amount, method, reference }, Guid.NewGuid().ToString("N"), ct);
+
+    public Task<ReportResult?> ReportAsync(string kind, Guid venue, DateOnly from, DateOnly to, CancellationToken ct = default, string extra = "") => GetAsync<ReportResult>($"api/v1/reports/{kind}?venueId={venue}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}{extra}", ct);
+    public async Task<byte[]> ExportReportAsync(string kind, Guid venue, DateOnly from, DateOnly to, string format, CancellationToken ct = default, string extra = "")
+    { using var response = await Client().GetAsync($"api/v1/reports/{kind}?venueId={venue}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}&format={format}{extra}", ct); await EnsureAsync(response, ct); return await response.Content.ReadAsByteArrayAsync(ct); }
+    public Task<List<SmsUsageDto>?> SmsUsageAsync(Guid venue, CancellationToken ct = default) => GetAsync<List<SmsUsageDto>>($"api/v1/admin/venues/{venue}/notifications/usage", ct);
+    public Task<NotificationSettingsDto?> NotificationSettingsAsync(Guid venue, CancellationToken ct = default) => GetAsync<NotificationSettingsDto>($"api/v1/admin/venues/{venue}/notifications/settings", ct);
+    public Task<List<TemplateDto>?> TemplatesAsync(Guid venue, CancellationToken ct = default) => GetAsync<List<TemplateDto>>($"api/v1/admin/venues/{venue}/notifications/templates", ct);
+    public Task<List<NotificationLogDto>?> NotificationLogsAsync(Guid venue, CancellationToken ct = default) => GetAsync<List<NotificationLogDto>>($"api/v1/admin/venues/{venue}/notifications/logs", ct);
+    public async Task SaveNotificationSettingsAsync(Guid venue, NotificationSettingsDto settings, CancellationToken ct = default)
+    { using var response = await Client().PutAsJsonAsync($"api/v1/admin/venues/{venue}/notifications/settings", settings, Json, ct); await EnsureAsync(response, ct); }
+    public async Task SaveTemplateAsync(Guid venue, TemplateDto template, CancellationToken ct = default)
+    { using var response = await Client().PutAsJsonAsync($"api/v1/admin/venues/{venue}/notifications/templates", template, Json, ct); await EnsureAsync(response, ct); }
+    public Task<SmsPreviewDto?> PreviewSmsAsync(Guid venue, TemplateDto template, CancellationToken ct = default) => PostAsync<TemplateDto, SmsPreviewDto>($"api/v1/admin/venues/{venue}/notifications/preview", template, null, ct);
+    public async Task ResendNotificationAsync(Guid venue, Guid notification, CancellationToken ct = default)
+    { using var response = await Client().PostAsJsonAsync($"api/v1/admin/venues/{venue}/notifications/{notification}/resend", new { }, Json, ct); await EnsureAsync(response, ct); }
 
     private async Task<T?> GetAsync<T>(string uri, CancellationToken ct)
     {

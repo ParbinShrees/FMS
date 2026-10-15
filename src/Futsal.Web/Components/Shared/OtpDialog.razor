@@ -68,6 +68,7 @@
 </MudDialog>
 
 @code {
+    [Parameter] public Guid? VenueId {get;set;}
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public EventCallback OnSuccess { get; set; }
 
@@ -83,7 +84,7 @@
         ErrorMessage = null;
         try
         {
-            var success = await TokenClient.RequestOtpAsync(Phone, default);
+            var success = await TokenClient.RequestOtpAsync(Phone, default,VenueId);
             if (success)
             {
                 OtpSent = true;

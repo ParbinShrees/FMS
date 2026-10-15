@@ -17,7 +17,7 @@ namespace Futsal.Api.Bookings;
 
 public sealed class BookingService(
     FutsalDbContext db,ICurrentUser current,IClock clock,BookingPricing pricing,IBookingNotifier notifier,
-    ILogger<BookingService> logger)
+    ILogger<BookingService> logger, Futsal.Api.Notifications.NotificationEvents? notifications = null)
 {
     private static readonly JsonSerializerOptions JsonOptions=new(JsonSerializerDefaults.Web);
 
@@ -174,6 +174,7 @@ public sealed class BookingService(
             AddAudit(booking.OrganizationId,userId,request.Amount<0?"PAYMENT_REFUNDED":"PAYMENT_RECORDED",id,null,new{request.Amount,request.Method},ip);
             db.IdempotencyKeys.Add(new IdempotencyKey{Key=idempotencyKey,UserId=userId,Endpoint=endpoint,RequestHash=hash,ResponseStatus=204,ResponseBody=JsonSerializer.Serialize(new{paymentId,booking.PaidAmount},JsonOptions),CreatedAt=clock.UtcNow});
             await db.SaveChangesAsync(ct);await transaction.CommitAsync(ct);
+            if (notifications != null) await notifications.PublishAsync(id, ct);
         }
         catch{await transaction.RollbackAsync(ct);throw;}
     }

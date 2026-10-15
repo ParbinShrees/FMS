@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Futsal.Contracts\Futsal.Contracts.csproj" />
+    <ProjectReference Include="..\Futsal.Application\Futsal.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

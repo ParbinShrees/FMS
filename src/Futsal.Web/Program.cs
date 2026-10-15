@@ -12,11 +12,13 @@ builder.Services.AddHttpClient("FutsalApi", client => client.BaseAddress = new U
 builder.Services.AddSingleton<TokenSessionStore>();
 builder.Services.AddScoped<BffAuthState>();
 builder.Services.AddScoped<ApiClient>();
+builder.Services.AddSingleton<Futsal.Application.Abstractions.IClock, ReportClock>();
 builder.Services.AddSingleton<TokenEndpointClient>();
 var app = builder.Build();
 if (!app.Environment.IsDevelopment()) { app.UseExceptionHandler("/Error", true); app.UseHsts(); }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+app.UseRequestLocalization(new RequestLocalizationOptions().SetDefaultCulture("en").AddSupportedCultures("en", "ne").AddSupportedUICultures("en", "ne"));
 app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapPost("/bff/login", async (HttpContext context, TokenEndpointClient api, TokenSessionStore sessions, CancellationToken ct) =>

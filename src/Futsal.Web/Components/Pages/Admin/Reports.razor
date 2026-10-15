@@ -1,0 +1,42 @@
+@page "/admin/reports"
+@layout Futsal.Web.Components.Layout.MainLayout
+@using Futsal.Contracts
+@using Futsal.Web.Services
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Futsal.Web.Milestone8> L
+@inject ApiClient Api
+@inject IJSRuntime JS
+@inject Futsal.Application.Abstractions.IClock Clock
+@inject Futsal.Web.Services.BffAuthState Auth
+<MudText Typo="Typo.h4">@L["Reports"]</MudText>
+<MudSelect T="Guid" Label="@L["Venue"]" @bind-Value="venue">@foreach(var v in venues){<MudSelectItem T="Guid" Value="v.Id">@v.Name</MudSelectItem>}</MudSelect>
+<MudSelect T="string" @bind-Value="kind">@foreach(var k in kinds){<MudSelectItem T="string" Value="@k">@L[k]</MudSelectItem>}</MudSelect>
+<MudDateRangePicker Label="@L["From"]" @bind-DateRange="range" />
+@if(range.Start!=null && range.End!=null){<MudText>@BsDate.FromAd(DateOnly.FromDateTime(range.Start.Value)) — @BsDate.FromAd(DateOnly.FromDateTime(range.End.Value))</MudText>}
+<MudTextField T="string" Label="@L["BsFrom"]" @bind-Value="bsFrom"/><MudTextField T="string" Label="@L["BsTo"]" @bind-Value="bsTo"/><MudButton OnClick="ApplyBs">@L["ApplyBs"]</MudButton>
+@if(kind=="shift"){
+<MudTimePicker Label="@L["ShiftFrom"]" @bind-Time="shiftFrom"/><MudTimePicker Label="@L["ShiftTo"]" @bind-Time="shiftTo"/>
+@if(Auth.Token?.Role!="Cashier"){<MudTextField T="string" Label="@L["CashierId"]" @bind-Value="cashier"/>}}
+<MudButton Disabled="busy" OnClick="Load">@L["Load"]</MudButton>
+<MudButton Disabled="@(busy||result==null)" OnClick='()=>Export("csv")'>@L["Csv"]</MudButton><MudButton Disabled="@(busy||result==null)" OnClick='()=>Export("pdf")'>@L["Pdf"]</MudButton>
+@if(error!=null){<MudAlert Severity="Severity.Error">@error</MudAlert>}
+@if(busy){<MudProgressLinear Indeterminate="true" aria-label="@L["Loading"]" />}
+else if(result!=null && result.Rows.Count==0){<MudAlert>@L["Empty"]</MudAlert>}
+else if(result!=null){
+<MudChart ChartType="ChartType.Bar" ChartSeries="series" XAxisLabels="labels" Width="100%" Height="300px" />
+<MudTable Items="result.Rows" Dense="true" Hover="true"><HeaderContent><MudTh>@L["Category"]</MudTh><MudTh>@L["Label"]</MudTh><MudTh>@L["Amount"]</MudTh><MudTh>@L["Count"]</MudTh><MudTh>@L[kind=="customers"?"NoShows":kind=="dues"?"DebtAge":kind=="utilization"?"UtilizationPercent":"Value"]</MudTh><MudTh>@L["Detail"]</MudTh></HeaderContent><RowTemplate><MudTd>@L[context.Category]</MudTd><MudTd>@L[context.Label]</MudTd><MudTd>@context.Amount.ToString("N2")</MudTd><MudTd>@context.Count</MudTd><MudTd>@context.Value.ToString("N2")</MudTd><MudTd>@context.Detail</MudTd></RowTemplate></MudTable>
+@if(kind=="utilization"){
+<MudText Typo="Typo.h6">@L["Heatmap"]</MudText>
+<table class="table"><tbody>@for(int d=0;d<7;d++){<tr><th>@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.DayNames[d]</th>@for(int h=0;h<24;h++){var cell=result.Rows.FirstOrDefault(x=>x.Category=="heatmap" && x.Label==$"{d}:{h}");<td title="@($"{h}:00")" style="@($"background:rgba(30,150,90,{(cell?.Value??0)/100m});")">@(cell?.Value.ToString("0")??"—")</td>}</tr>}</tbody></table>
+}}
+@code {
+ Guid venue;string kind="daily";bool busy;string? error;List<VenueDto> venues=[];string[] kinds=["daily","monthly","dues","utilization","customers","shift"];ReportResult? result;
+ DateRange range=new();string bsFrom="",bsTo="",cashier="";TimeSpan? shiftFrom=TimeSpan.Zero,shiftTo=new TimeSpan(23,59,59);Guid resultVenue;string resultExtra="";
+ string ShiftQuery(){if(kind!="shift"||range.Start==null||range.End==null)return "";var zone=TimeZoneInfo.FindSystemTimeZoneById("Asia/Kathmandu");var start=new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(range.Start.Value.Date+(shiftFrom??TimeSpan.Zero),zone));var end=new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(range.End.Value.Date+(shiftTo??new TimeSpan(23,59,59)),zone));return $"&shiftStart={Uri.EscapeDataString(start.ToString("O"))}&shiftEnd={Uri.EscapeDataString(end.ToString("O"))}"+(Guid.TryParse(cashier,out var id)?$"&cashierId={id}":"");}
+ void ApplyBs(){try{range=new(Futsal.Application.Notifications.NepalDate.Ad(bsFrom).ToDateTime(TimeOnly.MinValue),Futsal.Application.Notifications.NepalDate.Ad(bsTo).ToDateTime(TimeOnly.MinValue));error=null;}catch{error=L["InvalidBs"];}}
+
+ List<ChartSeries> series=[];string[] labels=[];
+ protected override async Task OnInitializedAsync(){var today=TimeZoneInfo.ConvertTimeBySystemTimeZoneId(Clock.UtcNow,"Asia/Kathmandu").Date;range=new(today,today);try{venues=(await Api.GetVenuesAsync()).ToList();venue=venues.FirstOrDefault()?.Id??Guid.Empty;if(Auth.Token?.Role=="Cashier"){kinds=["shift"];kind="shift";}}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}}
+ async Task Load(){busy=true;error=null;try{if(range.Start==null||range.End==null)return;resultVenue=venue;resultExtra=ShiftQuery();result=await Api.ReportAsync(kind,venue,DateOnly.FromDateTime(range.Start.Value),DateOnly.FromDateTime(range.End.Value),extra:resultExtra);var rows=result?.Rows.Where(x=>x.Category==(kind=="utilization"?"court":kind=="monthly"?"income":kind=="daily"?"income":kind)).Take(31).ToList()??[];labels=rows.Select(x=>x.Label).ToArray();series=[new(){Name=L[kind],Data=rows.Select(x=>(double)(kind=="utilization"?x.Value:x.Amount)).ToArray()}];}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}finally{busy=false;}}
+ async Task Export(string format){try{if(result==null)return;var bytes=await Api.ExportReportAsync(result.Kind,resultVenue,result.From,result.To,format,extra:resultExtra);await JS.InvokeVoidAsync("futsalDownload",$"{kind}.{format}",format=="pdf"?"application/pdf":"text/csv",Convert.ToBase64String(bytes));}catch(Exception ex){error=ex is ApiProblemException problem?L[problem.Code]:L["REQUEST_FAILED"];}}
+}

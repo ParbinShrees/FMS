@@ -11,7 +11,7 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("FutsalPro")
             ?? throw new InvalidOperationException("Connection string 'FutsalPro' is required.");
-        services.AddDbContext<FutsalDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddDbContext<FutsalDbContext>(options => options.UseNpgsql(connectionString, FutsalDbContext.ConfigurePostgres));
         services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database", timeout: TimeSpan.FromSeconds(3));
         return services;
     }
