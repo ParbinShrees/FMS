@@ -34,7 +34,7 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
             await context.Response.WriteAsJsonAsync(new ProblemDetails
             {
                 Type = "about:blank",
-                Title = title,
+                Title = Futsal.Application.Common.ErrorMessages.Get(code,title),
                 Status = status,
                 Instance = context.Request.Path,
                 Extensions = { ["code"] = code, ["traceId"] = context.TraceIdentifier }

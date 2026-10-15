@@ -2,7 +2,7 @@ using Futsal.Infrastructure.Persistence;
 
 namespace Futsal.Api.Bookings;
 
-public sealed class ExpireHoldsBackgroundService(IServiceScopeFactory scopeFactory,ILogger<ExpireHoldsBackgroundService> logger):BackgroundService
+public sealed class ExpireHoldsBackgroundService(IServiceScopeFactory scopeFactory,ILogger<ExpireHoldsBackgroundService> logger, Futsal.Api.Operations.JobHeartbeat? heartbeat = null):BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -13,6 +13,7 @@ public sealed class ExpireHoldsBackgroundService(IServiceScopeFactory scopeFacto
             {
                 await using var scope=scopeFactory.CreateAsyncScope();
                 await scope.ServiceProvider.GetRequiredService<BookingService>().ExpireDueHoldsAsync(stoppingToken);
+                heartbeat?.Beat("expiry");
             }
             catch(OperationCanceledException)when(stoppingToken.IsCancellationRequested){break;}
             catch(Exception ex){logger.LogError(ex,"Expiring booking holds failed; it will retry on the next interval.");}

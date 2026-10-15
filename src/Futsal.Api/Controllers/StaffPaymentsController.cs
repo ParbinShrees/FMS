@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using Futsal.Api.Contracts;
 using Futsal.Api.Identity;
 using Futsal.Application.Abstractions;
@@ -11,6 +12,7 @@ using System.Text.Json;
 
 namespace Futsal.Api.Controllers;
 
+[EnableRateLimiting("payments")]
 [ApiController, Route("api/v1/staff/payments"), Authorize(Policy = "StaffAccess")]
 public sealed class StaffPaymentsController(
     FutsalDbContext db,
@@ -25,7 +27,7 @@ public sealed class StaffPaymentsController(
         var orgId = current.OrganizationId ?? throw new UnauthorizedAccessException();
 
         var query = from p in db.Payments
-                    where p.OrganizationId == orgId && p.Status == PaymentStatus.NEEDS_REFUND
+                    where p.OrganizationId == orgId && p.Status == PaymentStatus.NEEDS_REFUND && p.Amount+(db.Payments.Where(r=>r.ReversalOf==p.Id).Sum(r=>(decimal?)r.Amount)??0)>0
                     join b in db.Bookings on p.BookingId equals b.Id into bj
                     from b in bj.DefaultIfEmpty()
                     join c in db.Customers on b.CustomerId equals c.Id into cj
@@ -59,58 +61,24 @@ public sealed class StaffPaymentsController(
         var userId = current.UserId ?? throw new UnauthorizedAccessException();
         var orgId = current.OrganizationId ?? throw new UnauthorizedAccessException();
 
-        var originalPayment = await db.Payments.SingleOrDefaultAsync(p => p.Id == id && p.OrganizationId == orgId, ct)
-            ?? throw new ApiException(404, "NOT_FOUND", "Payment was not found.");
-
-        if (originalPayment.Status == PaymentStatus.REFUNDED)
-            throw new ApiException(400, "VALIDATION_FAILED", "This payment has already been refunded.");
-
-        var refundAmount = -Math.Abs(request.Amount);
-
-        var refundPayment = new Payment
-        {
-            Id = Guid.NewGuid(),
-            OrganizationId = orgId,
-            BookingId = originalPayment.BookingId,
-            Method = request.Method,
-            Status = PaymentStatus.REFUNDED,
-            Amount = refundAmount,
-            GatewayRef = request.Reference,
-            ReceivedBy = userId,
-            CreatedAt = clock.UtcNow,
-            VerifiedAt = clock.UtcNow
-        };
-
-        if (originalPayment.Status == PaymentStatus.NEEDS_REFUND)
-        {
-            originalPayment.Status = PaymentStatus.REFUNDED;
-        }
-
-        if (originalPayment.BookingId is Guid bookingId)
-        {
-            var booking = await db.Bookings.SingleOrDefaultAsync(b => b.Id == bookingId, ct);
-            if (booking != null && booking.PaidAmount >= Math.Abs(refundAmount))
-            {
-                booking.PaidAmount -= Math.Abs(refundAmount);
-            }
-        }
-
-        db.Payments.Add(refundPayment);
-
-        db.AuditLogs.Add(new AuditLog
-        {
-            OrganizationId = orgId,
-            UserId = userId,
-            Action = "PAYMENT_REFUNDED",
-            EntityType = "Payment",
-            EntityId = refundPayment.Id,
-            Before = null,
-            After = JsonSerializer.Serialize(new { originalPaymentId = id, refundAmount, method = request.Method }, JsonOptions),
-            Ip = HttpContext.Connection.RemoteIpAddress,
-            CreatedAt = clock.UtcNow
-        });
-
-        await db.SaveChangesAsync(ct);
+        var endpoint=$"POST:/api/v1/staff/payments/{id}/refund";
+        var hash=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(request,JsonOptions))));
+        await using var tx=await db.Database.BeginTransactionAsync(ct);
+        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({"idempotency:"+userId+":"+key},0))",ct);
+        var replay=await db.IdempotencyKeys.SingleOrDefaultAsync(x=>x.Key==key&&x.UserId==userId&&x.Endpoint==endpoint,ct);
+        if(replay!=null){if(replay.RequestHash!=hash)throw new ApiException(409,"IDEMPOTENCY_CONFLICT","Idempotency key already used.");await tx.CommitAsync(ct);return NoContent();}
+        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({"refund:"+id},0))",ct);
+        var originalPayment=await db.Payments.SingleOrDefaultAsync(p=>p.Id==id&&p.OrganizationId==orgId,ct)??throw new ApiException(404,"NOT_FOUND","Payment was not found.");
+        if(request.Amount is < -9999999999.99m or > 9999999999.99m||!Enum.IsDefined(request.Method))throw new ApiException(400,"VALIDATION_FAILED","Invalid refund amount or method.");
+        var amount=Math.Abs(request.Amount);
+        var already=-await db.Payments.Where(x=>x.ReversalOf==id).SumAsync(x=>x.Amount,ct);
+        if(originalPayment.Status is not (PaymentStatus.COMPLETED or PaymentStatus.NEEDS_REFUND)||amount<=0||decimal.Round(amount,2)!=amount||amount>originalPayment.Amount-already)throw new ApiException(400,"VALIDATION_FAILED","Refund exceeds the remaining received amount.");
+        var refund=new Payment{OrganizationId=orgId,BookingId=originalPayment.BookingId,ReversalOf=id,Method=request.Method,Status=PaymentStatus.REFUNDED,Amount=-amount,GatewayRef=request.Reference,ReceivedBy=userId,CreatedAt=clock.UtcNow,VerifiedAt=clock.UtcNow};
+        if(originalPayment.Status==PaymentStatus.COMPLETED&&originalPayment.BookingId is Guid bookingId){var booking=await db.Bookings.SingleAsync(x=>x.Id==bookingId,ct);if(booking.PaidAmount<amount)throw new ApiException(409,"VALIDATION_FAILED","Booking balance changed. Reload before refunding.");booking.PaidAmount-=amount;}
+        db.Payments.Add(refund);
+        db.IdempotencyKeys.Add(new(){Key=key!,UserId=userId,Endpoint=endpoint,RequestHash=hash,ResponseStatus=204,ResponseBody=JsonSerializer.Serialize(new{refund.Id},JsonOptions),CreatedAt=clock.UtcNow});
+        db.AuditLogs.Add(new(){OrganizationId=orgId,UserId=userId,Action="PAYMENT_REFUNDED",EntityType="Payment",EntityId=refund.Id,After=JsonSerializer.Serialize(new{originalPaymentId=id,Amount=-amount},JsonOptions),CreatedAt=clock.UtcNow});
+        await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);
 
         return NoContent();
     }

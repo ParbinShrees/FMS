@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using Futsal.Api.Contracts;
 using Futsal.Api.Identity;
 using Futsal.Api.Payments;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Futsal.Api.Controllers;
 
+[EnableRateLimiting("payments")]
 [ApiController, Route("api/v1/payments")]
 public sealed class PaymentsController(PaymentProcessingService paymentService) : ControllerBase
 {

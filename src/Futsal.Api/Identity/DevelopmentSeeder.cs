@@ -23,6 +23,7 @@ public sealed class DevelopmentSeeder(
             return;
         }
 
+        if(!StaffPasswordPolicy.Accepts(superAdminPassword)||!StaffPasswordPolicy.Accepts(ownerPassword))throw new InvalidOperationException("Seed passwords do not meet the staff password policy.");
         var superAdminEmail = configuration["Seed:SuperAdminEmail"] ?? "superadmin@futsalpro.local";
         var ownerEmail = configuration["Seed:OwnerEmail"] ?? "owner@sample-futsal.local";
         if (string.Equals(superAdminEmail, ownerEmail, StringComparison.OrdinalIgnoreCase))

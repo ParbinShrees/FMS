@@ -1,3 +1,6 @@
+using Futsal.Api.Operations;
+using Futsal.Security;
+using Futsal.Api.Security;
 using Futsal.Api.Notifications;
 using Futsal.Infrastructure.Notifications;
 using System.Text;
@@ -26,12 +29,14 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+ProductionConfiguration.Validate(builder.Configuration,builder.Environment.IsProduction());
+builder.AddTransportHardening();
+ProductionConfiguration.ConfigureKeys(builder);
 
-builder.Host.UseSerilog((context, configuration) => configuration
-    .ReadFrom.Configuration(context.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File("logs/futsalpro-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14));
+builder.Host.UseSerilog((context,configuration)=>{
+ configuration.ReadFrom.Configuration(context.Configuration).Enrich.FromLogContext().MinimumLevel.Override("Microsoft.AspNetCore",Serilog.Events.LogEventLevel.Warning).WriteTo.Console(new SafeLogFormatter());
+ if(context.HostingEnvironment.IsDevelopment())configuration.WriteTo.File(new SafeLogFormatter(),"logs/futsalpro-.log",rollingInterval:RollingInterval.Day,retainedFileCountLimit:14);
+});
 
 var signingKey = builder.Configuration["Jwt:SigningKey"];
 if (string.IsNullOrWhiteSpace(signingKey) || Encoding.UTF8.GetByteCount(signingKey) < 32)
@@ -42,6 +47,9 @@ var audience = builder.Configuration["Jwt:Audience"] ?? "FutsalProClients";
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddSingleton<IClock, SystemClock>();
+builder.Services.AddSingleton<JobHeartbeat>();
+builder.Services.AddHostedService<OperationsJobs>();
+builder.Services.Configure<HostOptions>(o=>o.ShutdownTimeout=TimeSpan.FromSeconds(45));
 builder.Services.AddSingleton<PasswordHasher<AppUser>>();
 builder.Services.AddSingleton<PasswordHasher<OtpCode>>();
 builder.Services.AddScoped<IOtpSender, QueuedOtpSender>();
@@ -55,12 +63,13 @@ builder.Services.AddScoped<INotificationSender>(sp => (builder.Configuration["Sm
 builder.Services.AddHostedService<NotificationJobs>();
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<OwnerTwoFactor>();
 builder.Services.AddScoped<DevelopmentSeeder>();
 builder.Services.AddScoped<BookingPricing>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<IBookingNotifier, SignalRBookingNotifier>();
 builder.Services.AddHostedService<ExpireHoldsBackgroundService>();
-builder.Services.AddDataProtection();
+
 builder.Services.AddSingleton<IVenuePaymentProtector, VenuePaymentProtector>();
 builder.Services.Configure<EsewaOptions>(builder.Configuration.GetSection(EsewaOptions.SectionName));
 builder.Services.AddHttpClient<EsewaGateway>();
@@ -123,6 +132,8 @@ builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHand
 
 builder.Services.AddRateLimiter(options =>
 {
+    options.GlobalLimiter=PartitionedRateLimiter.Create<HttpContext,string>(context=>RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString()??"unknown",_=>new FixedWindowRateLimiterOptions{PermitLimit=600,Window=TimeSpan.FromMinutes(1),QueueLimit=0}));
+    options.AddPolicy("payments",context=>RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString()??"unknown",_=>new FixedWindowRateLimiterOptions{PermitLimit=30,Window=TimeSpan.FromMinutes(1),QueueLimit=0}));
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.OnRejected = async (context, cancellationToken) =>
         await ProblemResponse.WriteAsync(context.HttpContext, StatusCodes.Status429TooManyRequests, "RATE_LIMITED", "Too many requests. Try again later.", cancellationToken);
@@ -137,10 +148,10 @@ builder.Services.AddRateLimiter(options =>
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
     options.AddPolicy("holds", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-        _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = Math.Clamp(builder.Configuration.GetValue("RateLimits:HoldsPerMinute",20),1,200), Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
 });
 
-builder.Services.AddControllers().AddJsonOptions(options =>
+builder.Services.AddControllers(options=>options.Filters.Add<SubscriptionWriteFilter>()).AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())).ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
@@ -158,14 +169,21 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddHealthChecks().AddCheck("live", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+builder.Services.AddHealthChecks().AddCheck<ReadinessCheck>("readiness").AddCheck("live", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
 
 var app = builder.Build();
 
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var database = scope.ServiceProvider.GetRequiredService<FutsalDbContext>();
-    await database.Database.MigrateAsync();
+    for(var attempt=0;;attempt++)
+    {
+        try{await database.Database.OpenConnectionAsync();await database.Database.CloseConnectionAsync();break;}
+        catch(Exception) when(attempt<5){await Task.Delay(TimeSpan.FromSeconds(Math.Min(8,Math.Pow(2,attempt))));}
+    }
+    if(app.Environment.IsDevelopment()||args.Contains("--migrate"))await database.Database.MigrateAsync();
+    else if((await database.Database.GetPendingMigrationsAsync()).Any())throw new InvalidOperationException("Apply migrations with the migration role before starting the API.");
+    if(args.Contains("--migrate"))return;
     if (app.Environment.IsDevelopment())
     {
         await LocationCatalog.SeedAsync(database, CancellationToken.None);
@@ -173,17 +191,19 @@ await using (var scope = app.Services.CreateAsyncScope())
     }
 }
 
+app.UseTransportHardening(false);
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 app.UseRequestLocalization(new RequestLocalizationOptions().SetDefaultCulture("en").AddSupportedCultures("en", "ne").AddSupportedUICultures("en", "ne"));
 app.UseRouting();
 app.UseCors("web");
+app.UseRequestTimeouts();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
-app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Name == "database" });
-app.MapControllers();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Name == "readiness" });
+app.MapControllers().WithRequestTimeout("api");
 app.MapHub<AvailabilityHub>("/hubs/availability");
 
 app.Run();

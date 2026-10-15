@@ -18,12 +18,12 @@
     @if (IsLoading)
     {
         <div class="d-flex justify-center pa-8">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudProgressCircular aria-label="@Text["Load"]" Color="Color.Primary" Indeterminate="true" />
         </div>
     }
     else if (Venue == null)
     {
-        <MudAlert Severity="Severity.Error">Venue not found.</MudAlert>
+        <MudAlert Severity="Severity.Error">@Text["Uiacdd2e26ae4e"]</MudAlert>
     }
     else
     {
@@ -40,7 +40,7 @@
                             {
                                 <a href="@($"https://www.google.com/maps/search/?api=1&query={Venue.Latitude.Value},{Venue.Longitude.Value}")"
                                    target="_blank" class="ml-2 font-weight-medium">
-                                    (View on Google Maps)
+                                    @Text["Ui3aa2765ed9a9"]
                                 </a>
                             }
                         </MudText>
@@ -56,7 +56,7 @@
                 @if (!Venue.HasOnlinePayment)
                 {
                     <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-3" Dense="true">
-                        Online booking is currently disabled for this venue. Please contact the front desk directly.
+                        @Text["Uid3baa908b5ee"]
                     </MudAlert>
                 }
 
@@ -81,7 +81,7 @@
             <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-3" Elevation="3">
                 <div class="d-flex justify-space-between align-center flex-wrap gap-2">
                     <div>
-                        <strong>Slot Held!</strong> Booking Code: <code>@ActiveBooking.BookingCode</code>
+                        <strong>@Text["Ui18bf713b10a6"]</strong> @Text["Ui73056c835768"] <code>@ActiveBooking.BookingCode</code>
                         <div class="caption">Complete advance payment of Rs @ActiveBooking.AdvanceRequired.ToString("N0") before hold expires.</div>
                     </div>
                     <div class="d-flex align-center gap-3">
@@ -92,7 +92,7 @@
                                    StartIcon="@Icons.Material.Filled.Payment"
                                    OnClick="InitiatePayment"
                                    Disabled="@IsPaymentBusy">
-                            @if (IsPaymentBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
+                            @if (IsPaymentBusy) { <MudProgressCircular aria-label="@Text["Load"]" Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
                             Pay with eSewa
                         </MudButton>
                     </div>
@@ -102,19 +102,19 @@
 
         <!-- Date Picker & SignalR Status -->
         <div class="d-flex justify-space-between align-center mb-3 flex-wrap gap-2">
-            <BsDatePicker Date="@SelectedDate" DateChanged="OnDateChanged" />
+            <BsDatePicker BsFirst="@(Venue?.BsFirst??false)" NepaliNumerals="@(Venue?.NepaliNumerals??false)" Date="@SelectedDate" DateChanged="OnDateChanged" />
 
             <div class="d-flex align-center">
                 @if (IsHubConnected)
                 {
                     <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text" Icon="@Icons.Material.Filled.Wifi">
-                        Live Availability
+                        @Text["Uia59217005d28"]
                     </MudChip>
                 }
                 else
                 {
                     <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text" Icon="@Icons.Material.Filled.WifiOff">
-                        Reconnecting...
+                        @Text["Ui66bce4bdb48e"]
                     </MudChip>
                 }
             </div>
@@ -128,7 +128,7 @@
         </MudCard>
 
         <!-- Booking Action Bar -->
-        @if (SelectedSlots.Count > 0 && ActiveBooking == null)
+        @if (Venue != null && SelectedSlots.Count > 0 && ActiveBooking == null)
         {
             var totalPrice = SelectedSlots.Sum(s => s.Price);
             var advanceAmount = Venue.AdvanceType == "FIXED"
@@ -141,19 +141,19 @@
                         @SelectedSlots.Count @(SelectedSlots.Count == 1 ? "Slot" : "Slots") Selected
                     </div>
                     <div class="caption text-secondary">
-                        Total: <strong>Rs @totalPrice.ToString("N0")</strong> | Advance required: <strong class="text-success">Rs @advanceAmount.ToString("N0")</strong>
+                        @Text["Ui18e872be2359"] <strong>Rs @totalPrice.ToString("N0")</strong> @Text["Ui74f44b5fd77f"] <strong class="text-success">Rs @advanceAmount.ToString("N0")</strong>
                     </div>
                 </div>
 
                 <div class="d-flex gap-2">
                     <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="() => SelectedSlots.Clear()">
-                        Clear
+                        @Text["Ui83b12c2216ef"]
                     </MudButton>
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
                                Disabled="@(!Venue.HasOnlinePayment || IsHolding)"
                                OnClick="HoldSlots">
-                        @if (IsHolding) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
+                        @if (IsHolding) { <MudProgressCircular aria-label="@Text["Load"]" Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
                         Hold & Pay Advance
                     </MudButton>
                 </div>
@@ -304,7 +304,7 @@
         // If player is not authenticated, prompt OTP login dialog
         if (!AuthState.IsAuthenticated)
         {
-            var dialog = await DialogService.ShowAsync<OtpDialog>("Player Login", new DialogParameters { [nameof(OtpDialog.VenueId)] = Venue?.Id });
+            var dialog = await DialogService.ShowAsync<OtpDialog>(Text["Uib3206f025aab"].Value, new DialogParameters { [nameof(OtpDialog.VenueId)] = Venue?.Id });
             var result = await dialog.Result;
             if (result == null || result.Canceled)
             {
@@ -324,12 +324,12 @@
             {
                 ActiveBooking = booking;
                 SelectedSlots.Clear();
-                Snackbar.Add("Slot held! Please pay advance to confirm.", Severity.Success);
+                Snackbar.Add(Text["Ui45b3589bd4a4"].Value, Severity.Success);
             }
         }
         catch (ApiProblemException ex) when (ex.Code == "SLOT_UNAVAILABLE")
         {
-            Snackbar.Add("Someone just booked this slot. Pick another.", Severity.Warning);
+            Snackbar.Add(Text["Ui6f5cf35bc37b"].Value, Severity.Warning);
             await LoadSlots();
         }
         catch (Exception ex)
@@ -357,7 +357,7 @@
                 StateHasChanged();
                 await Task.Delay(100);
                 // Submit hidden form to eSewa gateway
-                await JS.InvokeVoidAsync("eval", "document.getElementById('esewaForm').submit()");
+                await JS.InvokeVoidAsync("futsalSubmitForm", "esewaForm");
             }
         }
         catch (Exception ex)
@@ -373,7 +373,7 @@
     private void OnHoldExpired()
     {
         ActiveBooking = null;
-        Snackbar.Add("Hold time expired. Please choose a slot again.", Severity.Info);
+        Snackbar.Add(Text["Uib127436ba491"].Value, Severity.Info);
         _ = LoadSlots();
     }
 

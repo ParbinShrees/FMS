@@ -1,0 +1,8 @@
+@page "/admin/display-settings"
+@using Futsal.Contracts
+@inject Futsal.Web.Services.ApiClient Api
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Milestone9> L
+<MudSelect T="Guid" @bind-Value="venue" Label="@Text["Uib06daa6bb5a7"]">@foreach(var v in venues){<MudSelectItem T="Guid" Value="v.Id">@v.Name</MudSelectItem>}</MudSelect><MudButton OnClick="Load">@L["Load"]</MudButton><MudSwitch T="bool" @bind-Value="bs" Label="@L["DateOrder"]"/><MudSwitch T="bool" @bind-Value="numerals" Label="@L["Numerals"]"/><MudButton OnClick="Save">@L["Save"]</MudButton>
+@code{Guid venue;List<VenueDto> venues=[];bool bs,numerals;public sealed record Settings(bool BsFirst,bool NepaliNumerals);protected override async Task OnInitializedAsync(){try{venues=(await Api.GetVenuesAsync()).ToList();venue=venues.FirstOrDefault()?.Id??Guid.Empty;}catch{}}
+async Task Load(){var s=await Api.ManagementGetAsync<Settings>($"admin/venues/{venue}/display-settings");bs=s?.BsFirst??false;numerals=s?.NepaliNumerals??false;}
+async Task Save()=>await Api.ManagementSendAsync<object>($"admin/venues/{venue}/display-settings",new{bsFirst=bs,nepaliNumerals=numerals},true);}

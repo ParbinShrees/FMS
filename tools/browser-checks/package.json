@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lighthouse": "node lighthouse.mjs",
+    "reconnect": "node ../../load/reconnect.mjs"
+  },
+  "devDependencies": {
+    "@microsoft/signalr": "10.0.11",
+    "lighthouse": "13.5.0"
+  }
+}

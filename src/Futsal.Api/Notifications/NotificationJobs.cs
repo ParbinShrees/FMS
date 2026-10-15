@@ -3,7 +3,7 @@ using Futsal.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 namespace Futsal.Api.Notifications;
 
-public sealed class NotificationJobs(IServiceScopeFactory scopes, ILogger<NotificationJobs> logger) : BackgroundService
+public sealed class NotificationJobs(IServiceScopeFactory scopes, ILogger<NotificationJobs> logger, Futsal.Api.Operations.JobHeartbeat? heartbeat = null) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -17,7 +17,7 @@ public sealed class NotificationJobs(IServiceScopeFactory scopes, ILogger<Notifi
                 // Session-wide PostgreSQL lock serializes workers, including provider requests and cap reservations.
                 await db.Database.OpenConnectionAsync(stoppingToken);
                 var locked = await db.Database.SqlQueryRaw<bool>("SELECT pg_try_advisory_lock(800008) AS \"Value\"").SingleAsync(stoppingToken);
-                if (!locked) continue;
+                if (!locked){heartbeat?.Beat("notifications");continue;}
                 try
                 {
                     var queue = scope.ServiceProvider.GetRequiredService<NotificationQueue>();
@@ -35,6 +35,7 @@ public sealed class NotificationJobs(IServiceScopeFactory scopes, ILogger<Notifi
                     }
                     await db.SaveChangesAsync(stoppingToken);
                     await queue.SendQueuedAsync(stoppingToken);
+                    heartbeat?.Beat("notifications");
                 }
                 finally { await db.Database.ExecuteSqlRawAsync("SELECT pg_advisory_unlock(800008)", CancellationToken.None); }
             }

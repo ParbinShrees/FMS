@@ -1,0 +1,10 @@
+{
+  "runId": "unique-per-test-run",
+  "slug": "staging-only-venue",
+  "date": "YYYY-MM-DD",
+  "courtId": "",
+  "mixedCourtId": "",
+  "startAt": "YYYY-MM-DDT13:15:00Z",
+  "endAt": "YYYY-MM-DDT14:15:00Z",
+  "players": []
+}

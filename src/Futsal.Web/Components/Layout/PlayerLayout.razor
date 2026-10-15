@@ -3,7 +3,7 @@
 @inject BffAuthState AuthState
 @inject NavigationManager Navigation
 
-<MudThemeProvider />
+<MudThemeProvider /><MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
@@ -23,19 +23,19 @@
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Search"
                        Size="Size.Small">
-                Find
+                @Text["Ui822b2ae4542b"]
             </MudButton>
             <MudButton Href="/v/my-bookings"
                        Variant="Variant.Text"
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.BookmarkBorder"
                        Size="Size.Small">
-                My Bookings
+                @Text["Ui6b0363a50b3e"]
             </MudButton>
             @if (AuthState.IsAuthenticated)
             {
                 <MudChip T="string" Color="Color.Success" Variant="Variant.Outlined" Size="Size.Small">
-                    Player
+                    @Text["Ui64aee8c6cbd0"]
                 </MudChip>
             }
         </div>
@@ -47,7 +47,7 @@
 
     <footer class="player-footer text-center pa-4 text-secondary caption">
         <div>FutsalPro Nepal &copy; @DateTime.UtcNow.Year — Zero double bookings</div>
-    </footer>
+    <nav aria-label="Legal"><a href="/privacy">@Text["Privacy"]</a> ? <a href="/terms">@Text["Terms"]</a> ? <a href="/support">@Text["Support"]</a></nav></footer>
 </div>
 
 <style>

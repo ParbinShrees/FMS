@@ -3,7 +3,7 @@
 <div class="d-flex align-center gap-2">
     <MudDatePicker Date="@SelectedDate"
                    DateChanged="OnDateSelected"
-                   Label="Select Date"
+                   Label="@Text["Ui65eb52c443af"]"
                    DateFormat="yyyy-MM-dd"
                    Variant="Variant.Outlined"
                    Margin="Margin.Dense" />
@@ -13,11 +13,13 @@
 </div>
 
 @code {
+    [Parameter] public bool BsFirst {get;set;}
+    [Parameter] public bool NepaliNumerals {get;set;}
     [Parameter] public DateTime? Date { get; set; } = DateTime.Today;
     [Parameter] public EventCallback<DateTime?> DateChanged { get; set; }
 
     private DateTime? SelectedDate => Date ?? DateTime.Today;
-    private string BsDisplay => BsDate.FromAd(DateOnly.FromDateTime(SelectedDate ?? DateTime.Today));
+    private string BsDisplay => BsDate.Display(DateOnly.FromDateTime(SelectedDate ?? DateTime.Today),BsFirst,NepaliNumerals);
 
     private async Task OnDateSelected(DateTime? newDate)
     {

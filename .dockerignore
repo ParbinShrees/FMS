@@ -1,0 +1,14 @@
+**/bin
+**/obj
+**/logs
+.git
+.codex
+.env*
+**/*.pfx
+**/*.key
+TestResults
+artifacts
+
+**/node_modules
+.artifacts
+.m9*.py

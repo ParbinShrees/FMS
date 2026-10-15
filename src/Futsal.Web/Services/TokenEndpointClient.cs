@@ -5,9 +5,9 @@ namespace Futsal.Web.Services;
 
 public sealed class TokenEndpointClient(IHttpClientFactory factory)
 {
-    public async Task<TokenDto?> LoginAsync(string identifier, string password, CancellationToken ct)
+    public async Task<TokenDto?> LoginAsync(string identifier, string password, CancellationToken ct,string? twoFactorCode=null)
     {
-        var response = await factory.CreateClient("FutsalApi").PostAsJsonAsync("api/v1/auth/staff/login", new StaffLoginDto(identifier, password), ct);
+        var response = await factory.CreateClient("FutsalApi").PostAsJsonAsync("api/v1/auth/staff/login", new {identifier,password,twoFactorCode}, ct);
         return response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<TokenDto>(cancellationToken: ct) : null;
     }
     public async Task LogoutAsync(TokenDto token, CancellationToken ct) =>

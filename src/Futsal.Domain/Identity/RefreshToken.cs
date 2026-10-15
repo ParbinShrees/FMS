@@ -4,6 +4,7 @@ namespace Futsal.Domain.Identity;
 
 public sealed class RefreshToken
 {
+    public Guid FamilyId{get;set;}=Guid.NewGuid();
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid UserId { get; set; }
     public required string TokenHash { get; set; }

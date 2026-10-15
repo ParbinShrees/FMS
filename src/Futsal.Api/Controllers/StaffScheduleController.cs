@@ -15,7 +15,7 @@ public sealed class StaffScheduleController(FutsalDbContext db, BookingPricing p
 {
     [HttpGet("venues")]
     public async Task<IActionResult> Venues(CancellationToken ct) => Ok(await db.Venues.AsNoTracking()
-        .Where(v => v.IsActive).OrderBy(v => v.Name).Select(v => new { v.Id, v.Name, v.Slug, v.Timezone }).ToListAsync(ct));
+        .Where(v => v.IsActive).OrderBy(v => v.Name).Select(v => new { v.Id, v.Name, v.Slug, v.Timezone,v.BsFirst,v.NepaliNumerals }).ToListAsync(ct));
 
     [HttpGet("venues/{slug}/availability")]
     public async Task<IActionResult> Availability(string slug, [FromQuery] DateOnly? date, CancellationToken ct)

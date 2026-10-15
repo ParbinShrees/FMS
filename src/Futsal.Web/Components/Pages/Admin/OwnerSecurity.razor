@@ -1,0 +1,12 @@
+@page "/admin/security"
+@using System.Text.Json
+@inject Futsal.Web.Services.ApiClient Api
+@inject Microsoft.JSInterop.IJSRuntime JS
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Milestone9> L
+<h1>@L["TwoFactorSetup"]</h1><MudTextField T="string" @bind-Value="password" InputType="InputType.Password" Label="@L["Password"]"/><MudButton OnClick="Setup">@L["Setup"]</MudButton><p>@secret</p><MudTextField T="string" @bind-Value="code" Label="@L["Code"]"/><MudButton OnClick="Enable">@L["Enable"]</MudButton>@if(recovery.Count>0){<p>@L["Recovery"]</p><ul>@foreach(var r in recovery){<li>@r</li>}</ul>}
+<h2>@L["PrivacyTools"]</h2><MudTextField T="string" @bind-Value="customer" Label="@L["CustomerId"]"/><MudButton OnClick="Export">@L["Export"]</MudButton><MudCheckBox T="bool" @bind-Value="consent" Label="@L["ConfirmAnonymize"]"/><MudButton Disabled="@(!consent)" OnClick="Anonymize">@L["Anonymize"]</MudButton>@if(error){<MudAlert Severity="Severity.Error">@L["Failure"]</MudAlert>}
+@code{string password="",code="",secret="",customer="";List<string> recovery=[];bool consent,error;
+async Task Setup(){try{var r=await Api.ManagementSendAsync<JsonElement>("auth/two-factor/setup",new{password});secret=r.GetProperty("secret").GetString()??"";password="";error=false;}catch{error=true;}}
+async Task Enable(){try{var r=await Api.ManagementSendAsync<JsonElement>("auth/two-factor/verify",new{code});recovery=r.GetProperty("recoveryCodes").EnumerateArray().Select(x=>x.GetString()??"").ToList();secret="";code="";error=false;}catch{error=true;}}
+async Task Export(){try{var r=await Api.ManagementGetAsync<JsonElement>($"admin/privacy/customers/{Guid.Parse(customer)}/export");await JS.InvokeVoidAsync("futsalDownload","customer.json","application/json",Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(r.ToString())));error=false;}catch{error=true;}}
+async Task Anonymize(){try{await Api.AnonymizeAsync(Guid.Parse(customer));error=false;}catch{error=true;}}}

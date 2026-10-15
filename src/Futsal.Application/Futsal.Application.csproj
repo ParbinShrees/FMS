@@ -14,4 +14,5 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+<ItemGroup><EmbeddedResource Include="Notifications/bs-months.csv" /></ItemGroup>
 </Project>

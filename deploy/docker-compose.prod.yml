@@ -1,0 +1,95 @@
+services:
+  postgres:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: futsalpro
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?}
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    networks: [backend]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d futsalpro"]
+      interval: 5s
+      retries: 20
+  api:
+    image: ${API_IMAGE:?}
+    restart: unless-stopped
+    environment: &api-env
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__FutsalPro: Host=postgres;Database=futsalpro;Username=futsal_app;Password=${APP_DB_PASSWORD:?}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?}
+      Cors__WebOrigins__0: https://${SITE_HOST:?}
+      Security__KnownProxies__0: 172.30.0.10
+      Security__KnownProxies__1: 172.30.0.11
+      DataProtection__KeyPath: /keys
+      DataProtection__CertificatePath: /run/secrets/payment-keys.pfx
+      DataProtection__CertificatePassword: ${PAYMENT_KEY_PASSWORD:?}
+      Sms__Sender: Http
+      Sms__ProviderUrl: ${SMS_PROVIDER_URL:-}
+      Sms__ApiKey: ${SMS_API_KEY:-}
+      Sms__SenderId: ${SMS_SENDER_ID:-}
+      Sms__ContractConfirmed: ${SMS_CONTRACT_CONFIRMED:-false}
+      Esewa__FormUrl: ${ESEWA_FORM_URL:?}
+      Esewa__StatusUrl: ${ESEWA_STATUS_URL:?}
+      Esewa__SuccessUrl: https://${SITE_HOST}/v/callback/esewa
+      Esewa__FailureUrl: https://${SITE_HOST}/v/callback/esewa
+      Reports__PdfLicense: ${PDF_LICENSE:-Community}
+      AllowedHosts: ${SITE_HOST:?};api
+    volumes: ["api-keys:/keys", "${PAYMENT_KEY_FILE:?}:/run/secrets/payment-keys.pfx:ro"]
+    read_only: true
+    tmpfs: ["/tmp"]
+    networks: [backend]
+    depends_on: {postgres: {condition: service_healthy}}
+    stop_grace_period: 45s
+  web:
+    image: ${WEB_IMAGE:?}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Api__BaseUrl: http://api:8080/
+      DataProtection__KeyPath: /keys
+      DataProtection__CertificatePath: /run/secrets/payment-keys.pfx
+      DataProtection__CertificatePassword: ${PAYMENT_KEY_PASSWORD:?}
+      Security__KnownProxies__0: 172.30.0.10
+      AllowedHosts: ${SITE_HOST:?}
+    read_only: true
+    tmpfs: ["/tmp"]
+    volumes: ["web-keys:/keys", "${PAYMENT_KEY_FILE:?}:/run/secrets/payment-keys.pfx:ro"]
+    networks: {backend: {ipv4_address: 172.30.0.11}}
+  migrate:
+    image: ${API_IMAGE:?}
+    profiles: [tools]
+    command: ["--migrate"]
+    environment:
+      <<: *api-env
+      ConnectionStrings__FutsalPro: Host=postgres;Database=futsalpro;Username=futsal_migrate;Password=${MIGRATION_DB_PASSWORD:?}
+    volumes: ["api-keys:/keys", "${PAYMENT_KEY_FILE:?}:/run/secrets/payment-keys.pfx:ro"]
+    networks: [backend]
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment: {SITE_HOST: "${SITE_HOST:?}", ACME_EMAIL: "${ACME_EMAIL:?}"}
+    volumes: ["./Caddyfile:/etc/caddy/Caddyfile:ro", "caddy-data:/data", "caddy-config:/config"]
+    networks: {backend: {ipv4_address: 172.30.0.10}}
+  backup:
+    image: ${BACKUP_IMAGE:?}
+    profiles: [tools]
+    environment:
+      PGHOST: postgres
+      PGDATABASE: futsalpro
+      PGUSER: futsal_backup
+      PGPASSWORD: ${BACKUP_DB_PASSWORD:?}
+      BACKUP_DIR: /backups
+      BACKUP_RECIPIENT: ${BACKUP_RECIPIENT:?}
+    volumes: ["${BACKUP_PATH:?}:/backups"]
+    networks: [backend]
+networks:
+  backend: {ipam: {config: [{subnet: 172.30.0.0/24}]}}
+volumes:
+  postgres-data:
+  api-keys:
+  web-keys:
+  caddy-data:
+  caddy-config:

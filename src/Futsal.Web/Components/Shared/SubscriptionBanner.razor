@@ -1,0 +1,7 @@
+@using System.Text.Json
+@using Futsal.Web.Services
+@inject ApiClient Api
+@inject BffAuthState Auth
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Milestone9> L
+@if(readOnly){<MudAlert Severity="Severity.Warning">@L["ReadOnly"]</MudAlert>}else if(warning){<MudAlert Severity="Severity.Info">@L["ExpiryWarning"]</MudAlert>}
+@code{bool readOnly,warning;protected override async Task OnInitializedAsync(){if(Auth.Token?.OrganizationId==null)return;try{var s=await Api.ManagementGetAsync<JsonElement>("staff/subscription");readOnly=s.GetProperty("readOnly").GetBoolean();warning=s.GetProperty("warning").ValueKind==JsonValueKind.True;}catch{}}}

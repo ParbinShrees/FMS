@@ -33,6 +33,7 @@ public sealed class BookingService(
             var court=await db.Courts.IgnoreQueryFilters().Include(x=>x.Venue).SingleOrDefaultAsync(x=>x.Id==request.CourtId,ct)
                 ?? throw new ApiException(404,"NOT_FOUND","Court was not found.");
             var venue=court.Venue;
+            await Futsal.Api.Security.SubscriptionGuard.RequireWritableAsync(db,clock,venue.OrganizationId,ct);
             if(!court.IsActive||!venue.IsActive||!venue.IsPublic||!await ActiveLocationAsync(venue.LocationId,ct))throw new ApiException(404,"NOT_FOUND","Court is not available for public booking.");
             var hasOnlinePayment = await db.VenuePaymentSettings.IgnoreQueryFilters().AnyAsync(s => s.VenueId == venue.Id && s.IsEnabled && s.MerchantCode != "", ct);
             if (!hasOnlinePayment) throw new ApiException(400, "ONLINE_PAYMENT_DISABLED", "Online booking is not available for this venue.");
@@ -77,6 +78,7 @@ public sealed class BookingService(
             var replay=await ReplayAsync(idempotencyKey,userId,endpoint,requestHash,ct);if(replay is not null){await transaction.CommitAsync(ct);return replay;}
             var court=await db.Courts.SingleOrDefaultAsync(x=>x.Id==request.CourtId&&x.OrganizationId==orgId,ct)??throw new ApiException(404,"NOT_FOUND","Court was not found.");
             var venue=await db.Venues.SingleAsync(x=>x.Id==court.VenueId,ct);
+            await Futsal.Api.Security.SubscriptionGuard.RequireWritableAsync(db,clock,venue.OrganizationId,ct);
             await AdvisoryLockAsync("court:"+court.Id,ct);
             var times=await ValidateSlot(request.StartAt,request.EndAt,court,venue,ct);
             if(times.Start<clock.UtcNow&&current.Role is not ("Owner" or "Manager"))throw new ApiException(403,"FORBIDDEN","Back-dated bookings require Manager or Owner permission.");

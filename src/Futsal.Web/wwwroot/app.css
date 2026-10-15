@@ -58,3 +58,12 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+@font-face{font-family:'Noto Sans Devanagari';src:url('/fonts/NotoSansDevanagari.ttf') format('truetype');font-display:swap;}
+body,.mud-typography{font-family:'Noto Sans Devanagari',Arial,sans-serif;}
+:focus-visible{outline:3px solid #145a28;outline-offset:3px;}
+a{color:#145a28;}
+
+.mud-input-label{color:#555!important;}
+.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+.mud-appbar a{color:#fff!important;}

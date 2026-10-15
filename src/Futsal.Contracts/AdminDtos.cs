@@ -5,7 +5,7 @@ public sealed record TokenDto(Guid UserId, Guid? OrganizationId, string Role, st
     DateTimeOffset AccessExpiresAt, string RefreshToken, DateTimeOffset RefreshExpiresAt);
 public sealed record RefreshDto(string RefreshToken, Guid? OrganizationId = null);
 public sealed record LogoutDto(string RefreshToken);
-public sealed record VenueDto(Guid Id, string Name, string Slug, string Timezone);
+public sealed record VenueDto(Guid Id, string Name, string Slug, string Timezone,bool BsFirst=false,bool NepaliNumerals=false);
 public sealed record AvailabilitySlotDto(Guid CourtId, string CourtName, DateTimeOffset StartAt, DateTimeOffset EndAt,
     string Status, decimal Price);
 public sealed record BookingQuoteDto(decimal TotalAmount, decimal DiscountAmount, decimal AdvanceRequired);
@@ -30,7 +30,7 @@ public sealed record PublicVenueDetailDto(
     decimal AdvanceValue,
     bool HasOnlinePayment,
     IReadOnlyList<PublicCourtDto> Courts,
-    IReadOnlyList<string> Amenities);
+    IReadOnlyList<string> Amenities,bool BsFirst=false,bool NepaliNumerals=false);
 
 public sealed record PublicCourtDto(
     Guid Id,

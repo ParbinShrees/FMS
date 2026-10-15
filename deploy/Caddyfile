@@ -1,0 +1,10 @@
+{
+ email {$ACME_EMAIL}
+}
+{$SITE_HOST} {
+ encode zstd gzip
+ handle /api/* { reverse_proxy api:8080 }
+ handle /hubs/* { reverse_proxy api:8080 }
+ handle /health/* { reverse_proxy api:8080 }
+ handle { reverse_proxy web:8080 }
+}

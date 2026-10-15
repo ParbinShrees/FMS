@@ -1,0 +1,137 @@
+# Machine-written Nepali strings requiring native-speaker review
+
+All Nepali resource translations added in Milestones 8 and 9 require human review before launch. These include transactional templates, legal drafts, payment/refund wording, security messages and display labels.
+
+- `Ui0019dfc4b32d`: Not Found → भेटिएन
+- `Ui0308e44975af`: Configure your venue's eSewa merchant account for receiving player advance payments. Secrets are encrypted and never shown once saved. → खेलाडीको अग्रिम रकम लिन स्थलको ईसेवा व्यापारी खाता सेट गर्नुहोस्। गोप्य विवरण गुप्तीकरण गरिन्छ र सुरक्षित गरेपछि फेरि देखाइँदैन।
+- `Ui082298ac8a0b`: Booking Code → बुकिङ कोड
+- `Ui0905f7f59021`: Surface → सतह
+- `Ui0e9161011702`: Refresh → पुनः लोड
+- `Ui0f0514e06bca`: Add to Calendar (.ics) → पात्रोमा थप्नुहोस् (.ics)
+- `Ui102cf1442cf6`: CONFIRMED → पुष्टि
+- `Ui18bf713b10a6`: Slot Held! → समय होल्ड भयो!
+- `Ui18e872be2359`: Total: → जम्मा:
+- `Ui18f2a0947f9d`: Blocked → बन्द
+- `Ui19766ed6ccb2`: Cancel → रद्द गर्नुहोस्
+- `Ui1b1d8a89035c`: Player initiated cancellation → खेलाडीले रद्द गरेको
+- `Ui1e0a06e554be`: Secret Key is required for initial configuration. → प्रारम्भिक सेटिङमा गोप्य कुञ्जी आवश्यक छ।
+- `Ui1fa4f11c247d`: Could not retrieve current location. → हालको स्थान प्राप्त हुन सकेन।
+- `Ui218df9ee1aca`: Login with your mobile number to view and manage your booked games. → बुक गरिएका खेल हेर्न र व्यवस्थापन गर्न मोबाइल नम्बरबाट साइन इन गर्नुहोस्।
+- `Ui22daa3fec87f`: Booking cancelled. → बुकिङ रद्द भयो।
+- `Ui2b9f35dc92e2`: Hold Expired — Payment Marked for Refund → होल्ड समाप्त — रकम फिर्ताका लागि चिन्ह लगाइयो
+- `Ui2dfafd2ec54e`: Secret Key (HMAC-SHA256) → गोप्य कुञ्जी (HMAC-SHA256)
+- `Ui2f9830eabb0d`: Paid: → तिरेको:
+- `Ui30c5de348c7c`: Player Login Required → खेलाडी साइन इन आवश्यक
+- `Ui30c90d385905`: The session has been paused by the server. → सर्भरले सत्र रोकेको छ।
+- `Ui32b2f5dbc1c1`: . The front desk staff will contact you to process your refund. → । रकम फिर्ता प्रक्रियाका लागि कर्मचारीले सम्पर्क गर्नेछन्।
+- `Ui33b93476cf59`: Time → समय
+- `Ui34904c379f85`: Please wait, do not close or refresh this tab. → कृपया पर्खनुहोस्, यो ट्याब बन्द वा पुनः लोड नगर्नुहोस्।
+- `Ui34975ecb9b9a`: Mobile Number → मोबाइल नम्बर
+- `Ui368a3e0ad1e2`: Select Venue → स्थल छान्नुहोस्
+- `Ui37414f841be5`: No past bookings. → पुराना बुकिङ छैनन्।
+- `Ui3a78695388b3`: Home → गृहपृष्ठ
+- `Ui3aa2765ed9a9`: (View on Google Maps) → (गुगल नक्सामा हेर्नुहोस्)
+- `Ui3b9af8bb9413`: Instant live availability. Advance payment via eSewa. Zero double bookings. → प्रत्यक्ष उपलब्धता। ईसेवाबाट अग्रिम भुक्तानी। दोहोरो बुकिङ हुँदैन।
+- `Ui3cc0b3383052`: Your court advance has been received and your slot is booked. → तपाईंको अग्रिम रकम प्राप्त भयो र समय बुक भयो।
+- `Ui3f9abc8733ba`: Navigation menu → नेभिगेसन सूची
+- `Ui4474a2a216a8`: Enable Online Booking via eSewa → ईसेवामार्फत अनलाइन बुकिङ सक्रिय गर्नुहोस्
+- `Ui45b3589bd4a4`: Slot held! Please pay advance to confirm. → समय होल्ड भयो! पुष्टि गर्न अग्रिम रकम तिर्नुहोस्।
+- `Ui47bfd8d799c0`: Venue settings → स्थल सेटिङ
+- `Ui47d2a515ef2f`: Loading... → लोड हुँदैछ...
+- `Ui49e96d7cdf58`: Amount → रकम
+- `Ui4bc2bdacff11`: Rejoin failed... trying again in → पुनः जोडिन असफल... फेरि प्रयास हुन बाँकी
+- `Ui4c4bd4993ac8`: Using near me location... → नजिकको स्थान प्रयोग हुँदैछ...
+- `Ui4d95548ac104`: Max Price (Rs) → अधिकतम मूल्य (रु)
+- `Ui4e5b78538119`: Book Futsal Courts in Nepal → नेपालमा फुटसल कोर्ट बुक गर्नुहोस्
+- `Ui4e5f81ada70c`: Bookings → बुकिङहरू
+- `Ui50d8b3cf97bf`: Rubber Mat → रबर म्याट
+- `Ui54a0e8c17ebb`: Error → त्रुटि
+- `Ui55f899a0a210`: Online Payment Settings (eSewa) → अनलाइन भुक्तानी सेटिङ (ईसेवा)
+- `Ui564592d252f0`: Online payment settings updated successfully. → अनलाइन भुक्तानी सेटिङ सफलतापूर्वक बदलियो।
+- `Ui57eb604a07e5`: No court slots available for this day. → यस दिन कुनै कोर्ट समय उपलब्ध छैन।
+- `Ui5c68ece4c16e`: No payments currently require a refund. All online payments are reconciled! → हाल रकम फिर्ता गर्नुपर्ने भुक्तानी छैन। सबै अनलाइन भुक्तानी मिलाइएको छ।
+- `Ui5d3db699f0c1`: Payment Confirmation — FutsalPro → भुक्तानी पुष्टि — FutsalPro
+- `Ui5d9eaabcb349`: Failed to resume the session. → सत्र पुनः सुरु हुन सकेन।
+- `Ui5eb2057c1eb7`: Gateway Txn → भुक्तानी कारोबार
+- `Ui60fa23ac0518`: eSewa Product / Merchant Code → ईसेवा उत्पादन / व्यापारी कोड
+- `Ui632e1c583941`: Payments → भुक्तानीहरू
+- `Ui63dceb8800b2`: Phone → फोन
+- `Ui64aee8c6cbd0`: Player → खेलाडी
+- `Ui64cff1319d2f`: Action → कार्य
+- `Ui65eb52c443af`: Select Date → मिति छान्नुहोस्
+- `Ui66bce4bdb48e`: Reconnecting... → पुनः जोडिँदै...
+- `Ui681927e34b77`: Staff → कर्मचारी
+- `Ui69c11a79ab4b`: e.g. EPAYTEST → जस्तै EPAYTEST
+- `Ui6b0363a50b3e`: My Bookings → मेरा बुकिङहरू
+- `Ui6c5af5ac1043`: Booking Confirmed! → बुकिङ पुष्टि भयो!
+- `Ui6d2227555fcc`: Sort By → क्रम मिलाउनुहोस्
+- `Ui6de0977a3d4f`: Rejoining the server... → सर्भरमा पुनः जोडिँदै...
+- `Ui6df751127f98`: Error. → त्रुटि।
+- `Ui6f5cf35bc37b`: Someone just booked this slot. Pick another. → यो समय भर्खरै अरूले बुक गरे। अर्को छान्नुहोस्।
+- `Ui6f95a85ed928`: Search area, city or venue name (English / नेपाली)... → क्षेत्र, सहर वा स्थलको नाम खोज्नुहोस् (English / नेपाली)...
+- `Ui70fa1ceef58e`: No upcoming bookings. → आउँदा बुकिङ छैनन्।
+- `Ui73056c835768`: Booking Code: → बुकिङ कोड:
+- `Ui731140284eac`: Wood → काठ
+- `Ui74f44b5fd77f`: | Advance required: → | आवश्यक अग्रिम:
+- `Ui755c8b2a9fb1`: Status: → स्थिति:
+- `Ui7803c123d5cc`: No payment verification data was returned by eSewa. → ईसेवाले भुक्तानी प्रमाणीकरण विवरण पठाएन।
+- `Ui7b32a9ea3879`: Artificial Turf → कृत्रिम घाँस
+- `Ui7dc73a4e8d86`: Book Court → कोर्ट बुक गर्नुहोस्
+- `Ui816d7f4ff525`: Request ID: → अनुरोध आईडी:
+- `Ui822b2ae4542b`: Find → खोज्नुहोस्
+- `Ui837926d95c79`: Record Refund → रकम फिर्ता अभिलेख गर्नुहोस्
+- `Ui83b0f20b7ead`: Being booked → बुकिङ भइरहेको
+- `Ui83b12c2216ef`: Clear → हटाउनुहोस्
+- `Ui85092a272f49`: Verifying your payment with eSewa... → ईसेवामा भुक्तानी जाँच हुँदैछ...
+- `Ui859818e2119b`: Your payment was received, but the hold expired and the slot was taken by another player. Your advance has been marked as → भुक्तानी प्राप्त भयो तर होल्ड समाप्त भई अर्को खेलाडीले समय बुक गरे। तपाईंको अग्रिम रकम यसरी चिन्ह लगाइएको छ:
+- `Ui88ae5250d5b7`: Courts → कोर्टहरू
+- `Ui89e6e92772d3`: Failed to rejoin. → पुनः जोडिन सकेन।
+- `Ui8f6fb4eb7f42`: Security → सुरक्षा
+- `Ui91576c2a6def`: Could not send OTP. Please check the phone number. → ओटीपी पठाउन सकेन। फोन नम्बर जाँच गर्नुहोस्।
+- `Ui92794ad4b938`: Find a court to play! → खेल्न कोर्ट खोज्नुहोस्!
+- `Ui942087cc2d41`: Retry → फेरि प्रयास
+- `Ui956823ab23a4`: Refund recorded successfully. → रकम फिर्ता सफलतापूर्वक अभिलेख भयो।
+- `Ui99c40ab40592`: Date → मिति
+- `Ui9b8d8af98e54`: Online Payment Settings — FutsalPro Admin → अनलाइन भुक्तानी सेटिङ — FutsalPro व्यवस्थापक
+- `Ui9d86648cbd4f`: Late payments where the hold expired and the court slot was taken by another player. → होल्ड समाप्त भई अर्को खेलाडीले समय बुक गरेपछिका भुक्तानीहरू।
+- `Ui9f8c24dcc2c7`: View My Bookings → मेरा बुकिङ हेर्नुहोस्
+- `Uia59217005d28`: Live Availability → प्रत्यक्ष उपलब्धता
+- `Uia67e544672e3`: Needs Refund Queue — FutsalPro Admin → रकम फिर्ता सूची — FutsalPro व्यवस्थापक
+- `Uiaa34ee5b966c`: Sorry, the content you are looking for does not exist. → तपाईंले खोजेको सामग्री उपलब्ध छैन।
+- `Uiaabe76f1f4ec`: Customers → ग्राहकहरू
+- `Uiacdd2e26ae4e`: Venue not found. → स्थल भेटिएन।
+- `Uib0efaff03280`: Please retry or reload the page. → फेरि प्रयास गर्नुहोस् वा पृष्ठ पुनः लोड गर्नुहोस्।
+- `Uib127436ba491`: Hold time expired. Please choose a slot again. → होल्ड अवधि समाप्त भयो। फेरि समय छान्नुहोस्।
+- `Uib3206f025aab`: Player Login → खेलाडी साइन इन
+- `Uib7bdf7a2d6e7`: Distance → दूरी
+- `Uib7c71f0cd63e`: All Cities → सबै सहर
+- `Uibc9a632f7a70`: Return to Courts → कोर्टमा फर्कनुहोस्
+- `Uibf3763383aaf`: Customer → ग्राहक
+- `Uibfd402b2f6f3`: Sign in → साइन इन
+- `Uic51979d1b209`: Return to Search → खोजीमा फर्कनुहोस्
+- `Uic78ffe195710`: Platform → प्लेटफर्म
+- `Uic7cbd74dd190`: Lowest Price → न्यूनतम मूल्य
+- `Uid04c044005a5`: No futsal venues found matching your criteria. Try adjusting filters or search. → तपाईंको खोजीसँग मिल्ने स्थल भेटिएन। खोजी वा फिल्टर बदल्नुहोस्।
+- `Uid3baa908b5ee`: Online booking is currently disabled for this venue. Please contact the front desk directly. → यस स्थलमा अनलाइन बुकिङ बन्द छ। काउन्टरमा सम्पर्क गर्नुहोस्।
+- `Uid400fafdb937`: No venues found for your organization. → तपाईंको संस्थाका स्थल भेटिएनन्।
+- `Uid53fc6cd3673`: Page not found. → पृष्ठ भेटिएन।
+- `Uid5479441fc3b`: Login with Mobile OTP → मोबाइल ओटीपीबाट साइन इन
+- `Uid640c7421da0`: Resume → पुनः सुरु
+- `Uida2643a17db8`: Merchant Code is required. → व्यापारी कोड आवश्यक छ।
+- `Uidacca3cba3f3`: Reports → प्रतिवेदनहरू
+- `Uidcc97ae420a8`: Are you sure you want to cancel this booking? If you cancel within the venue's cancellation window, your advance may be forfeited according to the venue cancellation policy. → यो बुकिङ रद्द गर्ने पक्का हो? स्थलको रद्द नीतिअनुसार तपाईंको अग्रिम रकम जफत हुन सक्छ।
+- `Uidcd0884db34d`: Cancel Booking → बुकिङ रद्द गर्नुहोस्
+- `Uidcd1d5223f73`: Name → नाम
+- `Uidd69abffa332`: Enter your mobile number to receive a one-time verification code. → एक पटक प्रयोग हुने प्रमाणीकरण कोड पाउन मोबाइल नम्बर राख्नुहोस्।
+- `Uidfc47792a64e`: Payment Verification Failed → भुक्तानी प्रमाणीकरण असफल
+- `Uidfe95783edfe`: Pricing → मूल्य निर्धारण
+- `Uie0c1f3130baa`: My Bookings — FutsalPro → मेरा बुकिङहरू — FutsalPro
+- `Uiea3689c46f68`: You don't have any bookings yet. → तपाईंका कुनै बुकिङ छैनन्।
+- `Uieebc633b215e`: Book Another Court → अर्को कोर्ट बुक गर्नुहोस्
+- `Uif13ac06b7298`: Find Futsal Courts — FutsalPro → फुटसल कोर्ट खोज्नुहोस् — FutsalPro
+- `Uif4830a1dae29`: Schedule → तालिका
+- `Uif58738c73fe4`: Payments Needing Refund → फिर्ता आवश्यक भुक्तानीहरू
+- `Uif5e9bbb9621b`: Near Me → मेरो नजिक
+- `Uif9800275b179`: Invalid verification code. Please try again. → अमान्य प्रमाणीकरण कोड। फेरि प्रयास गर्नुहोस्।
+- `Uifd1331d7a6cd`: Booked → बुक गरिएको
+- `Uiffee9c06e5dc`: NEEDS REFUND → रकम फिर्ता आवश्यक

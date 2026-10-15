@@ -6,63 +6,63 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
-<PageTitle>Needs Refund Queue — FutsalPro Admin</PageTitle>
+<PageTitle>@Text["Uia67e544672e3"]</PageTitle>
 
 <div class="pa-4">
     <div class="d-flex justify-space-between align-center mb-3">
         <div>
             <MudText Typo="Typo.h5" Class="font-weight-bold text-primary">
                 <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Warning" Class="mr-1" />
-                Payments Needing Refund
+                @Text["Uif58738c73fe4"]
             </MudText>
             <MudText Typo="Typo.body2" Class="text-secondary">
-                Late payments where the hold expired and the court slot was taken by another player.
+                @Text["Ui9d86648cbd4f"]
             </MudText>
         </div>
         <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadRefunds">
-            Refresh
+            @Text["Ui0e9161011702"]
         </MudButton>
     </div>
 
     @if (IsLoading)
     {
-        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        <MudProgressCircular aria-label="@Text["Load"]" Color="Color.Primary" Indeterminate="true" />
     }
     else if (Refunds.Count == 0)
     {
         <MudAlert Severity="Severity.Success" Variant="Variant.Outlined">
-            No payments currently require a refund. All online payments are reconciled!
+            @Text["Ui5c68ece4c16e"]
         </MudAlert>
     }
     else
     {
         <MudTable Items="@Refunds" Hover="true" Dense="true" Elevation="2">
             <HeaderContent>
-                <MudTh>Date</MudTh>
-                <MudTh>Customer</MudTh>
-                <MudTh>Phone</MudTh>
-                <MudTh>Booking Code</MudTh>
-                <MudTh>Amount</MudTh>
-                <MudTh>Gateway Txn</MudTh>
-                <MudTh>Action</MudTh>
+                <MudTh>@Text["Ui99c40ab40592"]</MudTh>
+                <MudTh>@Text["Uibf3763383aaf"]</MudTh>
+                <MudTh>@Text["Ui63dceb8800b2"]</MudTh>
+                <MudTh>@Text["Ui082298ac8a0b"]</MudTh>
+                <MudTh>@Text["Ui49e96d7cdf58"]</MudTh>
+                <MudTh>@Text["Ui5eb2057c1eb7"]</MudTh>
+                <MudTh>@Text["Ui64cff1319d2f"]</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Date">@context.CreatedAt.ToLocalTime().ToString("g")</MudTd>
-                <MudTd DataLabel="Customer">@(context.CustomerName ?? "Customer")</MudTd>
-                <MudTd DataLabel="Phone">@(context.CustomerPhone ?? "-")</MudTd>
-                <MudTd DataLabel="Booking Code"><code>@(context.BookingCode ?? "-")</code></MudTd>
-                <MudTd DataLabel="Amount">
+                <MudTd DataLabel="@Text["Ui99c40ab40592"]">@BsDate.Display(context.CreatedAt)</MudTd>
+                <MudTd DataLabel="@Text["Uibf3763383aaf"]">@(context.CustomerName ?? "Customer")</MudTd>
+                <MudTd DataLabel="@Text["Ui63dceb8800b2"]">@(context.CustomerPhone ?? "-")</MudTd>
+                <MudTd DataLabel="@Text["Ui082298ac8a0b"]"><code>@(context.BookingCode ?? "-")</code></MudTd>
+                <MudTd DataLabel="@Text["Ui49e96d7cdf58"]">
                     <strong class="text-danger">Rs @context.Amount.ToString("N0")</strong>
                 </MudTd>
-                <MudTd DataLabel="Gateway Txn">
+                <MudTd DataLabel="@Text["Ui5eb2057c1eb7"]">
                     <span class="caption">@(context.GatewayRef ?? context.GatewayTxnUuid)</span>
                 </MudTd>
-                <MudTd DataLabel="Action">
+                <MudTd DataLabel="@Text["Ui64cff1319d2f"]">
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Error"
                                Size="Size.Small"
                                OnClick="() => RecordRefund(context)">
-                        Record Refund
+                        @Text["Ui837926d95c79"]
                     </MudButton>
                 </MudTd>
             </RowTemplate>
@@ -99,17 +99,17 @@
     private async Task RecordRefund(NeedsRefundPaymentDto payment)
     {
         var confirmed = await DialogService.ShowMessageBox(
-            "Record Refund",
+            Text["Ui837926d95c79"].Value,
             $"Confirm recording a refund of Rs {payment.Amount:N0} to customer {payment.CustomerName} ({payment.CustomerPhone})? A negative payment record will be logged.",
             yesText: "Confirm Refund",
-            cancelText: "Cancel");
+            cancelText: Text["Ui19766ed6ccb2"].Value);
 
         if (confirmed == true)
         {
             try
             {
                 await Api.RecordPaymentRefundAsync(payment.PaymentId, payment.Amount, payment.Method, payment.GatewayRef ?? payment.GatewayTxnUuid);
-                Snackbar.Add("Refund recorded successfully.", Severity.Success);
+                Snackbar.Add(Text["Ui956823ab23a4"].Value, Severity.Success);
                 await LoadRefunds();
             }
             catch (Exception ex)

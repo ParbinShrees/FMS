@@ -17,7 +17,7 @@ public sealed class AuthService(
     JwtTokenService tokenService,
     IOtpSender otpSender,
     IClock clock,
-    ILogger<AuthService> logger)
+    ILogger<AuthService> logger,Futsal.Api.Security.OwnerTwoFactor? twoFactor=null)
 {
     private static readonly TimeSpan StaffLockDuration = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan OtpLifetime = TimeSpan.FromMinutes(5);
@@ -30,6 +30,8 @@ public sealed class AuthService(
     {
         var identifier = request.Identifier.Trim();
         var normalizedIdentifier = identifier.ToLowerInvariant();
+        await using var loginTx=database.Database.IsRelational()?await database.Database.BeginTransactionAsync(cancellationToken):null;
+        if(loginTx!=null)await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtext({"login:"+normalizedIdentifier}))",cancellationToken);
         var user = await database.Users.FirstOrDefaultAsync(
             x => x.Email == normalizedIdentifier || x.Phone == identifier,
             cancellationToken);
@@ -38,6 +40,7 @@ public sealed class AuthService(
         {
             await WriteAuditAsync(request.OrganizationId, user?.Id, "LOGIN_FAILED", "User", user?.Id, ip, cancellationToken);
             await database.SaveChangesAsync(cancellationToken);
+            if(loginTx!=null)await loginTx.CommitAsync(cancellationToken);
             throw new ApiException(StatusCodes.Status401Unauthorized, "INVALID_CREDENTIALS", "Email/phone or password is incorrect.");
         }
 
@@ -45,6 +48,7 @@ public sealed class AuthService(
         {
             await WriteAuditAsync(request.OrganizationId, user.Id, "LOGIN_FAILED", "User", user.Id, ip, cancellationToken);
             await database.SaveChangesAsync(cancellationToken);
+            if(loginTx!=null)await loginTx.CommitAsync(cancellationToken);
             throw new ApiException(StatusCodes.Status423Locked, "ACCOUNT_LOCKED", "Account is temporarily locked. Try again later.");
         }
 
@@ -61,6 +65,7 @@ public sealed class AuthService(
             if (user.FailedLoginCount >= MaxFailedStaffLogins) user.LockedUntil = now.Add(StaffLockDuration);
             await WriteAuditAsync(request.OrganizationId, user.Id, "LOGIN_FAILED", "User", user.Id, ip, cancellationToken);
             await database.SaveChangesAsync(cancellationToken);
+            if(loginTx!=null)await loginTx.CommitAsync(cancellationToken);
             if (user.LockedUntil is not null)
                 throw new ApiException(StatusCodes.Status423Locked, "ACCOUNT_LOCKED", "Account is temporarily locked for 15 minutes.");
             throw new ApiException(StatusCodes.Status401Unauthorized, "INVALID_CREDENTIALS", "Email/phone or password is incorrect.");
@@ -73,14 +78,22 @@ public sealed class AuthService(
         {
             await WriteAuditAsync(request.OrganizationId, user.Id, "LOGIN_FAILED", "User", user.Id, ip, cancellationToken);
             await database.SaveChangesAsync(cancellationToken);
+            if(loginTx!=null)await loginTx.CommitAsync(cancellationToken);
             throw new ApiException(StatusCodes.Status401Unauthorized, "INVALID_CREDENTIALS", "Email/phone or password is incorrect.");
         }
 
+        if(user.TotpEnabled && (twoFactor==null||!twoFactor.Verify(user,request.TwoFactorCode)))
+        {
+            user.FailedLoginCount++;if(user.FailedLoginCount>=5)user.LockedUntil=now.Add(StaffLockDuration);
+            await database.SaveChangesAsync(cancellationToken);if(loginTx!=null)await loginTx.CommitAsync(cancellationToken);
+            throw new ApiException(401,"TWO_FACTOR_REQUIRED","A valid authenticator or recovery code is required.");
+        }
         user.FailedLoginCount = 0;
         user.LockedUntil = null;
         var session = await IssueSessionAsync(user, membership?.OrganizationId, user.IsPlatformAdmin ? "SuperAdmin" : RoleName(membership!.Role), ip, cancellationToken);
         await WriteAuditAsync(membership?.OrganizationId, user.Id, "LOGIN_SUCCEEDED", "User", user.Id, ip, cancellationToken);
         await database.SaveChangesAsync(cancellationToken);
+            if(loginTx!=null)await loginTx.CommitAsync(cancellationToken);
         logger.LogInformation("Staff login succeeded for user {UserId}", user.Id);
         return session;
     }
@@ -91,17 +104,25 @@ public sealed class AuthService(
             throw new ApiException(StatusCodes.Status401Unauthorized, "INVALID_REFRESH_TOKEN", "Refresh token is invalid.");
 
         await using var transaction = database.Database.IsRelational()
-            ? await database.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken)
+            ? await database.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken)
             : null;
         var tokenHash = JwtTokenService.HashRefreshToken(request.RefreshToken);
+        if(transaction!=null)await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtext({tokenHash}))",cancellationToken);
         var oldToken = await database.RefreshTokens.SingleOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
         if (oldToken is null)
             throw new ApiException(StatusCodes.Status401Unauthorized, "INVALID_REFRESH_TOKEN", "Refresh token is invalid.");
 
+        // Serialize every generation of a family, then reload after waiting so reuse
+        // revocation cannot race a descendant rotation and leave an active escape token.
+        if(transaction!=null)
+        {
+            await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtext({"refresh-family:"+oldToken.FamilyId}))",cancellationToken);
+            await database.Entry(oldToken).ReloadAsync(cancellationToken);
+        }
         if (oldToken.RevokedAt is not null)
         {
             var now = clock.UtcNow;
-            var activeTokens = await database.RefreshTokens.Where(x => x.UserId == oldToken.UserId && x.RevokedAt == null).ToListAsync(cancellationToken);
+            var activeTokens = await database.RefreshTokens.Where(x => x.UserId == oldToken.UserId && x.FamilyId==oldToken.FamilyId && x.RevokedAt == null).ToListAsync(cancellationToken);
             foreach (var active in activeTokens)
             {
                 active.RevokedAt = now;
@@ -124,11 +145,11 @@ public sealed class AuthService(
         else if (!user.IsPlatformAdmin && !string.IsNullOrEmpty(user.PasswordHash))
             membership = await ResolveMembershipAsync(user.Id, request.OrganizationId, cancellationToken);
 
-        if (!user.IsPlatformAdmin && membership is null)
+        if (!user.IsPlatformAdmin && membership is null && !string.IsNullOrEmpty(user.PasswordHash))
             throw new ApiException(StatusCodes.Status401Unauthorized, "INVALID_REFRESH_TOKEN", "Refresh token is invalid.");
 
         var role = user.IsPlatformAdmin ? "SuperAdmin" : membership is null ? "Customer" : RoleName(membership.Role);
-        var session = await IssueSessionAsync(user, membership?.OrganizationId, role, ip, cancellationToken);
+        var session = await IssueSessionAsync(user, membership?.OrganizationId, role, ip, cancellationToken,oldToken.FamilyId);
         oldToken.RevokedAt = clock.UtcNow;
         oldToken.ReplacedBy = database.RefreshTokens.Local.Single(x => x.TokenHash == JwtTokenService.HashRefreshToken(session.RefreshToken)).Id;
         await WriteAuditAsync(membership?.OrganizationId, user.Id, "TOKEN_REVOKED", "RefreshToken", oldToken.Id, ip, cancellationToken);
@@ -182,6 +203,8 @@ public sealed class AuthService(
     public async Task<TokenResponse> VerifyOtpAsync(OtpVerifyRequest request, IPAddress? ip, CancellationToken cancellationToken)
     {
         var phone = NormalizePhone(request.Phone);
+        await using var verifyTx=database.Database.IsRelational()?await database.Database.BeginTransactionAsync(cancellationToken):null;
+        if(verifyTx!=null)await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtext({"otp:"+phone}))",cancellationToken);
         var now = clock.UtcNow;
         var otp = await database.OtpCodes.Where(x => x.Phone == phone && x.ConsumedAt == null)
             .OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(cancellationToken);
@@ -189,6 +212,7 @@ public sealed class AuthService(
         {
             await WriteAuditAsync(null, null, "LOGIN_FAILED", "OtpCode", null, ip, cancellationToken);
             await database.SaveChangesAsync(cancellationToken);
+            if(verifyTx!=null)await verifyTx.CommitAsync(cancellationToken);
             throw new ApiException(StatusCodes.Status401Unauthorized, "OTP_INVALID", "The OTP is invalid or expired.");
         }
 
@@ -198,6 +222,7 @@ public sealed class AuthService(
             var userId = await database.Users.Where(x => x.Phone == phone).Select(x => (Guid?)x.Id).SingleOrDefaultAsync(cancellationToken);
             await WriteAuditAsync(null, userId, "LOGIN_FAILED", "OtpCode", otp.Id, ip, cancellationToken);
             await database.SaveChangesAsync(cancellationToken);
+            if(verifyTx!=null)await verifyTx.CommitAsync(cancellationToken);
             throw new ApiException(StatusCodes.Status401Unauthorized, "OTP_INVALID", "The OTP is invalid or expired.");
         }
 
@@ -223,13 +248,15 @@ public sealed class AuthService(
         var session = await IssueSessionAsync(user, null, "Customer", ip, cancellationToken);
         await WriteAuditAsync(null, user.Id, "CUSTOMER_LOGIN_SUCCEEDED", "User", user.Id, ip, cancellationToken);
         await database.SaveChangesAsync(cancellationToken);
+            if(verifyTx!=null)await verifyTx.CommitAsync(cancellationToken);
         return session;
     }
 
-    private async Task<TokenResponse> IssueSessionAsync(AppUser user, Guid? organizationId, string role, IPAddress? ip, CancellationToken cancellationToken)
+    private async Task<TokenResponse> IssueSessionAsync(AppUser user, Guid? organizationId, string role, IPAddress? ip, CancellationToken cancellationToken,Guid? familyId=null)
     {
         var (accessToken, accessExpiresAt) = tokenService.CreateAccessToken(user, organizationId, role);
         var (rawRefreshToken, refreshEntity) = tokenService.CreateRefreshToken(user.Id, ip);
+        if(familyId!=null)refreshEntity.FamilyId=familyId.Value;
         database.RefreshTokens.Add(refreshEntity);
         return new TokenResponse(user.Id, organizationId, role, accessToken, accessExpiresAt, rawRefreshToken, refreshEntity.ExpiresAt);
     }

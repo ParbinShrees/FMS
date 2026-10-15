@@ -4,3 +4,15 @@
 .vs/
 .idea/
 TestResults/
+
+.artifacts/
+artifacts/
+.env
+.env.*
+!.env.example
+**/*.pfx
+**/*.pem
+**/*.key
+
+**/node_modules/
+load/fixture.json

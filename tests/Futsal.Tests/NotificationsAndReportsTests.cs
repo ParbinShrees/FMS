@@ -79,8 +79,10 @@ public sealed class NotificationsAndReportsTests
 public sealed class Milestone8PostgresFixture : IAsyncLifetime
 {
     private readonly PostgreSqlContainer container = new PostgreSqlBuilder("postgres:16-alpine").Build();
+    public PostgreSqlContainer Container=>container;
     public DbContextOptions<FutsalDbContext> Options { get; private set; } = null!;
     public async Task InitializeAsync() { await container.StartAsync(); Options = new DbContextOptionsBuilder<FutsalDbContext>().UseNpgsql(container.GetConnectionString(), FutsalDbContext.ConfigurePostgres).Options; await using var db = new FutsalDbContext(Options, new SuperAdminUser(), new FixedClock(DateTimeOffset.UtcNow)); await db.Database.MigrateAsync(); }
+    public void UpdateConnectionString(string connectionString) => Options = new DbContextOptionsBuilder<FutsalDbContext>().UseNpgsql(connectionString, FutsalDbContext.ConfigurePostgres).Options;
     public Task DisposeAsync() => container.DisposeAsync().AsTask();
 }
 public sealed class Milestone8PostgresTests(Milestone8PostgresFixture fixture) : IClassFixture<Milestone8PostgresFixture>, IAsyncLifetime

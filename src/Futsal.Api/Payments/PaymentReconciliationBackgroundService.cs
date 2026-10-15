@@ -2,7 +2,7 @@ namespace Futsal.Api.Payments;
 
 public sealed class PaymentReconciliationBackgroundService(
     IServiceScopeFactory scopeFactory,
-    ILogger<PaymentReconciliationBackgroundService> logger) : BackgroundService
+    ILogger<PaymentReconciliationBackgroundService> logger, Futsal.Api.Operations.JobHeartbeat? heartbeat = null) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -14,6 +14,7 @@ public sealed class PaymentReconciliationBackgroundService(
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var service = scope.ServiceProvider.GetRequiredService<PaymentProcessingService>();
                 await service.ProcessPendingReconciliationsAsync(stoppingToken);
+                heartbeat?.Beat("payments");
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {

@@ -1,4 +1,5 @@
 @page "/v"
+@attribute [StreamRendering]
 @page "/"
 @layout Futsal.Web.Components.Layout.PlayerLayout
 @using Futsal.Web.Services
@@ -6,16 +7,16 @@
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 
-<PageTitle>Find Futsal Courts — FutsalPro</PageTitle>
+<PageTitle>@Text["Uif13ac06b7298"]</PageTitle>
 
-<div class="player-home">
+<div class="player-home"><h1 class="visually-hidden">@Text["Uif13ac06b7298"]</h1>
     <div class="search-hero pa-4 mb-3 rounded-lg" style="background: linear-gradient(135deg, #1b5e20, #2e7d32); color: white;">
-        <MudText Typo="Typo.h5" Class="font-weight-bold mb-1">Book Futsal Courts in Nepal</MudText>
-        <MudText Typo="Typo.body2" Class="mb-3 opacity-80">Instant live availability. Advance payment via eSewa. Zero double bookings.</MudText>
+        <MudText Typo="Typo.h5" Class="font-weight-bold mb-1">@Text["Ui4e5b78538119"]</MudText>
+        <MudText Typo="Typo.body2" Class="mb-3 opacity-80">@Text["Ui3b9af8bb9413"]</MudText>
 
         <div class="d-flex flex-column gap-2">
-            <MudTextField @bind-Value="SearchQuery"
-                          Placeholder="Search area, city or venue name (English / नेपाली)..."
+            <MudTextField aria-label="@Text["Ui6f95a85ed928"]" @bind-Value="SearchQuery"
+                          Placeholder="@Text["Ui6f95a85ed928"]"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -30,19 +31,19 @@
                            StartIcon="@Icons.Material.Filled.MyLocation"
                            Size="Size.Small"
                            OnClick="UseNearMe">
-                    Near Me
+                    @Text["Uif5e9bbb9621b"]
                 </MudButton>
 
                 <MudSelect T="string" @bind-Value="SelectedSort"
-                           Label="Sort By"
+                           Label="@Text["Ui6d2227555fcc"]"
                            Variant="Variant.Outlined"
                            Dense="true"
                            Margin="Margin.Dense"
                            SelectedValuesChanged="ApplyFilters"
                            Style="background: white; border-radius: 6px; min-width: 140px;">
-                    <MudSelectItem Value="@("price")">Lowest Price</MudSelectItem>
-                    <MudSelectItem Value="@("name")">Name</MudSelectItem>
-                    <MudSelectItem Value="@("distance")">Distance</MudSelectItem>
+                    <MudSelectItem Value="@("price")">@Text["Uic7cbd74dd190"]</MudSelectItem>
+                    <MudSelectItem Value="@("name")">@Text["Uidcd1d5223f73"]</MudSelectItem>
+                    <MudSelectItem Value="@("distance")">@Text["Uib7bdf7a2d6e7"]</MudSelectItem>
                 </MudSelect>
             </div>
         </div>
@@ -54,7 +55,7 @@
             <div class="d-flex flex-column gap-2">
                 @if (Locations.Count == 0)
                 {
-                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+                    <MudProgressLinear aria-label="@Text["Load"]" Color="Color.Primary" Indeterminate="true" />
                 }
                 else
                 {
@@ -65,7 +66,7 @@
                                  Variant="Variant.Filled"
                                  Size="Size.Small"
                                  OnClick="() => FilterByCity(null)">
-                            All Cities
+                            @Text["Uib7c71f0cd63e"]
                         </MudChip>
                         @foreach (var city in cities)
                         {
@@ -86,7 +87,7 @@
     <!-- Filters Row -->
     <div class="filters-bar d-flex gap-2 mb-3 flex-wrap align-center">
         <MudTextField @bind-Value="MaxPrice"
-                      Label="Max Price (Rs)"
+                      Label="@Text["Ui4d95548ac104"]"
                       Variant="Variant.Outlined"
                       Margin="Margin.Dense"
                       DebounceInterval="500"
@@ -94,16 +95,16 @@
                       Style="max-width: 140px;" />
 
         <MudSelect T="string" @bind-Value="SelectedSurface"
-                   Label="Surface"
+                   Label="@Text["Ui0905f7f59021"]"
                    Variant="Variant.Outlined"
                    Dense="true"
                    Margin="Margin.Dense"
                    Clearable="true"
                    SelectedValuesChanged="ApplyFilters"
                    Style="max-width: 150px;">
-            <MudSelectItem Value="@("Artificial Turf")">Artificial Turf</MudSelectItem>
-            <MudSelectItem Value="@("Rubber Mat")">Rubber Mat</MudSelectItem>
-            <MudSelectItem Value="@("Wood")">Wood</MudSelectItem>
+            <MudSelectItem Value="@("Artificial Turf")">@Text["Ui7b32a9ea3879"]</MudSelectItem>
+            <MudSelectItem Value="@("Rubber Mat")">@Text["Ui50d8b3cf97bf"]</MudSelectItem>
+            <MudSelectItem Value="@("Wood")">@Text["Ui731140284eac"]</MudSelectItem>
         </MudSelect>
     </div>
 
@@ -111,13 +112,13 @@
     @if (IsLoading)
     {
         <div class="d-flex justify-center pa-6">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudProgressCircular aria-label="@Text["Load"]" Color="Color.Primary" Indeterminate="true" />
         </div>
     }
     else if (Venues.Count == 0)
     {
         <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-            No futsal venues found matching your criteria. Try adjusting filters or search.
+            @Text["Uid04c044005a5"]
         </MudAlert>
     }
     else
@@ -172,7 +173,7 @@
                                    Color="Color.Primary"
                                    Size="Size.Small"
                                    EndIcon="@Icons.Material.Filled.ArrowForward">
-                            Book Court
+                            @Text["Ui7dc73a4e8d86"]
                         </MudButton>
                     </MudCardActions>
                 </MudCard>
@@ -260,12 +261,12 @@
             // Try to query geolocation via JS interop or standard coordinates
             NearParam = "27.7172,85.3240"; // Default Kathmandu coords if denied
             SelectedSort = "distance";
-            Snackbar.Add("Using near me location...", Severity.Info);
+            Snackbar.Add(Text["Ui4c4bd4993ac8"].Value, Severity.Info);
             await ApplyFilters();
         }
         catch
         {
-            Snackbar.Add("Could not retrieve current location.", Severity.Warning);
+            Snackbar.Add(Text["Ui1fa4f11c247d"].Value, Severity.Warning);
         }
     }
 }

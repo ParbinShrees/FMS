@@ -196,10 +196,11 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_bookings_hold")
                         .HasFilter("status = 'HELD'");
 
-                    b.HasIndex("OrganizationId");
-
                     b.HasIndex("VenueId", "StartAt")
                         .HasDatabaseName("ix_bookings_venue_start");
+
+                    b.HasIndex("OrganizationId", "VenueId", "StartAt")
+                        .HasDatabaseName("ix_bookings_org_venue_start");
 
                     b.ToTable("bookings", null, t =>
                         {
@@ -395,6 +396,10 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("received_by");
 
+                    b.Property<Guid?>("ReversalOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reversal_of");
+
                     b.Property<PaymentStatus>("Status")
                         .HasColumnType("payment_status")
                         .HasColumnName("status");
@@ -416,9 +421,13 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.HasIndex("GatewayTxnUuid")
                         .IsUnique();
 
-                    b.HasIndex("OrganizationId");
-
                     b.HasIndex("ReceivedBy");
+
+                    b.HasIndex("ReversalOf")
+                        .HasDatabaseName("ix_payment_reversals");
+
+                    b.HasIndex("OrganizationId", "BookingId", "CreatedAt")
+                        .HasDatabaseName("ix_payments_org_booking_created");
 
                     b.ToTable("payments", null, t =>
                         {
@@ -530,6 +539,23 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("text")
                         .HasColumnName("phone");
+
+                    b.PrimitiveCollection<string[]>("RecoveryCodeHashes")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("recovery_code_hashes");
+
+                    b.Property<bool>("TotpEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("totp_enabled");
+
+                    b.Property<long>("TotpLastStep")
+                        .HasColumnType("bigint")
+                        .HasColumnName("totp_last_step");
+
+                    b.Property<string>("TotpSecret")
+                        .HasColumnType("text")
+                        .HasColumnName("totp_secret");
 
                     b.HasKey("Id");
 
@@ -738,6 +764,10 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_at");
 
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("family_id");
+
                     b.Property<Guid?>("ReplacedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("replaced_by");
@@ -757,6 +787,9 @@ namespace Futsal.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FamilyId")
+                        .HasDatabaseName("ix_refresh_family");
+
                     b.HasIndex("ReplacedBy");
 
                     b.HasIndex("TokenHash")
@@ -765,6 +798,51 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("refresh_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Identity.Subscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("EndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ends_at");
+
+                    b.Property<int>("GraceDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("grace_days");
+
+                    b.Property<int>("MaxCourts")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_courts");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Plan")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("plan");
+
+                    b.Property<DateTimeOffset>("StartsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("starts_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId")
+                        .IsUnique();
+
+                    b.ToTable("subscriptions", (string)null);
                 });
 
             modelBuilder.Entity("Futsal.Domain.Locations.Amenity", b =>
@@ -940,6 +1018,10 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasDefaultValue(30m)
                         .HasColumnName("advance_value");
 
+                    b.Property<bool>("BsFirst")
+                        .HasColumnType("boolean")
+                        .HasColumnName("bs_first");
+
                     b.Property<Guid>("CityId")
                         .HasColumnType("uuid")
                         .HasColumnName("city_id");
@@ -982,6 +1064,10 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<bool>("NepaliNumerals")
+                        .HasColumnType("boolean")
+                        .HasColumnName("nepali_numerals");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid")
@@ -1173,6 +1259,9 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.HasIndex("Status", "ScheduledFor");
+
+                    b.HasIndex("OrganizationId", "CustomerId", "Template", "CreatedAt")
+                        .HasDatabaseName("ix_notifications_due_throttle");
 
                     b.ToTable("notifications", (string)null);
                 });

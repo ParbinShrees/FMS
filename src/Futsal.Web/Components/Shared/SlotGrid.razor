@@ -3,7 +3,7 @@
 <div class="slot-grid-container pa-2">
     @if (Slots.Count == 0)
     {
-        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">No court slots available for this day.</MudAlert>
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">@Text["Ui57eb604a07e5"]</MudAlert>
     }
     else
     {
@@ -15,7 +15,7 @@
             <table class="mud-table-root slot-table">
                 <thead>
                     <tr>
-                        <th class="time-col pa-2 font-weight-bold">Time</th>
+                        <th class="time-col pa-2 font-weight-bold">@Text["Ui33b93476cf59"]</th>
                         @foreach (var court in courts)
                         {
                             <th class="court-col pa-2 text-center font-weight-bold">@court.Name</th>
@@ -51,19 +51,19 @@
                                     {
                                         <div class="slot-box slot-held">
                                             <div class="font-weight-medium">Rs @slot.Price.ToString("N0")</div>
-                                            <div class="caption">Being booked</div>
+                                            <div class="caption">@Text["Ui83b0f20b7ead"]</div>
                                         </div>
                                     }
                                     else if (slot.Status == "BLOCKED")
                                     {
                                         <div class="slot-box slot-blocked">
-                                            <div>Blocked</div>
+                                            <div>@Text["Ui18f2a0947f9d"]</div>
                                         </div>
                                     }
                                     else
                                     {
                                         <div class="slot-box slot-booked">
-                                            <div>Booked</div>
+                                            <div>@Text["Uifd1331d7a6cd"]</div>
                                         </div>
                                     }
                                 </td>

@@ -6,15 +6,15 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-<PageTitle>Payment Confirmation — FutsalPro</PageTitle>
+<PageTitle>@Text["Ui5d3db699f0c1"]</PageTitle>
 
 <div class="payment-callback pa-4">
     @if (IsVerifying)
     {
         <div class="d-flex flex-column align-center justify-center pa-8">
-            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" Class="mb-4" />
-            <MudText Typo="Typo.h6">Verifying your payment with eSewa...</MudText>
-            <MudText Typo="Typo.body2" Class="text-secondary">Please wait, do not close or refresh this tab.</MudText>
+            <MudProgressCircular aria-label="@Text["Load"]" Color="Color.Primary" Size="Size.Large" Indeterminate="true" Class="mb-4" />
+            <MudText Typo="Typo.h6">@Text["Ui85092a272f49"]</MudText>
+            <MudText Typo="Typo.body2" Class="text-secondary">@Text["Ui34904c379f85"]</MudText>
         </div>
     }
     else if (VerificationResult != null && VerificationResult.IsSuccess)
@@ -25,22 +25,22 @@
             </div>
 
             <MudText Typo="Typo.h5" Class="font-weight-bold text-success mb-1">
-                Booking Confirmed!
+                @Text["Ui6c5af5ac1043"]
             </MudText>
             <MudText Typo="Typo.body2" Class="text-secondary mb-4">
-                Your court advance has been received and your slot is booked.
+                @Text["Ui3cc0b3383052"]
             </MudText>
 
             <MudDivider Class="my-3" />
 
             <div class="d-flex flex-column gap-2 text-left my-4">
                 <div class="d-flex justify-space-between">
-                    <span class="text-secondary">Booking Code:</span>
+                    <span class="text-secondary">@Text["Ui73056c835768"]</span>
                     <strong class="text-primary font-weight-bold" style="font-size: 1.1rem;">@VerificationResult.BookingCode</strong>
                 </div>
                 <div class="d-flex justify-space-between">
-                    <span class="text-secondary">Status:</span>
-                    <MudChip T="string" Color="Color.Success" Size="Size.Small" Variant="Variant.Filled">CONFIRMED</MudChip>
+                    <span class="text-secondary">@Text["Ui755c8b2a9fb1"]</span>
+                    <MudChip T="string" Color="Color.Success" Size="Size.Small" Variant="Variant.Filled">@Text["Ui102cf1442cf6"]</MudChip>
                 </div>
             </div>
 
@@ -51,19 +51,19 @@
                            Color="Color.Primary"
                            StartIcon="@Icons.Material.Filled.Event"
                            OnClick="DownloadCalendarFile">
-                    Add to Calendar (.ics)
+                    @Text["Ui0f0514e06bca"]
                 </MudButton>
 
                 <MudButton Variant="Variant.Outlined"
                            Color="Color.Default"
                            Href="/v/my-bookings">
-                    View My Bookings
+                    @Text["Ui9f8c24dcc2c7"]
                 </MudButton>
 
                 <MudButton Variant="Variant.Text"
                            Color="Color.Default"
                            Href="/v">
-                    Book Another Court
+                    @Text["Uieebc633b215e"]
                 </MudButton>
             </div>
         </MudCard>
@@ -71,14 +71,13 @@
     else if (VerificationResult != null && VerificationResult.NeedsRefund)
     {
         <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="pa-4">
-            <MudText Typo="Typo.h6">Hold Expired — Payment Marked for Refund</MudText>
+            <MudText Typo="Typo.h6">@Text["Ui2b9f35dc92e2"]</MudText>
             <MudText Typo="Typo.body2" Class="mt-2">
-                Your payment was received, but the hold expired and the slot was taken by another player.
-                Your advance has been marked as <strong>NEEDS REFUND</strong>. The front desk staff will contact you to process your refund.
+                @Text["Ui859818e2119b"] <strong>@Text["Uiffee9c06e5dc"]</strong>@Text["Ui32b2f5dbc1c1"]
             </MudText>
             <div class="mt-4">
                 <MudButton Variant="Variant.Outlined" Color="Color.Inherit" Href="/v">
-                    Return to Courts
+                    @Text["Uibc9a632f7a70"]
                 </MudButton>
             </div>
         </MudAlert>
@@ -90,13 +89,13 @@
                 <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Color="Color.Error" Style="font-size: 64px;" />
             </div>
 
-            <MudText Typo="Typo.h6" Class="text-danger mb-2">Payment Verification Failed</MudText>
+            <MudText Typo="Typo.h6" Class="text-danger mb-2">@Text["Uidfc47792a64e"]</MudText>
             <MudText Typo="Typo.body2" Class="text-secondary mb-4">
                 @(ErrorMessage ?? "We could not verify your transaction with eSewa. If money was deducted, please contact front desk with your eSewa transaction code.")
             </MudText>
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/v">
-                Return to Search
+                @Text["Uic51979d1b209"]
             </MudButton>
         </MudCard>
     }
@@ -115,7 +114,7 @@
         if (string.IsNullOrWhiteSpace(CallbackData))
         {
             IsVerifying = false;
-            ErrorMessage = "No payment verification data was returned by eSewa.";
+            ErrorMessage = Text["Ui7803c123d5cc"].Value;
             return;
         }
 
@@ -152,6 +151,6 @@ END:VCALENDAR";
         var bytes = System.Text.Encoding.UTF8.GetBytes(icsContent);
         var base64 = Convert.ToBase64String(bytes);
         var href = $"data:text/calendar;charset=utf-8;base64,{base64}";
-        await JS.InvokeVoidAsync("eval", $"let a = document.createElement('a'); a.href = '{href}'; a.download = 'futsal-booking-{code}.ics'; document.body.appendChild(a); a.click(); document.body.removeChild(a);");
+        await JS.InvokeVoidAsync("futsalDownload", $"futsal-booking-{code}.ics", "text/calendar", base64);
     }
 }

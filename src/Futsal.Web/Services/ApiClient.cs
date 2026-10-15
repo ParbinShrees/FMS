@@ -145,6 +145,9 @@ public sealed class ApiClient(IHttpClientFactory factory, BffAuthState auth)
     public async Task ResendNotificationAsync(Guid venue, Guid notification, CancellationToken ct = default)
     { using var response = await Client().PostAsJsonAsync($"api/v1/admin/venues/{venue}/notifications/{notification}/resend", new { }, Json, ct); await EnsureAsync(response, ct); }
 
+    public Task<T?> ManagementGetAsync<T>(string path,CancellationToken ct=default)=>GetAsync<T>("api/v1/"+path,ct);
+    public async Task<T?> ManagementSendAsync<T>(string path,object input,bool put=false,CancellationToken ct=default){using var response=put?await Client().PutAsJsonAsync("api/v1/"+path,input,Json,ct):await Client().PostAsJsonAsync("api/v1/"+path,input,Json,ct);await EnsureAsync(response,ct);return response.StatusCode==HttpStatusCode.NoContent?default:await response.Content.ReadFromJsonAsync<T>(Json,ct);}
+    public async Task AnonymizeAsync(Guid customerId,CancellationToken ct=default){using var response=await Client().DeleteAsync($"api/v1/admin/privacy/customers/{customerId}",ct);await EnsureAsync(response,ct);}
     private async Task<T?> GetAsync<T>(string uri, CancellationToken ct)
     {
         using var response = await Client().GetAsync(uri, ct);

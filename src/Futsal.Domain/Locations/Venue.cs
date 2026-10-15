@@ -4,6 +4,8 @@ namespace Futsal.Domain.Locations;
 
 public sealed class Venue : IOrganizationScoped
 {
+    public bool BsFirst{get;set;}
+    public bool NepaliNumerals{get;set;}
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid OrganizationId { get; set; }
     public Guid LocationId { get; set; }

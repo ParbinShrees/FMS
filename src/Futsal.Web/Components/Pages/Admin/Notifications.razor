@@ -9,7 +9,7 @@
 <MudSelect T="Guid" Label="@L["Venue"]" @bind-Value="venue">@foreach(var v in venues){<MudSelectItem T="Guid" Value="v.Id">@v.Name</MudSelectItem>}</MudSelect>
 <MudButton OnClick="Load" Disabled="busy">@L["Load"]</MudButton>
 @if(error!=null){<MudAlert Severity="Severity.Error">@error</MudAlert>}
-@if(busy){<MudProgressLinear Indeterminate="true" />}
+@if(busy){<MudProgressLinear aria-label="@Text["Load"]" Indeterminate="true" />}
 @if(settings!=null){
 @if(settings.Alert!=null){<MudAlert Severity="Severity.Warning">@L[settings.Alert]</MudAlert>}
 <MudSwitch T="bool" @bind-Value="confirmation" Label="@L["confirmation"]"/><MudSwitch T="bool" @bind-Value="payment" Label="@L["payment"]"/><MudSwitch T="bool" @bind-Value="cancellation" Label="@L["cancellation"]"/><MudSwitch T="bool" @bind-Value="reminder" Label="@L["reminder"]"/><MudSwitch T="bool" @bind-Value="due" Label="@L["due"]"/>

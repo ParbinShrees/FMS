@@ -20,6 +20,7 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
         options.MapEnum<PaymentMethod>("payment_method", nameTranslator: translator);
         options.MapEnum<PaymentStatus>("payment_status", nameTranslator: translator);
     }
+    public DbSet<Subscription> Subscriptions=>Set<Subscription>();
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<Membership> Memberships => Set<Membership>();
@@ -46,6 +47,20 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
     public DbSet<SmsUsage> SmsUsage => Set<SmsUsage>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Subscription>(e=>{e.ToTable("subscriptions");e.HasKey(x=>x.Id);e.HasIndex(x=>x.OrganizationId).IsUnique();e.HasQueryFilter(x=>currentUser.IsSuperAdmin||(currentUser.OrganizationId!=null&&x.OrganizationId==currentUser.OrganizationId));foreach(var prop in e.Metadata.GetProperties())prop.SetColumnName(new NpgsqlSnakeCaseNameTranslator().TranslateMemberName(prop.Name));});
+        modelBuilder.Entity<RefreshToken>().Property(x=>x.FamilyId).HasColumnName("family_id");
+        modelBuilder.Entity<AppUser>().Property(x=>x.TotpEnabled).HasColumnName("totp_enabled");
+        modelBuilder.Entity<AppUser>().Property(x=>x.TotpSecret).HasColumnName("totp_secret");
+        modelBuilder.Entity<AppUser>().Property(x=>x.TotpLastStep).HasColumnName("totp_last_step");
+        modelBuilder.Entity<AppUser>().Property(x=>x.RecoveryCodeHashes).HasColumnName("recovery_code_hashes");
+        modelBuilder.Entity<Booking>().HasIndex(x=>new{x.OrganizationId,x.VenueId,x.StartAt}).HasDatabaseName("ix_bookings_org_venue_start");
+        modelBuilder.Entity<Payment>().HasIndex(x=>new{x.OrganizationId,x.BookingId,x.CreatedAt}).HasDatabaseName("ix_payments_org_booking_created");
+        modelBuilder.Entity<Notification>().HasIndex(x=>new{x.OrganizationId,x.CustomerId,x.Template,x.CreatedAt}).HasDatabaseName("ix_notifications_due_throttle");
+        modelBuilder.Entity<RefreshToken>().HasIndex(x=>x.FamilyId).HasDatabaseName("ix_refresh_family");
+        modelBuilder.Entity<Venue>().Property(x=>x.BsFirst).HasColumnName("bs_first");
+        modelBuilder.Entity<Venue>().Property(x=>x.NepaliNumerals).HasColumnName("nepali_numerals");
+        modelBuilder.Entity<Payment>().Property(x=>x.ReversalOf).HasColumnName("reversal_of");
+        modelBuilder.Entity<Payment>().HasIndex(x=>x.ReversalOf).HasDatabaseName("ix_payment_reversals");
         ConfigureNotifications(modelBuilder);
         modelBuilder.Entity<Customer>().Property(x => x.OptOut).HasColumnName("opt_out");
         modelBuilder.HasPostgresExtension("btree_gist");
@@ -207,6 +222,15 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
             e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId));
         });
 
+        modelBuilder.Entity<Venue>().HasQueryFilter(x=>(currentUser.IsSuperAdmin || (currentUser.OrganizationId!=null && x.OrganizationId==currentUser.OrganizationId && Memberships.Any(m=>m.UserId==currentUser.UserId && m.OrganizationId==x.OrganizationId && (m.VenueId==null || m.VenueId==x.Id)))));
+        modelBuilder.Entity<Court>().HasQueryFilter(x=>(currentUser.IsSuperAdmin || (currentUser.OrganizationId!=null && x.OrganizationId==currentUser.OrganizationId && Memberships.Any(m=>m.UserId==currentUser.UserId && m.OrganizationId==x.OrganizationId && (m.VenueId==null || m.VenueId==x.VenueId)))));
+        modelBuilder.Entity<Booking>().HasQueryFilter(x=>(currentUser.IsSuperAdmin || (currentUser.OrganizationId!=null && x.OrganizationId==currentUser.OrganizationId && Memberships.Any(m=>m.UserId==currentUser.UserId && m.OrganizationId==x.OrganizationId && (m.VenueId==null || m.VenueId==x.VenueId)))));
+        modelBuilder.Entity<Notification>().HasQueryFilter(x=>(currentUser.IsSuperAdmin || (currentUser.OrganizationId!=null && x.OrganizationId==currentUser.OrganizationId && Memberships.Any(m=>m.UserId==currentUser.UserId && m.OrganizationId==x.OrganizationId && (m.VenueId==null || m.VenueId==x.VenueId)))));
+        modelBuilder.Entity<NotificationSettings>().HasQueryFilter(x=>(currentUser.IsSuperAdmin || (currentUser.OrganizationId!=null && x.OrganizationId==currentUser.OrganizationId && Memberships.Any(m=>m.UserId==currentUser.UserId && m.OrganizationId==x.OrganizationId && (m.VenueId==null || m.VenueId==x.VenueId)))));
+        modelBuilder.Entity<NotificationTemplate>().HasQueryFilter(x=>(currentUser.IsSuperAdmin || (currentUser.OrganizationId!=null && x.OrganizationId==currentUser.OrganizationId && Memberships.Any(m=>m.UserId==currentUser.UserId && m.OrganizationId==x.OrganizationId && (m.VenueId==null || m.VenueId==x.VenueId)))));
+        modelBuilder.Entity<SmsUsage>().HasQueryFilter(x=>(currentUser.IsSuperAdmin || (currentUser.OrganizationId!=null && x.OrganizationId==currentUser.OrganizationId && Memberships.Any(m=>m.UserId==currentUser.UserId && m.OrganizationId==x.OrganizationId && (m.VenueId==null || m.VenueId==x.VenueId)))));
+        modelBuilder.Entity<VenuePaymentSettings>().HasQueryFilter(x=>(currentUser.IsSuperAdmin || (currentUser.OrganizationId!=null && x.OrganizationId==currentUser.OrganizationId && Memberships.Any(m=>m.UserId==currentUser.UserId && m.OrganizationId==x.OrganizationId && (m.VenueId==null || m.VenueId==x.VenueId)))));
+        modelBuilder.Entity<Payment>().HasQueryFilter(x=>currentUser.IsSuperAdmin||(currentUser.OrganizationId!=null&&x.OrganizationId==currentUser.OrganizationId&&Bookings.Any(b=>b.Id==x.BookingId)));
         modelBuilder.Entity<AppUser>(entity =>
         {
             entity.ToTable("users");
@@ -315,12 +339,23 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
     {
         RecordRoleChanges();
         EnforceTenantWriteScope();
+        var courtOrgs=ChangeTracker.Entries<Court>().Where(e=>e.State==EntityState.Added||e.State==EntityState.Modified).Select(e=>e.Entity.OrganizationId).Distinct().Order().ToArray();
+        await using var capTx=Database.IsRelational()&&courtOrgs.Length>0&&Database.CurrentTransaction==null?await Database.BeginTransactionAsync(cancellationToken):null;
+        if(Database.IsRelational())foreach(var org in courtOrgs)await Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({"court-cap:"+org},0))",cancellationToken);
         await ValidateVenuesAsync(cancellationToken);
-        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        var saved=await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        if(capTx!=null)await capTx.CommitAsync(cancellationToken);
+        return saved;
     }
 
     private async Task ValidateVenuesAsync(CancellationToken cancellationToken)
     {
+        foreach(var group in ChangeTracker.Entries<Court>().Where(x=>x.State==EntityState.Added||(x.State==EntityState.Modified&&x.Entity.IsActive&&x.Property(c=>c.IsActive).IsModified)).GroupBy(x=>x.Entity.OrganizationId))
+        {
+            var license=await Subscriptions.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.OrganizationId==group.Key,cancellationToken);
+            if(license!=null&&await Courts.IgnoreQueryFilters().CountAsync(x=>x.OrganizationId==group.Key&&x.IsActive,cancellationToken)+group.Count(x=>x.Entity.IsActive)>license.MaxCourts)throw new Futsal.Domain.Bookings.BookingDomainException("COURT_LIMIT_REACHED","Court limit reached.");
+        }
+
         foreach (var entry in ChangeTracker.Entries<Location>().Where(x => x.State == EntityState.Added))
         {
             if (currentUser.IsSuperAdmin || entry.Entity.IsSeeded) continue;

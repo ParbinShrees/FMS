@@ -1,6 +1,6 @@
 namespace Futsal.Domain.Locations;
 
-public sealed class Court
+public sealed class Court : Futsal.Domain.Identity.IOrganizationScoped
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid OrganizationId { get; set; }

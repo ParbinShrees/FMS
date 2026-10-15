@@ -1,0 +1,4 @@
+@page "/login"
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Milestone9> L
+<PageTitle>@L["Login"]</PageTitle>
+<h1>@L["Login"]</h1><form method="post" action="/bff/login" data-enhance="false"><AntiforgeryToken/><label for="identifier">@L["Identifier"]</label><input id="identifier" name="identifier" autocomplete="username" required/><label for="password">@L["Password"]</label><input id="password" name="password" type="password" autocomplete="current-password" required/><label for="twofactor">@L["TwoFactor"]</label><input id="twofactor" name="twoFactorCode" autocomplete="one-time-code"/><button type="submit">@L["Login"]</button></form>

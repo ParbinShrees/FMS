@@ -8,37 +8,37 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-<PageTitle>My Bookings — FutsalPro</PageTitle>
+<PageTitle>@Text["Uie0c1f3130baa"]</PageTitle>
 
 <div class="my-bookings-page pa-3">
     <MudText Typo="Typo.h5" Class="font-weight-bold mb-3 text-primary">
         <MudIcon Icon="@Icons.Material.Filled.BookmarkBorder" Class="mr-1" />
-        My Bookings
+        @Text["Ui6b0363a50b3e"]
     </MudText>
 
     @if (!AuthState.IsAuthenticated)
     {
         <MudCard Elevation="2" Class="pa-4 text-center">
             <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
-            <MudText Typo="Typo.h6" Class="mb-1">Player Login Required</MudText>
+            <MudText Typo="Typo.h6" Class="mb-1">@Text["Ui30c5de348c7c"]</MudText>
             <MudText Typo="Typo.body2" Class="text-secondary mb-4">
-                Login with your mobile number to view and manage your booked games.
+                @Text["Ui218df9ee1aca"]
             </MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenLogin">
-                Login with Mobile OTP
+                @Text["Uid5479441fc3b"]
             </MudButton>
         </MudCard>
     }
     else if (IsLoading)
     {
         <div class="d-flex justify-center pa-8">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudProgressCircular aria-label="@Text["Load"]" Color="Color.Primary" Indeterminate="true" />
         </div>
     }
     else if (Bookings.Count == 0)
     {
         <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-            You don't have any bookings yet. <a href="/v">Find a court to play!</a>
+            @Text["Uiea3689c46f68"] <a href="/v">@Text["Ui92794ad4b938"]</a>
         </MudAlert>
     }
     else
@@ -50,7 +50,7 @@
             <MudTabPanel Text="@($"Upcoming ({upcoming.Count})")">
                 @if (upcoming.Count == 0)
                 {
-                    <MudText Typo="Typo.body2" Class="text-secondary pa-4 text-center">No upcoming bookings.</MudText>
+                    <MudText Typo="Typo.body2" Class="text-secondary pa-4 text-center">@Text["Ui70fa1ceef58e"]</MudText>
                 }
                 else
                 {
@@ -77,8 +77,8 @@
                                     </div>
 
                                     <div class="d-flex justify-space-between mt-3 caption">
-                                        <span>Total: <strong>Rs @b.TotalAmount.ToString("N0")</strong></span>
-                                        <span>Paid: <strong class="text-success">Rs @b.PaidAmount.ToString("N0")</strong></span>
+                                        <span>@Text["Ui18e872be2359"] <strong>Rs @b.TotalAmount.ToString("N0")</strong></span>
+                                        <span>@Text["Ui2f9830eabb0d"] <strong class="text-success">Rs @b.PaidAmount.ToString("N0")</strong></span>
                                     </div>
                                 </MudCardContent>
                                 @if (b.Status == "CONFIRMED" || b.Status == "HELD")
@@ -88,7 +88,7 @@
                                                    Color="Color.Error"
                                                    Size="Size.Small"
                                                    OnClick="() => ConfirmCancel(b)">
-                                            Cancel Booking
+                                            @Text["Uidcd0884db34d"]
                                         </MudButton>
                                     </MudCardActions>
                                 }
@@ -101,7 +101,7 @@
             <MudTabPanel Text="@($"Past & Cancelled ({past.Count})")">
                 @if (past.Count == 0)
                 {
-                    <MudText Typo="Typo.body2" Class="text-secondary pa-4 text-center">No past bookings.</MudText>
+                    <MudText Typo="Typo.body2" Class="text-secondary pa-4 text-center">@Text["Ui37414f841be5"]</MudText>
                 }
                 else
                 {
@@ -150,7 +150,7 @@
 
     private async Task OpenLogin()
     {
-        var dialog = await DialogService.ShowAsync<OtpDialog>("Player Login");
+        var dialog = await DialogService.ShowAsync<OtpDialog>(Text["Uib3206f025aab"].Value);
         var result = await dialog.Result;
         if (result != null && !result.Canceled)
         {
@@ -178,8 +178,8 @@
     private async Task ConfirmCancel(BookingDto booking)
     {
         var confirmed = await DialogService.ShowMessageBox(
-            "Cancel Booking",
-            "Are you sure you want to cancel this booking? If you cancel within the venue's cancellation window, your advance may be forfeited according to the venue cancellation policy.",
+            Text["Uidcd0884db34d"].Value,
+            Text["Uidcc97ae420a8"].Value,
             yesText: "Yes, Cancel Booking",
             cancelText: "Keep Booking");
 
@@ -187,8 +187,8 @@
         {
             try
             {
-                await Api.CancelBookingAsync(booking.Id, "Player initiated cancellation");
-                Snackbar.Add("Booking cancelled.", Severity.Info);
+                await Api.CancelBookingAsync(booking.Id, Text["Ui1b1d8a89035c"].Value);
+                Snackbar.Add(Text["Ui22daa3fec87f"].Value, Severity.Info);
                 await LoadBookings();
             }
             catch (Exception ex)
@@ -207,12 +207,7 @@
         _ => Color.Default
     };
 
-    private static string FormatDateTime(DateTimeOffset utc)
-    {
-        var zone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kathmandu");
-        var local = TimeZoneInfo.ConvertTime(utc, zone);
-        return local.ToString("ddd, dd MMM yyyy HH:mm");
-    }
+    private static string FormatDateTime(DateTimeOffset utc)=>BsDate.Display(utc);
 
     private static string FormatTime(DateTimeOffset utc)
     {

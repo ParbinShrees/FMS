@@ -112,7 +112,7 @@ public sealed class PublicLocationsController(FutsalDbContext db,IClock clock,Bo
             venue.AdvanceValue,
             hasOnlinePayment,
             courts,
-            amenities));
+            amenities,venue.BsFirst,venue.NepaliNumerals));
     }
 
     [HttpGet("venues/{slug}/availability")]

@@ -5,23 +5,23 @@
 @inject ApiClient Api
 @inject ISnackbar Snackbar
 
-<PageTitle>Online Payment Settings — FutsalPro Admin</PageTitle>
+<PageTitle>@Text["Ui9b8d8af98e54"]</PageTitle>
 
 <div class="pa-4">
     <MudText Typo="Typo.h5" Class="font-weight-bold mb-1 text-primary">
-        Online Payment Settings (eSewa)
+        @Text["Ui55f899a0a210"]
     </MudText>
     <MudText Typo="Typo.body2" Class="text-secondary mb-4">
-        Configure your venue's eSewa merchant account for receiving player advance payments. Secrets are encrypted and never shown once saved.
+        @Text["Ui0308e44975af"]
     </MudText>
 
     @if (IsLoadingVenues)
     {
-        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        <MudProgressCircular aria-label="@Text["Load"]" Color="Color.Primary" Indeterminate="true" />
     }
     else if (Venues.Count == 0)
     {
-        <MudAlert Severity="Severity.Warning">No venues found for your organization.</MudAlert>
+        <MudAlert Severity="Severity.Warning">@Text["Uid400fafdb937"]</MudAlert>
     }
     else
     {
@@ -29,7 +29,7 @@
             <MudCardContent Class="pa-4 d-flex flex-column gap-3">
                 @if (Venues.Count > 1)
                 {
-                    <MudSelect T="Guid" Value="SelectedVenueId" ValueChanged="OnVenueChanged" Label="Select Venue" Variant="Variant.Outlined" Dense="true">
+                    <MudSelect T="Guid" Value="SelectedVenueId" ValueChanged="OnVenueChanged" Label="@Text["Ui368a3e0ad1e2"]" Variant="Variant.Outlined" Dense="true">
                         @foreach (var v in Venues)
                         {
                             <MudSelectItem Value="@v.Id">@v.Name</MudSelectItem>
@@ -37,17 +37,17 @@
                     </MudSelect>
                 }
 
-                <MudSwitch @bind-Value="IsEnabled" Color="Color.Success" Label="Enable Online Booking via eSewa" />
+                <MudSwitch @bind-Value="IsEnabled" Color="Color.Success" Label="@Text["Ui4474a2a216a8"]" />
 
                 <MudTextField @bind-Value="MerchantCode"
-                              Label="eSewa Product / Merchant Code"
-                              Placeholder="e.g. EPAYTEST"
+                              Label="@Text["Ui60fa23ac0518"]"
+                              Placeholder="@Text["Ui69c11a79ab4b"]"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
                               HelperText="Assigned by eSewa merchant portal" />
 
                 <MudTextField @bind-Value="SecretKey"
-                              Label="Secret Key (HMAC-SHA256)"
+                              Label="@Text["Ui2dfafd2ec54e"]"
                               Placeholder="@(HasSecret ? "•••••••••••••••• (Leave blank to keep current secret)" : "Enter secret key from eSewa")"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
@@ -57,7 +57,7 @@
                 @if (UpdatedAt.HasValue)
                 {
                     <div class="caption text-secondary">
-                        Last updated: @UpdatedAt.Value.ToLocalTime().ToString("g")
+                        Last updated: @BsDate.Display(UpdatedAt.Value)
                     </div>
                 }
             </MudCardContent>
@@ -67,7 +67,7 @@
                            Color="Color.Primary"
                            Disabled="@IsSaving"
                            OnClick="SaveSettings">
-                    @if (IsSaving) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
+                    @if (IsSaving) { <MudProgressCircular aria-label="@Text["Load"]" Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
                     Save Payment Settings
                 </MudButton>
             </MudCardActions>
@@ -146,13 +146,13 @@
     {
         if (string.IsNullOrWhiteSpace(MerchantCode))
         {
-            Snackbar.Add("Merchant Code is required.", Severity.Error);
+            Snackbar.Add(Text["Uida2643a17db8"].Value, Severity.Error);
             return;
         }
 
         if (!HasSecret && string.IsNullOrWhiteSpace(SecretKey))
         {
-            Snackbar.Add("Secret Key is required for initial configuration.", Severity.Error);
+            Snackbar.Add(Text["Ui1e0a06e554be"].Value, Severity.Error);
             return;
         }
 
@@ -168,7 +168,7 @@
                 HasSecret = updated.HasSecret;
                 UpdatedAt = updated.UpdatedAt;
                 SecretKey = null;
-                Snackbar.Add("Online payment settings updated successfully.", Severity.Success);
+                Snackbar.Add(Text["Ui564592d252f0"].Value, Severity.Success);
             }
         }
         catch (Exception ex)

@@ -4,6 +4,7 @@ namespace Futsal.Domain.Bookings;
 
 public sealed class Payment : IOrganizationScoped
 {
+    public Guid? ReversalOf{get;set;}
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid OrganizationId { get; set; }
     public Guid? BookingId { get; set; }
