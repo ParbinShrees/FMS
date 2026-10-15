@@ -1,0 +1,124 @@
+@using Futsal.Contracts
+
+<div class="slot-grid-container pa-2">
+    @if (Slots.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">No court slots available for this day.</MudAlert>
+    }
+    else
+    {
+        var courtGroups = Slots.GroupBy(s => s.CourtId).ToList();
+        var courts = courtGroups.Select(g => new { Id = g.Key, Name = g.First().CourtName }).ToList();
+        var timeSlots = Slots.Select(s => (s.StartAt, s.EndAt)).Distinct().OrderBy(t => t.StartAt).ToList();
+
+        <div class="grid-table-wrapper" style="overflow-x: auto;">
+            <table class="mud-table-root slot-table">
+                <thead>
+                    <tr>
+                        <th class="time-col pa-2 font-weight-bold">Time</th>
+                        @foreach (var court in courts)
+                        {
+                            <th class="court-col pa-2 text-center font-weight-bold">@court.Name</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (start, end) in timeSlots)
+                    {
+                        <tr>
+                            <td class="time-cell pa-2 text-nowrap">
+                                @FormatTime(start) - @FormatTime(end)
+                            </td>
+                            @foreach (var court in courts)
+                            {
+                                var slot = Slots.FirstOrDefault(s => s.CourtId == court.Id && s.StartAt == start && s.EndAt == end);
+                                <td class="slot-cell pa-1 text-center">
+                                    @if (slot == null)
+                                    {
+                                        <div class="slot-box slot-empty">-</div>
+                                    }
+                                    else if (slot.Status == "FREE")
+                                    {
+                                        var isSelected = SelectedSlots.Any(s => s.CourtId == slot.CourtId && s.StartAt == slot.StartAt && s.EndAt == slot.EndAt);
+                                        <button type="button"
+                                                class="slot-btn @(isSelected ? "slot-selected" : "slot-free")"
+                                                @onclick="() => ToggleSlot(slot)">
+                                            <div class="font-weight-medium">Rs @slot.Price.ToString("N0")</div>
+                                            <div class="caption">@(isSelected ? "Selected" : "Available")</div>
+                                        </button>
+                                    }
+                                    else if (slot.Status == "HELD")
+                                    {
+                                        <div class="slot-box slot-held">
+                                            <div class="font-weight-medium">Rs @slot.Price.ToString("N0")</div>
+                                            <div class="caption">Being booked</div>
+                                        </div>
+                                    }
+                                    else if (slot.Status == "BLOCKED")
+                                    {
+                                        <div class="slot-box slot-blocked">
+                                            <div>Blocked</div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="slot-box slot-booked">
+                                            <div>Booked</div>
+                                        </div>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+    .slot-table { width: 100%; border-collapse: separate; border-spacing: 4px; }
+    .slot-btn { width: 100%; min-width: 90px; padding: 8px 4px; border-radius: 6px; border: 1px solid #4caf50; background: #e8f5e9; cursor: pointer; transition: all 0.2s; }
+    .slot-btn:hover { background: #c8e6c9; }
+    .slot-selected { background: #1b5e20 !important; color: white !important; border-color: #1b5e20 !important; }
+    .slot-box { width: 100%; min-width: 90px; padding: 8px 4px; border-radius: 6px; font-size: 0.85rem; }
+    .slot-held { background: #fff3e0; border: 1px solid #ff9800; color: #e65100; opacity: 0.8; }
+    .slot-booked { background: #ffebee; border: 1px solid #e57373; color: #c62828; }
+    .slot-blocked { background: #eeeeee; border: 1px solid #bdbdbd; color: #616161; }
+    .slot-empty { background: transparent; color: #bbb; }
+    .caption { font-size: 0.75rem; }
+</style>
+
+@code {
+    [Parameter] public IReadOnlyList<AvailabilitySlotDto> Slots { get; set; } = [];
+    [Parameter] public List<AvailabilitySlotDto> SelectedSlots { get; set; } = [];
+    [Parameter] public EventCallback<List<AvailabilitySlotDto>> SelectedSlotsChanged { get; set; }
+
+    private async Task ToggleSlot(AvailabilitySlotDto slot)
+    {
+        var existing = SelectedSlots.FirstOrDefault(s => s.CourtId == slot.CourtId && s.StartAt == slot.StartAt && s.EndAt == slot.EndAt);
+        if (existing != null)
+        {
+            SelectedSlots.Remove(existing);
+        }
+        else
+        {
+            // If selecting on a different court, reset selection to this court
+            if (SelectedSlots.Count > 0 && SelectedSlots.First().CourtId != slot.CourtId)
+            {
+                SelectedSlots.Clear();
+            }
+            SelectedSlots.Add(slot);
+            SelectedSlots.Sort((a, b) => a.StartAt.CompareTo(b.StartAt));
+        }
+
+        await SelectedSlotsChanged.InvokeAsync(SelectedSlots);
+    }
+
+    private static string FormatTime(DateTimeOffset utc)
+    {
+        var zone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kathmandu");
+        var local = TimeZoneInfo.ConvertTime(utc, zone);
+        return local.ToString("HH:mm");
+    }
+}

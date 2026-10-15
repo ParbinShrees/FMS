@@ -28,6 +28,7 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
     public DbSet<CourtHour> CourtHours => Set<CourtHour>();
     public DbSet<BlockedPeriod> BlockedPeriods => Set<BlockedPeriod>();
     public DbSet<PricingRule> PricingRules => Set<PricingRule>();
+    public DbSet<VenuePaymentSettings> VenuePaymentSettings => Set<VenuePaymentSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -170,6 +171,24 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
             e.Property(x=>x.Name).HasColumnName("name").IsRequired();e.Property(x=>x.Weekdays).HasColumnName("weekdays");e.Property(x=>x.FromTime).HasColumnName("from_time");e.Property(x=>x.ToTime).HasColumnName("to_time");
             e.Property(x=>x.PricePerSlot).HasColumnName("price_per_slot").HasPrecision(12,2);e.Property(x=>x.Priority).HasColumnName("priority");e.Property(x=>x.ValidFrom).HasColumnName("valid_from");e.Property(x=>x.ValidTo).HasColumnName("valid_to");
             e.HasOne<Court>().WithMany().HasForeignKey(x=>x.CourtId).OnDelete(DeleteBehavior.Cascade);e.HasQueryFilter(x=>currentUser.IsSuperAdmin||(currentUser.OrganizationId!=null&&x.OrganizationId==currentUser.OrganizationId));
+        });
+        modelBuilder.Entity<VenuePaymentSettings>(e =>
+        {
+            e.ToTable("venue_payment_settings");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.OrganizationId).HasColumnName("organization_id");
+            e.Property(x => x.VenueId).HasColumnName("venue_id");
+            e.Property(x => x.Method).HasColumnName("method").HasColumnType("payment_method");
+            e.Property(x => x.IsEnabled).HasColumnName("is_enabled");
+            e.Property(x => x.MerchantCode).HasColumnName("merchant_code").IsRequired();
+            e.Property(x => x.EncryptedSecret).HasColumnName("encrypted_secret").IsRequired();
+            e.Property(x => x.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+            e.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
+            e.HasIndex(x => new { x.VenueId, x.Method }).IsUnique();
+            e.HasOne(x => x.Venue).WithMany(x => x.PaymentSettings).HasForeignKey(x => x.VenueId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<Organization>().WithMany().HasForeignKey(x => x.OrganizationId).OnDelete(DeleteBehavior.Cascade);
+            e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId));
         });
 
         modelBuilder.Entity<AppUser>(entity =>
@@ -317,11 +336,15 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
                 throw new InvalidOperationException("Audit entries are immutable.");
         }
 
-        foreach (var entry in ChangeTracker.Entries<Payment>().Where(x => x.State is EntityState.Modified or EntityState.Deleted))
-            throw new InvalidOperationException("Payment entries are immutable; record corrections as a new payment.");
+        foreach (var entry in ChangeTracker.Entries<Payment>().Where(x => x.State is EntityState.Deleted))
+            throw new InvalidOperationException("Payment entries cannot be deleted.");
 
-        foreach (var entry in ChangeTracker.Entries<Payment>().Where(x => x.State is EntityState.Modified or EntityState.Deleted))
-            throw new InvalidOperationException("Payment entries are immutable; record corrections as a new payment.");
+        foreach (var entry in ChangeTracker.Entries<Payment>().Where(x => x.State is EntityState.Modified))
+        {
+            var originalStatus = entry.Property(x => x.Status).OriginalValue;
+            if (originalStatus != PaymentStatus.PENDING)
+                throw new InvalidOperationException("Payment entries are immutable; record corrections as a new payment.");
+        }
 
         if (currentUser.IsSuperAdmin) return;
 
@@ -342,6 +365,7 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
                 var ownedCustomers=ChangeTracker.Entries<Customer>().Where(x=>x.Entity.UserId==customerUserId).Select(x=>x.Entity.Id).ToHashSet();
                 if(entry.Entity is Customer customer && customer.UserId==customerUserId)continue;
                 if(entry.Entity is Booking booking && booking.CustomerId is Guid bookingCustomerId && ownedCustomers.Contains(bookingCustomerId))continue;
+                if(entry.Entity is Payment)continue;
             }
             throw new UnauthorizedAccessException("The current user cannot change data outside their organization.");
         }

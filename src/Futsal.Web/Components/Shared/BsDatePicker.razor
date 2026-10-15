@@ -1,0 +1,27 @@
+@using Futsal.Web.Services
+
+<div class="d-flex align-center gap-2">
+    <MudDatePicker Date="@SelectedDate"
+                   DateChanged="OnDateSelected"
+                   Label="Select Date"
+                   DateFormat="yyyy-MM-dd"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense" />
+    <MudChip T="string" Color="Color.Info" Variant="Variant.Filled" Size="Size.Medium">
+        @BsDisplay
+    </MudChip>
+</div>
+
+@code {
+    [Parameter] public DateTime? Date { get; set; } = DateTime.Today;
+    [Parameter] public EventCallback<DateTime?> DateChanged { get; set; }
+
+    private DateTime? SelectedDate => Date ?? DateTime.Today;
+    private string BsDisplay => BsDate.FromAd(DateOnly.FromDateTime(SelectedDate ?? DateTime.Today));
+
+    private async Task OnDateSelected(DateTime? newDate)
+    {
+        Date = newDate;
+        await DateChanged.InvokeAsync(newDate);
+    }
+}

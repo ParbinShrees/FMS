@@ -1,0 +1,84 @@
+@inherits LayoutComponentBase
+@using Futsal.Web.Services
+@inject BffAuthState AuthState
+@inject NavigationManager Navigation
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="player-app-shell">
+    <header class="player-header d-flex justify-space-between align-center px-4 py-2">
+        <a href="/v" class="brand-link d-flex align-center text-decoration-none">
+            <MudIcon Icon="@Icons.Material.Filled.SportsSoccer" Color="Color.Primary" Size="Size.Large" Class="mr-2" />
+            <div>
+                <div class="brand-title font-weight-bold">FutsalPro</div>
+                <div class="brand-sub caption text-secondary">Court Booking</div>
+            </div>
+        </a>
+
+        <div class="d-flex align-center gap-2">
+            <MudButton Href="/v"
+                       Variant="Variant.Text"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Search"
+                       Size="Size.Small">
+                Find
+            </MudButton>
+            <MudButton Href="/v/my-bookings"
+                       Variant="Variant.Text"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.BookmarkBorder"
+                       Size="Size.Small">
+                My Bookings
+            </MudButton>
+            @if (AuthState.IsAuthenticated)
+            {
+                <MudChip T="string" Color="Color.Success" Variant="Variant.Outlined" Size="Size.Small">
+                    Player
+                </MudChip>
+            }
+        </div>
+    </header>
+
+    <main class="player-main pa-3">
+        @Body
+    </main>
+
+    <footer class="player-footer text-center pa-4 text-secondary caption">
+        <div>FutsalPro Nepal &copy; @DateTime.UtcNow.Year — Zero double bookings</div>
+    </footer>
+</div>
+
+<style>
+    .player-app-shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fafafa;
+    }
+    .player-header {
+        background: white;
+        border-bottom: 1px solid #e0e0e0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    .brand-title {
+        font-size: 1.25rem;
+        line-height: 1.2;
+        color: #2e7d32;
+    }
+    .brand-sub {
+        font-size: 0.75rem;
+        line-height: 1;
+    }
+    .player-main {
+        flex: 1;
+    }
+    .player-footer {
+        border-top: 1px solid #eeeeee;
+    }
+</style>

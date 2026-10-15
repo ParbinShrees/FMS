@@ -82,6 +82,39 @@ public sealed class PublicLocationsController(FutsalDbContext db,IClock clock,Bo
         return Ok(items);
     }
 
+    [HttpGet("venues/{slug}")]
+    public async Task<IActionResult> VenueDetails(string slug, CancellationToken ct)
+    {
+        var venue = await db.Venues.IgnoreQueryFilters().AsNoTracking()
+            .Include(v => v.Courts.Where(c => c.IsActive))
+            .Include(v => v.VenueAmenities).ThenInclude(va => va.Amenity)
+            .SingleOrDefaultAsync(v => v.Slug == slug && v.IsPublic && v.IsActive && db.Locations.Any(l => l.Id == v.LocationId && l.IsActive), ct);
+
+        if (venue == null) return NotFound();
+
+        var hasOnlinePayment = await db.VenuePaymentSettings.IgnoreQueryFilters()
+            .AnyAsync(s => s.VenueId == venue.Id && s.Method == PaymentMethod.ESEWA && s.IsEnabled && s.MerchantCode != "", ct);
+
+        var courts = venue.Courts.Select(c => new Futsal.Contracts.PublicCourtDto(c.Id, c.Name, c.Surface, c.SlotMinutes, c.PricePerSlot)).ToList();
+        var amenities = venue.VenueAmenities.Where(va => va.Amenity.IsActive).Select(va => va.Amenity.Code).ToList();
+
+        return Ok(new Futsal.Contracts.PublicVenueDetailDto(
+            venue.Id,
+            venue.Name,
+            venue.Slug,
+            venue.Address,
+            venue.Latitude,
+            venue.Longitude,
+            venue.PhotoPlaceholder ?? "placeholder",
+            venue.HoldMinutes,
+            venue.FreeCancelHours,
+            venue.AdvanceType,
+            venue.AdvanceValue,
+            hasOnlinePayment,
+            courts,
+            amenities));
+    }
+
     [HttpGet("venues/{slug}/availability")]
     public async Task<IActionResult> Availability(string slug,[FromQuery]DateOnly? date,CancellationToken ct)
     {

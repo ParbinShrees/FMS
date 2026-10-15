@@ -11,6 +11,7 @@ namespace Futsal.Api.Controllers;
 public sealed class BookingsController(BookingService bookings,IValidator<CreateHoldRequest> holdValidator,IValidator<CancelBookingRequest> cancelValidator):ControllerBase
 {
     [HttpPost("holds")]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("holds")]
     public async Task<ActionResult<BookingResponse>> CreateHold(CreateHoldRequest request,[FromHeader(Name="Idempotency-Key")]string? key,CancellationToken ct)
     {
         await ValidateAsync(holdValidator,request,ct);RequireKey(key);var result=await bookings.CreateHoldAsync(request,key!,HttpContext.Connection.RemoteIpAddress,ct);return StatusCode(StatusCodes.Status201Created,result);

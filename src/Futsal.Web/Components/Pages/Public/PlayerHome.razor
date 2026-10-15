@@ -1,0 +1,271 @@
+@page "/v"
+@page "/"
+@layout Futsal.Web.Components.Layout.PlayerLayout
+@using Futsal.Web.Services
+@inject ApiClient Api
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+
+<PageTitle>Find Futsal Courts — FutsalPro</PageTitle>
+
+<div class="player-home">
+    <div class="search-hero pa-4 mb-3 rounded-lg" style="background: linear-gradient(135deg, #1b5e20, #2e7d32); color: white;">
+        <MudText Typo="Typo.h5" Class="font-weight-bold mb-1">Book Futsal Courts in Nepal</MudText>
+        <MudText Typo="Typo.body2" Class="mb-3 opacity-80">Instant live availability. Advance payment via eSewa. Zero double bookings.</MudText>
+
+        <div class="d-flex flex-column gap-2">
+            <MudTextField @bind-Value="SearchQuery"
+                          Placeholder="Search area, city or venue name (English / नेपाली)..."
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          OnKeyUp="OnSearchKey"
+                          Style="background: white; border-radius: 6px;"
+                          Margin="Margin.Dense" />
+
+            <div class="d-flex gap-2 align-center flex-wrap">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Warning"
+                           StartIcon="@Icons.Material.Filled.MyLocation"
+                           Size="Size.Small"
+                           OnClick="UseNearMe">
+                    Near Me
+                </MudButton>
+
+                <MudSelect T="string" @bind-Value="SelectedSort"
+                           Label="Sort By"
+                           Variant="Variant.Outlined"
+                           Dense="true"
+                           Margin="Margin.Dense"
+                           SelectedValuesChanged="ApplyFilters"
+                           Style="background: white; border-radius: 6px; min-width: 140px;">
+                    <MudSelectItem Value="@("price")">Lowest Price</MudSelectItem>
+                    <MudSelectItem Value="@("name")">Name</MudSelectItem>
+                    <MudSelectItem Value="@("distance")">Distance</MudSelectItem>
+                </MudSelect>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Hierarchy Browser -->
+    <MudExpansionPanels Class="mb-3" Dense="true">
+        <MudExpansionPanel Text="Browse Locations (Province / City / Area)">
+            <div class="d-flex flex-column gap-2">
+                @if (Locations.Count == 0)
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+                }
+                else
+                {
+                    var cities = Locations.Where(l => l.Type == "CITY").ToList();
+                    <div class="d-flex flex-wrap gap-1">
+                        <MudChip T="string"
+                                 Color="@(SelectedCity == null ? Color.Primary : Color.Default)"
+                                 Variant="Variant.Filled"
+                                 Size="Size.Small"
+                                 OnClick="() => FilterByCity(null)">
+                            All Cities
+                        </MudChip>
+                        @foreach (var city in cities)
+                        {
+                            <MudChip T="string"
+                                     Color="@(SelectedCity == city.Slug ? Color.Primary : Color.Default)"
+                                     Variant="Variant.Filled"
+                                     Size="Size.Small"
+                                     OnClick="() => FilterByCity(city.Slug)">
+                                @city.NameEn (@city.NameNe)
+                            </MudChip>
+                        }
+                    </div>
+                }
+            </div>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+
+    <!-- Filters Row -->
+    <div class="filters-bar d-flex gap-2 mb-3 flex-wrap align-center">
+        <MudTextField @bind-Value="MaxPrice"
+                      Label="Max Price (Rs)"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      DebounceInterval="500"
+                      OnDebounceIntervalElapsed="ApplyFilters"
+                      Style="max-width: 140px;" />
+
+        <MudSelect T="string" @bind-Value="SelectedSurface"
+                   Label="Surface"
+                   Variant="Variant.Outlined"
+                   Dense="true"
+                   Margin="Margin.Dense"
+                   Clearable="true"
+                   SelectedValuesChanged="ApplyFilters"
+                   Style="max-width: 150px;">
+            <MudSelectItem Value="@("Artificial Turf")">Artificial Turf</MudSelectItem>
+            <MudSelectItem Value="@("Rubber Mat")">Rubber Mat</MudSelectItem>
+            <MudSelectItem Value="@("Wood")">Wood</MudSelectItem>
+        </MudSelect>
+    </div>
+
+    <!-- Venue List -->
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-center pa-6">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (Venues.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+            No futsal venues found matching your criteria. Try adjusting filters or search.
+        </MudAlert>
+    }
+    else
+    {
+        <div class="venue-cards d-flex flex-column gap-3">
+            @foreach (var venue in Venues)
+            {
+                <MudCard Elevation="2" Class="venue-card">
+                    <MudCardContent Class="pa-3">
+                        <div class="d-flex justify-space-between align-start">
+                            <div>
+                                <MudText Typo="Typo.h6" Class="font-weight-bold text-primary">
+                                    <a href="/v/@venue.Slug" class="text-decoration-none">@venue.Name</a>
+                                </MudText>
+                                <MudText Typo="Typo.caption" Class="text-secondary d-flex align-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Place" Size="Size.Small" Class="mr-1" />
+                                    @venue.LocationPath
+                                </MudText>
+                            </div>
+                            <div class="text-right">
+                                @if (venue.LowestPrice.HasValue)
+                                {
+                                    <div class="font-weight-bold text-success" style="font-size: 1.1rem;">
+                                        Rs @venue.LowestPrice.Value.ToString("N0")
+                                    </div>
+                                    <div class="caption text-secondary">per hour from</div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-1 mt-2 flex-wrap">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">
+                                @venue.CourtCount @(venue.CourtCount == 1 ? "Court" : "Courts")
+                            </MudChip>
+                            @foreach (var surface in venue.Surfaces)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">
+                                    @surface
+                                </MudChip>
+                            }
+                            @if (venue.DistanceKm.HasValue)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">
+                                    @venue.DistanceKm.Value.ToString("F1") km away
+                                </MudChip>
+                            }
+                        </div>
+                    </MudCardContent>
+                    <MudCardActions Class="px-3 pb-3 pt-0 d-flex justify-end">
+                        <MudButton Href="@($"/v/{venue.Slug}")"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   EndIcon="@Icons.Material.Filled.ArrowForward">
+                            Book Court
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<LocationItemDto> Locations { get; set; } = [];
+    private List<PublicVenueCardDto> Venues { get; set; } = [];
+    private bool IsLoading { get; set; } = true;
+
+    private string? SearchQuery { get; set; }
+    private string? SelectedCity { get; set; }
+    private string? SelectedSurface { get; set; }
+    private string? SelectedSort { get; set; } = "price";
+    private decimal? MaxPrice { get; set; }
+    private string? NearParam { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLocations();
+        await ApplyFilters();
+    }
+
+    private async Task LoadLocations()
+    {
+        try
+        {
+            Locations = (await Api.GetLocationsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Could not load locations: {ex.Message}", Severity.Warning);
+        }
+    }
+
+    private async Task ApplyFilters()
+    {
+        IsLoading = true;
+        try
+        {
+            Venues = (await Api.SearchVenuesAsync(
+                city: SelectedCity,
+                near: NearParam,
+                surface: SelectedSurface,
+                maxPrice: MaxPrice,
+                sort: SelectedSort)).ToList();
+
+            if (!string.IsNullOrWhiteSpace(SearchQuery))
+            {
+                var q = SearchQuery.Trim().ToLowerInvariant();
+                Venues = Venues.Where(v => v.Name.ToLowerInvariant().Contains(q) || v.LocationPath.ToLowerInvariant().Contains(q)).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Could not load venues: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task FilterByCity(string? citySlug)
+    {
+        SelectedCity = citySlug;
+        await ApplyFilters();
+    }
+
+    private async Task OnSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await ApplyFilters();
+        }
+    }
+
+    private async Task UseNearMe()
+    {
+        try
+        {
+            // Try to query geolocation via JS interop or standard coordinates
+            NearParam = "27.7172,85.3240"; // Default Kathmandu coords if denied
+            SelectedSort = "distance";
+            Snackbar.Add("Using near me location...", Severity.Info);
+            await ApplyFilters();
+        }
+        catch
+        {
+            Snackbar.Add("Could not retrieve current location.", Severity.Warning);
+        }
+    }
+}

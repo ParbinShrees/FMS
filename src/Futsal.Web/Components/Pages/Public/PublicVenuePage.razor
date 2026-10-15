@@ -1,0 +1,388 @@
+@page "/v/{Slug}"
+@layout Futsal.Web.Components.Layout.PlayerLayout
+@using Futsal.Contracts
+@using Futsal.Web.Services
+@using Futsal.Web.Components.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+@inject ApiClient Api
+@inject BffAuthState AuthState
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<PageTitle>@(Venue?.Name ?? "Venue") — FutsalPro</PageTitle>
+
+<div class="venue-booking-page">
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-center pa-8">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (Venue == null)
+    {
+        <MudAlert Severity="Severity.Error">Venue not found.</MudAlert>
+    }
+    else
+    {
+        <!-- Venue Header -->
+        <MudCard Elevation="2" Class="mb-3">
+            <MudCardContent Class="pa-4">
+                <div class="d-flex justify-space-between align-start flex-wrap gap-2">
+                    <div>
+                        <MudText Typo="Typo.h5" Class="font-weight-bold text-primary">@Venue.Name</MudText>
+                        <MudText Typo="Typo.body2" Class="text-secondary d-flex align-center mt-1">
+                            <MudIcon Icon="@Icons.Material.Filled.Place" Size="Size.Small" Class="mr-1" />
+                            @Venue.Address
+                            @if (Venue.Latitude.HasValue && Venue.Longitude.HasValue)
+                            {
+                                <a href="@($"https://www.google.com/maps/search/?api=1&query={Venue.Latitude.Value},{Venue.Longitude.Value}")"
+                                   target="_blank" class="ml-2 font-weight-medium">
+                                    (View on Google Maps)
+                                </a>
+                            }
+                        </MudText>
+                    </div>
+
+                    <div class="text-right">
+                        <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Size="Size.Small">
+                            Advance: @(Venue.AdvanceType == "FIXED" ? $"Rs {Venue.AdvanceValue:N0}" : $"{Venue.AdvanceValue:N0}%")
+                        </MudChip>
+                    </div>
+                </div>
+
+                @if (!Venue.HasOnlinePayment)
+                {
+                    <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-3" Dense="true">
+                        Online booking is currently disabled for this venue. Please contact the front desk directly.
+                    </MudAlert>
+                }
+
+                <div class="d-flex gap-1 mt-3 flex-wrap">
+                    @foreach (var amenity in Venue.Amenities)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">
+                            @amenity
+                        </MudChip>
+                    }
+                </div>
+
+                <div class="caption text-secondary mt-2">
+                    Cancellation policy: Free cancellation until @Venue.FreeCancelHours hours before slot time. After that, advance is forfeited.
+                </div>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Active Hold Banner (if any) -->
+        @if (ActiveBooking != null && ActiveBooking.HoldExpiresAt.HasValue)
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-3" Elevation="3">
+                <div class="d-flex justify-space-between align-center flex-wrap gap-2">
+                    <div>
+                        <strong>Slot Held!</strong> Booking Code: <code>@ActiveBooking.BookingCode</code>
+                        <div class="caption">Complete advance payment of Rs @ActiveBooking.AdvanceRequired.ToString("N0") before hold expires.</div>
+                    </div>
+                    <div class="d-flex align-center gap-3">
+                        <HoldCountdown ExpiresAt="@ActiveBooking.HoldExpiresAt.Value" OnExpired="OnHoldExpired" />
+                        <MudButton Color="Color.Dark"
+                                   Variant="Variant.Filled"
+                                   Size="Size.Medium"
+                                   StartIcon="@Icons.Material.Filled.Payment"
+                                   OnClick="InitiatePayment"
+                                   Disabled="@IsPaymentBusy">
+                            @if (IsPaymentBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
+                            Pay with eSewa
+                        </MudButton>
+                    </div>
+                </div>
+            </MudAlert>
+        }
+
+        <!-- Date Picker & SignalR Status -->
+        <div class="d-flex justify-space-between align-center mb-3 flex-wrap gap-2">
+            <BsDatePicker Date="@SelectedDate" DateChanged="OnDateChanged" />
+
+            <div class="d-flex align-center">
+                @if (IsHubConnected)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text" Icon="@Icons.Material.Filled.Wifi">
+                        Live Availability
+                    </MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text" Icon="@Icons.Material.Filled.WifiOff">
+                        Reconnecting...
+                    </MudChip>
+                }
+            </div>
+        </div>
+
+        <!-- Slot Grid -->
+        <MudCard Elevation="1" Class="mb-3">
+            <SlotGrid Slots="@Slots"
+                      SelectedSlots="@SelectedSlots"
+                      SelectedSlotsChanged="OnSelectedSlotsChanged" />
+        </MudCard>
+
+        <!-- Booking Action Bar -->
+        @if (SelectedSlots.Count > 0 && ActiveBooking == null)
+        {
+            var totalPrice = SelectedSlots.Sum(s => s.Price);
+            var advanceAmount = Venue.AdvanceType == "FIXED"
+                ? Math.Min(totalPrice, Venue.AdvanceValue)
+                : decimal.Round(totalPrice * Venue.AdvanceValue / 100m, 2);
+
+            <MudPaper Class="pa-3 sticky-bottom d-flex justify-space-between align-center flex-wrap gap-2" Elevation="4" Style="position: sticky; bottom: 10px; z-index: 99; background: white; border-radius: 8px;">
+                <div>
+                    <div class="font-weight-bold text-primary">
+                        @SelectedSlots.Count @(SelectedSlots.Count == 1 ? "Slot" : "Slots") Selected
+                    </div>
+                    <div class="caption text-secondary">
+                        Total: <strong>Rs @totalPrice.ToString("N0")</strong> | Advance required: <strong class="text-success">Rs @advanceAmount.ToString("N0")</strong>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="() => SelectedSlots.Clear()">
+                        Clear
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@(!Venue.HasOnlinePayment || IsHolding)"
+                               OnClick="HoldSlots">
+                        @if (IsHolding) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
+                        Hold & Pay Advance
+                    </MudButton>
+                </div>
+            </MudPaper>
+        }
+    }
+</div>
+
+@if (PaymentInitiation != null)
+{
+    <form id="esewaForm" method="POST" action="@PaymentInitiation.GatewayUrl" style="display:none;">
+        @foreach (var field in PaymentInitiation.FormFields)
+        {
+            <input type="hidden" name="@field.Key" value="@field.Value" />
+        }
+    </form>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = "";
+
+    private PublicVenueDetailDto? Venue { get; set; }
+    private DateTime SelectedDate { get; set; } = DateTime.Today;
+    private List<AvailabilitySlotDto> Slots { get; set; } = [];
+    private List<AvailabilitySlotDto> SelectedSlots { get; set; } = [];
+    private BookingDto? ActiveBooking { get; set; }
+    private InitiatePaymentResponseDto? PaymentInitiation { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+    private bool IsHolding { get; set; }
+    private bool IsPaymentBusy { get; set; }
+    private bool IsHubConnected => _hubConnection?.State == HubConnectionState.Connected;
+
+    private HubConnection? _hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVenue();
+        await LoadSlots();
+        await SetupSignalR();
+    }
+
+    private async Task LoadVenue()
+    {
+        IsLoading = true;
+        try
+        {
+            Venue = await Api.GetVenueDetailAsync(Slug);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load venue: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadSlots()
+    {
+        try
+        {
+            var dateOnly = DateOnly.FromDateTime(SelectedDate);
+            Slots = (await Api.GetPublicAvailabilityAsync(Slug, dateOnly)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load slot availability: {ex.Message}", Severity.Warning);
+        }
+    }
+
+    private async Task OnDateChanged(DateTime? newDate)
+    {
+        if (newDate.HasValue)
+        {
+            SelectedDate = newDate.Value;
+            SelectedSlots.Clear();
+            await LoadSlots();
+            if (_hubConnection != null && _hubConnection.State == HubConnectionState.Connected)
+            {
+                var dateStr = SelectedDate.ToString("yyyy-MM-dd");
+                await _hubConnection.InvokeAsync("JoinVenueDate", Slug, dateStr);
+            }
+        }
+    }
+
+    private void OnSelectedSlotsChanged(List<AvailabilitySlotDto> selected)
+    {
+        SelectedSlots = selected;
+    }
+
+    private async Task SetupSignalR()
+    {
+        try
+        {
+            var hubUrl = Navigation.ToAbsoluteUri("/hubs/availability");
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl)
+                .WithAutomaticReconnect()
+                .Build();
+
+            _hubConnection.On<AvailabilityEventDto>("SlotHeld", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "HELD"));
+            _hubConnection.On<AvailabilityEventDto>("SlotReleased", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "FREE"));
+            _hubConnection.On<AvailabilityEventDto>("SlotBooked", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "BOOKED"));
+            _hubConnection.On<AvailabilityEventDto>("SlotBlocked", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "BLOCKED"));
+
+            _hubConnection.Reconnected += async _ =>
+            {
+                await LoadSlots();
+                await _hubConnection.InvokeAsync("JoinVenueDate", Slug, SelectedDate.ToString("yyyy-MM-dd"));
+                await InvokeAsync(StateHasChanged);
+            };
+
+            await _hubConnection.StartAsync();
+            await _hubConnection.InvokeAsync("JoinVenueDate", Slug, SelectedDate.ToString("yyyy-MM-dd"));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SignalR connection failed: {ex.Message}");
+        }
+    }
+
+    private void HandleSlotEvent(Guid courtId, DateTimeOffset start, DateTimeOffset end, string status)
+    {
+        InvokeAsync(() =>
+        {
+            var match = Slots.FirstOrDefault(s => s.CourtId == courtId && s.StartAt == start && s.EndAt == end);
+            if (match != null)
+            {
+                var index = Slots.IndexOf(match);
+                Slots[index] = new AvailabilitySlotDto(match.CourtId, match.CourtName, match.StartAt, match.EndAt, status, match.Price);
+
+                // If held or booked by someone else while selected, deselect
+                if (status != "FREE")
+                {
+                    SelectedSlots.RemoveAll(s => s.CourtId == courtId && s.StartAt == start && s.EndAt == end);
+                }
+                StateHasChanged();
+            }
+        });
+    }
+
+    private async Task HoldSlots()
+    {
+        if (SelectedSlots.Count == 0) return;
+
+        // If player is not authenticated, prompt OTP login dialog
+        if (!AuthState.IsAuthenticated)
+        {
+            var dialog = await DialogService.ShowAsync<OtpDialog>("Player Login");
+            var result = await dialog.Result;
+            if (result == null || result.Canceled)
+            {
+                return;
+            }
+        }
+
+        IsHolding = true;
+        try
+        {
+            // Consecutive range: start of first slot to end of last slot
+            var firstSlot = SelectedSlots.OrderBy(s => s.StartAt).First();
+            var lastSlot = SelectedSlots.OrderBy(s => s.StartAt).Last();
+
+            var booking = await Api.CreateHoldAsync(firstSlot.CourtId, firstSlot.StartAt, lastSlot.EndAt);
+            if (booking != null)
+            {
+                ActiveBooking = booking;
+                SelectedSlots.Clear();
+                Snackbar.Add("Slot held! Please pay advance to confirm.", Severity.Success);
+            }
+        }
+        catch (ApiProblemException ex) when (ex.Code == "SLOT_UNAVAILABLE")
+        {
+            Snackbar.Add("Someone just booked this slot. Pick another.", Severity.Warning);
+            await LoadSlots();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+            await LoadSlots();
+        }
+        finally
+        {
+            IsHolding = false;
+        }
+    }
+
+    private async Task InitiatePayment()
+    {
+        if (ActiveBooking == null) return;
+
+        IsPaymentBusy = true;
+        try
+        {
+            var initiation = await Api.InitiateEsewaPaymentAsync(ActiveBooking.Id);
+            if (initiation != null)
+            {
+                PaymentInitiation = initiation;
+                StateHasChanged();
+                await Task.Delay(100);
+                // Submit hidden form to eSewa gateway
+                await JS.InvokeVoidAsync("eval", "document.getElementById('esewaForm').submit()");
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Payment initiation failed: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsPaymentBusy = false;
+        }
+    }
+
+    private void OnHoldExpired()
+    {
+        ActiveBooking = null;
+        Snackbar.Add("Hold time expired. Please choose a slot again.", Severity.Info);
+        _ = LoadSlots();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection != null)
+        {
+            try { await _hubConnection.StopAsync(); } catch { }
+            await _hubConnection.DisposeAsync();
+        }
+    }
+}

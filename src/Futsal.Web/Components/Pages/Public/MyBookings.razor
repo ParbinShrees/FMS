@@ -1,0 +1,223 @@
+@page "/v/my-bookings"
+@layout Futsal.Web.Components.Layout.PlayerLayout
+@using Futsal.Contracts
+@using Futsal.Web.Services
+@using Futsal.Web.Components.Shared
+@inject ApiClient Api
+@inject BffAuthState AuthState
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>My Bookings — FutsalPro</PageTitle>
+
+<div class="my-bookings-page pa-3">
+    <MudText Typo="Typo.h5" Class="font-weight-bold mb-3 text-primary">
+        <MudIcon Icon="@Icons.Material.Filled.BookmarkBorder" Class="mr-1" />
+        My Bookings
+    </MudText>
+
+    @if (!AuthState.IsAuthenticated)
+    {
+        <MudCard Elevation="2" Class="pa-4 text-center">
+            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
+            <MudText Typo="Typo.h6" Class="mb-1">Player Login Required</MudText>
+            <MudText Typo="Typo.body2" Class="text-secondary mb-4">
+                Login with your mobile number to view and manage your booked games.
+            </MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenLogin">
+                Login with Mobile OTP
+            </MudButton>
+        </MudCard>
+    }
+    else if (IsLoading)
+    {
+        <div class="d-flex justify-center pa-8">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (Bookings.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+            You don't have any bookings yet. <a href="/v">Find a court to play!</a>
+        </MudAlert>
+    }
+    else
+    {
+        var upcoming = Bookings.Where(b => b.StartAt > DateTimeOffset.UtcNow && b.Status != "CANCELLED").ToList();
+        var past = Bookings.Where(b => b.StartAt <= DateTimeOffset.UtcNow || b.Status == "CANCELLED").ToList();
+
+        <MudTabs Elevation="1" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-3">
+            <MudTabPanel Text="@($"Upcoming ({upcoming.Count})")">
+                @if (upcoming.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Class="text-secondary pa-4 text-center">No upcoming bookings.</MudText>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var b in upcoming)
+                        {
+                            <MudCard Elevation="2">
+                                <MudCardContent Class="pa-3">
+                                    <div class="d-flex justify-space-between align-start">
+                                        <div>
+                                            <div class="font-weight-bold text-primary" style="font-size: 1.1rem;">
+                                                @b.BookingCode
+                                            </div>
+                                            <div class="text-secondary caption">
+                                                @FormatDateTime(b.StartAt) - @FormatTime(b.EndAt)
+                                            </div>
+                                            <div class="caption font-weight-medium text-info">
+                                                @BsDate.FromAd(DateOnly.FromDateTime(b.StartAt.DateTime))
+                                            </div>
+                                        </div>
+                                        <MudChip T="string" Color="@GetStatusColor(b.Status)" Size="Size.Small" Variant="Variant.Filled">
+                                            @b.Status
+                                        </MudChip>
+                                    </div>
+
+                                    <div class="d-flex justify-space-between mt-3 caption">
+                                        <span>Total: <strong>Rs @b.TotalAmount.ToString("N0")</strong></span>
+                                        <span>Paid: <strong class="text-success">Rs @b.PaidAmount.ToString("N0")</strong></span>
+                                    </div>
+                                </MudCardContent>
+                                @if (b.Status == "CONFIRMED" || b.Status == "HELD")
+                                {
+                                    <MudCardActions Class="px-3 pb-3 pt-0 d-flex justify-end">
+                                        <MudButton Variant="Variant.Outlined"
+                                                   Color="Color.Error"
+                                                   Size="Size.Small"
+                                                   OnClick="() => ConfirmCancel(b)">
+                                            Cancel Booking
+                                        </MudButton>
+                                    </MudCardActions>
+                                }
+                            </MudCard>
+                        }
+                    </div>
+                }
+            </MudTabPanel>
+
+            <MudTabPanel Text="@($"Past & Cancelled ({past.Count})")">
+                @if (past.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Class="text-secondary pa-4 text-center">No past bookings.</MudText>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var b in past)
+                        {
+                            <MudCard Elevation="1">
+                                <MudCardContent Class="pa-3">
+                                    <div class="d-flex justify-space-between align-start">
+                                        <div>
+                                            <div class="font-weight-bold text-secondary">
+                                                @b.BookingCode
+                                            </div>
+                                            <div class="text-secondary caption">
+                                                @FormatDateTime(b.StartAt)
+                                            </div>
+                                        </div>
+                                        <MudChip T="string" Color="@GetStatusColor(b.Status)" Size="Size.Small" Variant="Variant.Outlined">
+                                            @b.Status
+                                        </MudChip>
+                                    </div>
+                                    <div class="caption text-secondary mt-2">
+                                        Paid: Rs @b.PaidAmount.ToString("N0")
+                                    </div>
+                                </MudCardContent>
+                            </MudCard>
+                        }
+                    </div>
+                }
+            </MudTabPanel>
+        </MudTabs>
+    }
+</div>
+
+@code {
+    private List<BookingDto> Bookings { get; set; } = [];
+    private bool IsLoading { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState.IsAuthenticated)
+        {
+            await LoadBookings();
+        }
+    }
+
+    private async Task OpenLogin()
+    {
+        var dialog = await DialogService.ShowAsync<OtpDialog>("Player Login");
+        var result = await dialog.Result;
+        if (result != null && !result.Canceled)
+        {
+            await LoadBookings();
+        }
+    }
+
+    private async Task LoadBookings()
+    {
+        IsLoading = true;
+        try
+        {
+            Bookings = (await Api.GetMyBookingsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Could not load bookings: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task ConfirmCancel(BookingDto booking)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Cancel Booking",
+            "Are you sure you want to cancel this booking? If you cancel within the venue's cancellation window, your advance may be forfeited according to the venue cancellation policy.",
+            yesText: "Yes, Cancel Booking",
+            cancelText: "Keep Booking");
+
+        if (confirmed == true)
+        {
+            try
+            {
+                await Api.CancelBookingAsync(booking.Id, "Player initiated cancellation");
+                Snackbar.Add("Booking cancelled.", Severity.Info);
+                await LoadBookings();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Failed to cancel booking: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private static Color GetStatusColor(string status) => status switch
+    {
+        "CONFIRMED" => Color.Success,
+        "HELD" => Color.Warning,
+        "COMPLETED" => Color.Info,
+        "CANCELLED" => Color.Error,
+        _ => Color.Default
+    };
+
+    private static string FormatDateTime(DateTimeOffset utc)
+    {
+        var zone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kathmandu");
+        var local = TimeZoneInfo.ConvertTime(utc, zone);
+        return local.ToString("ddd, dd MMM yyyy HH:mm");
+    }
+
+    private static string FormatTime(DateTimeOffset utc)
+    {
+        var zone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kathmandu");
+        var local = TimeZoneInfo.ConvertTime(utc, zone);
+        return local.ToString("HH:mm");
+    }
+}

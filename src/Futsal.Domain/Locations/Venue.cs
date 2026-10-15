@@ -24,4 +24,5 @@ public sealed class Venue : IOrganizationScoped
     public Location Location { get; set; } = null!;
     public ICollection<Court> Courts { get; set; } = new List<Court>();
     public ICollection<VenueAmenity> VenueAmenities { get; set; } = new List<VenueAmenity>();
+    public ICollection<VenuePaymentSettings> PaymentSettings { get; set; } = new List<VenuePaymentSettings>();
 }

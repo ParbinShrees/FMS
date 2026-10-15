@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FindCourts" xml:space="preserve">
+    <value>फुटसल कोर्ट खोज्नुहोस्</value>
+  </data>
+  <data name="BookCourt" xml:space="preserve">
+    <value>कोर्ट बुक गर्नुहोस्</value>
+  </data>
+  <data name="SlotHeld" xml:space="preserve">
+    <value>स्लट सुरक्षित गरिएको छ</value>
+  </data>
+  <data name="BeingBooked" xml:space="preserve">
+    <value>बुकिङ हुँदैछ</value>
+  </data>
+  <data name="Booked" xml:space="preserve">
+    <value>बुक गरिएको</value>
+  </data>
+  <data name="Available" xml:space="preserve">
+    <value>उपलब्ध</value>
+  </data>
+  <data name="Blocked" xml:space="preserve">
+    <value>बन्द गरिएको</value>
+  </data>
+  <data name="PayWithEsewa" xml:space="preserve">
+    <value>ईसेवा मार्फत भुक्तानी गर्नुहोस्</value>
+  </data>
+  <data name="BookingConfirmed" xml:space="preserve">
+    <value>बुकिङ पक्का भयो</value>
+  </data>
+  <data name="HoldExpired" xml:space="preserve">
+    <value>समय समाप्त भयो</value>
+  </data>
+  <data name="SlotUnavailable" xml:space="preserve">
+    <value>यो स्लट भर्खरै बुक भयो। अर्को रोज्नुहोस्।</value>
+  </data>
+  <data name="MyBookings" xml:space="preserve">
+    <value>मेरो बुकिङहरू</value>
+  </data>
+  <data name="CancelBooking" xml:space="preserve">
+    <value>बुकिङ रद्द गर्नुहोस्</value>
+  </data>
+  <data name="OnlineBookingDisabled" xml:space="preserve">
+    <value>यस भेन्युका लागि अनलाइन बुकिङ उपलब्ध छैन।</value>
+  </data>
+</root>

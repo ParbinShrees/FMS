@@ -56,3 +56,13 @@
 - SignalR publishing is best effort and occurs after persistence. A durable outbox is not added in this milestone; clients recover missed messages with the version endpoint and periodic grid refetch.
 - The prior checkout contained a blocked-period entity and availability reads but no write endpoints. Minimal Owner/Manager create/remove endpoints were added so blocked-period creation/removal can publish the required real-time events.
 - Redis scale-out is optional and activates only when `Redis:ConnectionString` is configured. Without it, SignalR uses its default single-process lifetime manager.
+
+## Milestone 7: eSewa payments and public booking
+
+- **Payment Gateway Abstraction**: Defined `IPaymentGateway` with `InitiateAsync`, `VerifyAsync`, `CheckStatusAsync` in `Futsal.Application.Abstractions`. `EsewaGateway` implements this in `Futsal.Infrastructure.Payments`. Future gateways (Khalti, Fonepay) can plug in via `IPaymentGatewayResolver` without altering booking orchestration.
+- **eSewa ePay v2**: Signature uses HMAC-SHA256 (Base64) over ordered `signed_field_names` (`total_amount`, `transaction_uuid`, `product_code`, etc.). Verification verifies signature using `CryptographicOperations.FixedTimeEquals` and calls eSewa status check API server-to-server.
+- **Amounts Server-Controlled**: Clients never supply payment amounts. The advance amount is computed strictly on the server from `booking.AdvanceRequired` (or `TotalAmount` if 0).
+- **Encrypted Per-Venue Settings**: Added `venue_payment_settings` with `EncryptedSecret` protected by ASP.NET Core Data Protection (`IVenuePaymentProtector`). Plain secrets are write-only and never exposed in GET responses or serialized DTOs. If a venue has no enabled online payment settings, online hold creation is rejected with `ONLINE_PAYMENT_DISABLED`.
+- **Reconciliation & Late Payment Rule**: `PaymentReconciliationBackgroundService` runs every 2 minutes for `PENDING` payments older than 2 minutes. Under the late payment rule (AGENTS.md §7.6), if eSewa reports `COMPLETE` on an expired hold, the slot is checked: if still free, booking is confirmed late (`Booking.ConfirmLate()`); if taken, payment is marked `NEEDS_REFUND` with an audit log alert for manual staff processing.
+- **Player PWA**: Built in `Futsal.Web` under `/v/...` with `PlayerLayout.razor`, location search/filters, live SignalR slot availability grid, hold countdown, OTP authentication modal, eSewa payment redirect callback, and "Add to Calendar" (.ics) download. App shell cached via service worker with no caching of availability or payment data.
+

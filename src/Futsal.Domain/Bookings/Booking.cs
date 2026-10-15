@@ -30,6 +30,11 @@ public sealed class Booking : IOrganizationScoped
     public static Booking NewStaffConfirmed() => new() { Status = BookingStatus.CONFIRMED };
 
     public void Confirm() { Ensure(BookingStatus.HELD); Status = BookingStatus.CONFIRMED; HoldExpiresAt = null; }
+    public void ConfirmLate()
+    {
+        if (Status is not (BookingStatus.HELD or BookingStatus.EXPIRED)) Invalid("Only a held or expired booking can be confirmed late.");
+        Status = BookingStatus.CONFIRMED; HoldExpiresAt = null;
+    }
     public void Expire() { Ensure(BookingStatus.HELD); Status = BookingStatus.EXPIRED; HoldExpiresAt = null; }
     public void Cancel(DateTimeOffset now, string? reason = null)
     {

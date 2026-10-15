@@ -15,3 +15,70 @@ public sealed record BookingDto(Guid Id, string BookingCode, string Status, Date
     DateTimeOffset? HoldExpiresAt, decimal TotalAmount, decimal DiscountAmount, decimal AdvanceRequired, decimal PaidAmount);
 public sealed record AvailabilityEventDto(Guid VenueId, Guid CourtId, DateTimeOffset StartUtc, DateTimeOffset EndUtc,
     string Status, DateTimeOffset? HoldExpiresAtUtc);
+
+public sealed record PublicVenueDetailDto(
+    Guid Id,
+    string Name,
+    string Slug,
+    string? Address,
+    decimal? Latitude,
+    decimal? Longitude,
+    string? PhotoPlaceholder,
+    int HoldMinutes,
+    int FreeCancelHours,
+    string AdvanceType,
+    decimal AdvanceValue,
+    bool HasOnlinePayment,
+    IReadOnlyList<PublicCourtDto> Courts,
+    IReadOnlyList<string> Amenities);
+
+public sealed record PublicCourtDto(
+    Guid Id,
+    string Name,
+    string? Surface,
+    int SlotMinutes,
+    decimal PricePerSlot);
+
+public sealed record InitiatePaymentRequestDto(Guid BookingId);
+
+public sealed record InitiatePaymentResponseDto(
+    string GatewayUrl,
+    string Method,
+    IReadOnlyDictionary<string, string> FormFields,
+    string TransactionUuid,
+    decimal Amount);
+
+public sealed record VerifyPaymentRequestDto(string Data);
+
+public sealed record VerifyPaymentResponseDto(
+    bool IsSuccess,
+    Guid BookingId,
+    string BookingCode,
+    bool NeedsRefund = false,
+    string? Message = null);
+
+public sealed record VenuePaymentSettingsDto(
+    bool IsEnabled,
+    string MerchantCode,
+    bool HasSecret,
+    DateTimeOffset? UpdatedAt);
+
+public sealed record UpdateVenuePaymentSettingsRequestDto(
+    bool IsEnabled,
+    string MerchantCode,
+    string? SecretKey);
+
+public sealed record NeedsRefundPaymentDto(
+    Guid PaymentId,
+    Guid OrganizationId,
+    Guid? BookingId,
+    string? BookingCode,
+    string? CustomerName,
+    string? CustomerPhone,
+    decimal Amount,
+    string Method,
+    string? GatewayTxnUuid,
+    string? GatewayRef,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? VerifiedAt);
+

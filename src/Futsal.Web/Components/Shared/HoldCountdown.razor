@@ -1,0 +1,51 @@
+@implements IDisposable
+
+<div class="hold-countdown @(RemainingSeconds <= 120 ? "text-danger" : "text-primary")">
+    <MudIcon Icon="@Icons.Material.Filled.Timer" Size="Size.Small" Class="mr-1" />
+    <span>@FormatTime(RemainingSeconds)</span>
+</div>
+
+@code {
+    [Parameter] public DateTimeOffset ExpiresAt { get; set; }
+    [Parameter] public EventCallback OnExpired { get; set; }
+
+    private System.Threading.Timer? _timer;
+    private int RemainingSeconds { get; set; }
+
+    protected override void OnInitialized()
+    {
+        UpdateRemaining();
+        _timer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                UpdateRemaining();
+                StateHasChanged();
+            });
+        }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+    }
+
+    private void UpdateRemaining()
+    {
+        var diff = ExpiresAt - DateTimeOffset.UtcNow;
+        RemainingSeconds = Math.Max(0, (int)diff.TotalSeconds);
+        if (RemainingSeconds <= 0)
+        {
+            _timer?.Dispose();
+            _timer = null;
+            OnExpired.InvokeAsync();
+        }
+    }
+
+    private static string FormatTime(int totalSeconds)
+    {
+        var mins = totalSeconds / 60;
+        var secs = totalSeconds % 60;
+        return $"{mins:D2}:{secs:D2}";
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

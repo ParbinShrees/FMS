@@ -1,0 +1,183 @@
+@page "/admin/settings/payment"
+@layout Futsal.Web.Components.Layout.MainLayout
+@using Futsal.Contracts
+@using Futsal.Web.Services
+@inject ApiClient Api
+@inject ISnackbar Snackbar
+
+<PageTitle>Online Payment Settings — FutsalPro Admin</PageTitle>
+
+<div class="pa-4">
+    <MudText Typo="Typo.h5" Class="font-weight-bold mb-1 text-primary">
+        Online Payment Settings (eSewa)
+    </MudText>
+    <MudText Typo="Typo.body2" Class="text-secondary mb-4">
+        Configure your venue's eSewa merchant account for receiving player advance payments. Secrets are encrypted and never shown once saved.
+    </MudText>
+
+    @if (IsLoadingVenues)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (Venues.Count == 0)
+    {
+        <MudAlert Severity="Severity.Warning">No venues found for your organization.</MudAlert>
+    }
+    else
+    {
+        <MudCard Elevation="2" Style="max-width: 600px;">
+            <MudCardContent Class="pa-4 d-flex flex-column gap-3">
+                @if (Venues.Count > 1)
+                {
+                    <MudSelect T="Guid" Value="SelectedVenueId" ValueChanged="OnVenueChanged" Label="Select Venue" Variant="Variant.Outlined" Dense="true">
+                        @foreach (var v in Venues)
+                        {
+                            <MudSelectItem Value="@v.Id">@v.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+
+                <MudSwitch @bind-Value="IsEnabled" Color="Color.Success" Label="Enable Online Booking via eSewa" />
+
+                <MudTextField @bind-Value="MerchantCode"
+                              Label="eSewa Product / Merchant Code"
+                              Placeholder="e.g. EPAYTEST"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              HelperText="Assigned by eSewa merchant portal" />
+
+                <MudTextField @bind-Value="SecretKey"
+                              Label="Secret Key (HMAC-SHA256)"
+                              Placeholder="@(HasSecret ? "•••••••••••••••• (Leave blank to keep current secret)" : "Enter secret key from eSewa")"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              InputType="InputType.Password"
+                              HelperText="Write-only. Encrypted at rest with Data Protection." />
+
+                @if (UpdatedAt.HasValue)
+                {
+                    <div class="caption text-secondary">
+                        Last updated: @UpdatedAt.Value.ToLocalTime().ToString("g")
+                    </div>
+                }
+            </MudCardContent>
+
+            <MudCardActions Class="pa-4 pt-0 d-flex justify-end">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="@IsSaving"
+                           OnClick="SaveSettings">
+                    @if (IsSaving) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
+                    Save Payment Settings
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    }
+</div>
+
+@code {
+    private List<VenueDto> Venues { get; set; } = [];
+    private Guid SelectedVenueId { get; set; }
+    private bool IsEnabled { get; set; }
+    private string MerchantCode { get; set; } = "";
+    private string? SecretKey { get; set; }
+    private bool HasSecret { get; set; }
+    private DateTimeOffset? UpdatedAt { get; set; }
+
+    private bool IsLoadingVenues { get; set; } = true;
+    private bool IsSaving { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Venues = (await Api.GetVenuesAsync()).ToList();
+            if (Venues.Count > 0)
+            {
+                SelectedVenueId = Venues[0].Id;
+                await LoadVenueSettings(SelectedVenueId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Could not load venues: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsLoadingVenues = false;
+        }
+    }
+
+    private async Task OnVenueChanged(Guid venueId)
+    {
+        SelectedVenueId = venueId;
+        await LoadVenueSettings(venueId);
+    }
+
+    private async Task LoadVenueSettings(Guid venueId)
+    {
+        try
+        {
+            var settings = await Api.GetVenuePaymentSettingsAsync(venueId);
+            if (settings != null)
+            {
+                IsEnabled = settings.IsEnabled;
+                MerchantCode = settings.MerchantCode;
+                HasSecret = settings.HasSecret;
+                UpdatedAt = settings.UpdatedAt;
+                SecretKey = null;
+            }
+            else
+            {
+                IsEnabled = false;
+                MerchantCode = "";
+                HasSecret = false;
+                UpdatedAt = null;
+                SecretKey = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Could not load payment settings: {ex.Message}", Severity.Warning);
+        }
+    }
+
+    private async Task SaveSettings()
+    {
+        if (string.IsNullOrWhiteSpace(MerchantCode))
+        {
+            Snackbar.Add("Merchant Code is required.", Severity.Error);
+            return;
+        }
+
+        if (!HasSecret && string.IsNullOrWhiteSpace(SecretKey))
+        {
+            Snackbar.Add("Secret Key is required for initial configuration.", Severity.Error);
+            return;
+        }
+
+        IsSaving = true;
+        try
+        {
+            var request = new UpdateVenuePaymentSettingsRequestDto(IsEnabled, MerchantCode, SecretKey);
+            var updated = await Api.UpdateVenuePaymentSettingsAsync(SelectedVenueId, request);
+            if (updated != null)
+            {
+                IsEnabled = updated.IsEnabled;
+                MerchantCode = updated.MerchantCode;
+                HasSecret = updated.HasSecret;
+                UpdatedAt = updated.UpdatedAt;
+                SecretKey = null;
+                Snackbar.Add("Online payment settings updated successfully.", Severity.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to update settings: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+}

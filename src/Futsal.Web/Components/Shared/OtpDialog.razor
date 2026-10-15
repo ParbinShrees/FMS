@@ -1,0 +1,135 @@
+@using Futsal.Web.Services
+@inject TokenEndpointClient TokenClient
+@inject BffAuthState AuthState
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.PhoneAndroid" Class="mr-2" />
+            Player Login
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (!OtpSent)
+        {
+            <MudText Typo="Typo.body2" Class="mb-3">
+                Enter your mobile number to receive a one-time verification code.
+            </MudText>
+            <MudTextField @bind-Value="Phone"
+                          Label="Mobile Number"
+                          Placeholder="98XXXXXXXX"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Immediate="true"
+                          HelperText="Nepali 10-digit mobile number" />
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info" Class="mb-3" Dense="true">
+                Code sent to @Phone. Check your messages.
+            </MudAlert>
+            <MudTextField @bind-Value="Code"
+                          Label="6-Digit OTP Code"
+                          Placeholder="123456"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Immediate="true"
+                          MaxLength="6" />
+        }
+
+        @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-3" Dense="true">@ErrorMessage</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        @if (!OtpSent)
+        {
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       Disabled="@(string.IsNullOrWhiteSpace(Phone) || IsBusy)"
+                       OnClick="RequestOtp">
+                @if (IsBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
+                Send Code
+            </MudButton>
+        }
+        else
+        {
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       Disabled="@(string.IsNullOrWhiteSpace(Code) || Code.Length < 6 || IsBusy)"
+                       OnClick="VerifyOtp">
+                @if (IsBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" /> }
+                Verify & Continue
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public EventCallback OnSuccess { get; set; }
+
+    private string Phone { get; set; } = "";
+    private string Code { get; set; } = "";
+    private bool OtpSent { get; set; }
+    private bool IsBusy { get; set; }
+    private string? ErrorMessage { get; set; }
+
+    private async Task RequestOtp()
+    {
+        IsBusy = true;
+        ErrorMessage = null;
+        try
+        {
+            var success = await TokenClient.RequestOtpAsync(Phone, default);
+            if (success)
+            {
+                OtpSent = true;
+            }
+            else
+            {
+                ErrorMessage = "Could not send OTP. Please check the phone number.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task VerifyOtp()
+    {
+        IsBusy = true;
+        ErrorMessage = null;
+        try
+        {
+            var token = await TokenClient.VerifyOtpAsync(Phone, Code, default);
+            if (token != null)
+            {
+                AuthState.Token = token;
+                await OnSuccess.InvokeAsync();
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                ErrorMessage = "Invalid verification code. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

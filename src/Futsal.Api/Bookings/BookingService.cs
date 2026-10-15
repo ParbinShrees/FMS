@@ -34,6 +34,8 @@ public sealed class BookingService(
                 ?? throw new ApiException(404,"NOT_FOUND","Court was not found.");
             var venue=court.Venue;
             if(!court.IsActive||!venue.IsActive||!venue.IsPublic||!await ActiveLocationAsync(venue.LocationId,ct))throw new ApiException(404,"NOT_FOUND","Court is not available for public booking.");
+            var hasOnlinePayment = await db.VenuePaymentSettings.IgnoreQueryFilters().AnyAsync(s => s.VenueId == venue.Id && s.IsEnabled && s.MerchantCode != "", ct);
+            if (!hasOnlinePayment) throw new ApiException(400, "ONLINE_PAYMENT_DISABLED", "Online booking is not available for this venue.");
             await AdvisoryLockAsync("court:"+court.Id,ct);
             var times=await ValidateSlot(request.StartAt,request.EndAt,court,venue,ct);
             var expiredEvents=await ExpireOverlappingHoldsAsync(court.Id,times.Start,times.End,ct);
@@ -187,9 +189,24 @@ public sealed class BookingService(
 
     public async Task ExpireDueHoldsAsync(CancellationToken ct)
     {
-        var now=clock.UtcNow;var holds=await db.Bookings.IgnoreQueryFilters().Where(x=>x.Status==BookingStatus.HELD&&x.HoldExpiresAt<=now).ToListAsync(ct);if(holds.Count==0)return;
-        foreach(var booking in holds)booking.Expire();await db.SaveChangesAsync(ct);
-        foreach(var booking in holds)await notifier.PublishAsync(new BookingEvent("SlotReleased",booking.VenueId,booking.CourtId,booking.StartAt,booking.EndAt,null,booking.Id),ct);
+        var now = clock.UtcNow;
+        var holds = await db.Bookings.IgnoreQueryFilters().Where(x => x.Status == BookingStatus.HELD && x.HoldExpiresAt <= now).ToListAsync(ct);
+        if (holds.Count == 0) return;
+
+        var recentPendingCutoff = now.AddMinutes(-5);
+        var activePendingBookingIds = await db.Payments.IgnoreQueryFilters()
+            .Where(p => p.Status == PaymentStatus.PENDING && p.BookingId != null && p.CreatedAt >= recentPendingCutoff)
+            .Select(p => p.BookingId!.Value)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var holdsToExpire = holds.Where(h => !activePendingBookingIds.Contains(h.Id)).ToList();
+        if (holdsToExpire.Count == 0) return;
+
+        foreach (var booking in holdsToExpire) booking.Expire();
+        await db.SaveChangesAsync(ct);
+        foreach (var booking in holdsToExpire)
+            await notifier.PublishAsync(new BookingEvent("SlotReleased", booking.VenueId, booking.CourtId, booking.StartAt, booking.EndAt, null, booking.Id), ct);
     }
 
     private async Task<(DateTimeOffset Start,DateTimeOffset End)> ValidateSlot(DateTimeOffset startInput,DateTimeOffset endInput,Court court,Venue venue,CancellationToken ct)

@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Futsal.Application\Futsal.Application.csproj" />
     <ProjectReference Include="..\Futsal.Infrastructure\Futsal.Infrastructure.csproj" />
+    <ProjectReference Include="..\Futsal.Contracts\Futsal.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

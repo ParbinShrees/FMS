@@ -1028,6 +1028,62 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.ToTable("venue_amenities", (string)null);
                 });
 
+            modelBuilder.Entity("Futsal.Domain.Locations.VenuePaymentSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("EncryptedSecret")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("encrypted_secret");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
+
+                    b.Property<string>("MerchantCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("merchant_code");
+
+                    b.Property<int>("Method")
+                        .HasColumnType("payment_method")
+                        .HasColumnName("method");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("VenueId", "Method")
+                        .IsUnique();
+
+                    b.ToTable("venue_payment_settings", (string)null);
+                });
+
             modelBuilder.Entity("Futsal.Domain.Bookings.BlockedPeriod", b =>
                 {
                     b.HasOne("Futsal.Domain.Locations.Court", null)
@@ -1217,6 +1273,23 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.Navigation("Venue");
                 });
 
+            modelBuilder.Entity("Futsal.Domain.Locations.VenuePaymentSettings", b =>
+                {
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", "Venue")
+                        .WithMany("PaymentSettings")
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Venue");
+                });
+
             modelBuilder.Entity("Futsal.Domain.Locations.Location", b =>
                 {
                     b.Navigation("Children");
@@ -1225,6 +1298,8 @@ namespace Futsal.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Futsal.Domain.Locations.Venue", b =>
                 {
                     b.Navigation("Courts");
+
+                    b.Navigation("PaymentSettings");
 
                     b.Navigation("VenueAmenities");
                 });
