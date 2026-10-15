@@ -1,0 +1,5 @@
+@inject Futsal.Web.Services.ApiClient Api
+@inject Futsal.Web.Services.BffAuthState Auth
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+@if(demo){<MudAlert Severity="Severity.Warning">@P["DemoBanner"]</MudAlert>}
+@code{bool demo;public sealed record DemoContext(bool IsDemo);protected override async Task OnInitializedAsync(){if(Auth.Token?.OrganizationId!=null)try{demo=(await Api.ManagementGetAsync<DemoContext>("pilot/context"))?.IsDemo??false;}catch{}}}

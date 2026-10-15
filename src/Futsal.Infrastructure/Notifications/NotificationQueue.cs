@@ -117,6 +117,7 @@ public sealed class NotificationQueue(FutsalDbContext db, IClock clock, IDataPro
         var pending = await db.Notifications.IgnoreQueryFilters().Where(x => x.Status == "QUEUED" && x.ScheduledFor <= now && x.Attempts < 5).OrderBy(x => x.ScheduledFor).Take(100).ToListAsync(ct);
         foreach (var n in pending)
         {
+            if(await Futsal.Infrastructure.Payments.DemoSafety.IsDemoAsync(db,n.OrganizationId,ct)){n.Status="FAILED";n.Error="DEMO_SUPPRESSED";n.Payload="";continue;}
             if (n.CustomerId != null && await db.Customers.IgnoreQueryFilters().AnyAsync(x => x.Id == n.CustomerId && x.OrganizationId == n.OrganizationId && x.OptOut, ct)) { n.Status = "FAILED"; n.Error = "OPTED_OUT"; continue; }
             if (n.Template == "reminder" && !await db.Bookings.IgnoreQueryFilters().AnyAsync(x => x.Id == n.BookingId && x.OrganizationId == n.OrganizationId && x.Status == BookingStatus.CONFIRMED && x.StartAt > now, ct)) { n.Status = "FAILED"; n.Error = "BOOKING_INACTIVE"; continue; }
             if (!SmsText.ValidPhone(n.Recipient)) { n.Status = "FAILED"; n.Error = "INVALID_PHONE"; continue; }

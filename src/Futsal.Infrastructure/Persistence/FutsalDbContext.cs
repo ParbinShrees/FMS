@@ -1,4 +1,5 @@
 using Futsal.Domain.Notifications;
+using Futsal.Domain.Pilot;
 using Futsal.Application.Abstractions;
 using Futsal.Domain.Identity;
 using Futsal.Domain.Locations;
@@ -11,15 +12,21 @@ namespace Futsal.Infrastructure.Persistence;
 
 public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, ICurrentUser currentUser, IClock clock) : DbContext(options)
 {
+    private static readonly NpgsqlNullNameTranslator PostgresNames = new();
     public static void ConfigurePostgres(Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.NpgsqlDbContextOptionsBuilder options)
     {
-        var translator = new NpgsqlNullNameTranslator();
+        var translator = PostgresNames;
         options.MapEnum<OrganizationRole>("member_role", nameTranslator: translator);
         options.MapEnum<BookingStatus>("booking_status", nameTranslator: translator);
         options.MapEnum<BookingSource>("booking_source", nameTranslator: translator);
         options.MapEnum<PaymentMethod>("payment_method", nameTranslator: translator);
         options.MapEnum<PaymentStatus>("payment_status", nameTranslator: translator);
     }
+    public DbSet<OnboardingState> OnboardingStates=>Set<OnboardingState>();
+    public DbSet<StaffInvite> StaffInvites=>Set<StaffInvite>();
+    public DbSet<PilotFeedback> PilotFeedback=>Set<PilotFeedback>();
+    public DbSet<PilotError> PilotErrors=>Set<PilotError>();
+    public DbSet<BookingWatch> BookingWatches=>Set<BookingWatch>();
     public DbSet<Subscription> Subscriptions=>Set<Subscription>();
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<Organization> Organizations => Set<Organization>();
@@ -47,6 +54,7 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
     public DbSet<SmsUsage> SmsUsage => Set<SmsUsage>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ConfigurePilot(modelBuilder);
         modelBuilder.Entity<Subscription>(e=>{e.ToTable("subscriptions");e.HasKey(x=>x.Id);e.HasIndex(x=>x.OrganizationId).IsUnique();e.HasQueryFilter(x=>currentUser.IsSuperAdmin||(currentUser.OrganizationId!=null&&x.OrganizationId==currentUser.OrganizationId));foreach(var prop in e.Metadata.GetProperties())prop.SetColumnName(new NpgsqlSnakeCaseNameTranslator().TranslateMemberName(prop.Name));});
         modelBuilder.Entity<RefreshToken>().Property(x=>x.FamilyId).HasColumnName("family_id");
         modelBuilder.Entity<AppUser>().Property(x=>x.TotpEnabled).HasColumnName("totp_enabled");
@@ -459,6 +467,20 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
         model.Entity<SmsUsage>(e => { e.ToTable("sms_usage"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.VenueId, x.Day }).IsUnique(); e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId)); });
         foreach (var type in new[] { typeof(Notification), typeof(NotificationSettings), typeof(NotificationTemplate), typeof(SmsUsage) })
             foreach (var property in model.Entity(type).Metadata.GetProperties()) property.SetColumnName(new NpgsqlSnakeCaseNameTranslator().TranslateMemberName(property.Name));
+    }
+
+    private void ConfigurePilot(ModelBuilder model)
+    {
+        model.Entity<Organization>().Property(x=>x.IsDemo).HasColumnName("is_demo");
+        PilotTable<OnboardingState>(model,"onboarding_states");PilotTable<StaffInvite>(model,"staff_invites");PilotTable<PilotFeedback>(model,"pilot_feedback");PilotTable<PilotError>(model,"pilot_errors");PilotTable<BookingWatch>(model,"booking_watches");
+        model.Entity<OnboardingState>().HasIndex(x=>x.OrganizationId).IsUnique();model.Entity<BookingWatch>().HasIndex(x=>x.OrganizationId).IsUnique();model.Entity<StaffInvite>().HasIndex(x=>x.TokenHash).IsUnique();model.Entity<PilotFeedback>().HasIndex(x=>new{x.OrganizationId,x.CreatedAt});model.Entity<PilotError>().HasIndex(x=>new{x.OrganizationId,x.CreatedAt});
+        model.Entity<PilotFeedback>().Property(x=>x.Text).HasMaxLength(4000);model.Entity<PilotFeedback>().Property(x=>x.PageUrl).HasMaxLength(500);
+    }
+    private void PilotTable<T>(ModelBuilder model,string table) where T:PilotRecord
+    {
+        var e=model.Entity<T>();e.HasBaseType((Type?)null);e.ToTable(table);e.HasKey(x=>x.Id);e.HasOne<Organization>().WithMany().HasForeignKey(x=>x.OrganizationId).OnDelete(DeleteBehavior.Cascade);
+        e.HasQueryFilter(x=>currentUser.IsSuperAdmin||(currentUser.OrganizationId!=null&&x.OrganizationId==currentUser.OrganizationId));
+        foreach(var p in e.Metadata.GetProperties())p.SetColumnName(new NpgsqlSnakeCaseNameTranslator().TranslateMemberName(p.Name));
     }
 
     private static string RoleName(OrganizationRole role) => role switch

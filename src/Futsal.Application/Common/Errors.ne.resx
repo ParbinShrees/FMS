@@ -1,1 +1,282 @@
-<root><resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader><data name="ACCOUNT_LOCKED" xml:space="preserve"><value>खाता केही समयका लागि बन्द छ। पछि प्रयास गर्नुहोस्।</value></data><data name="ACTIVE" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BLOCKED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BOOKED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BOOKING_CANCELLED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BOOKING_COMPLETED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BOOKING_CREATED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BOOKING_HELD" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BOOKING_NO_SHOW" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BOOKING_RELEASED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="BOOKING_RESCHEDULED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="CANCELLED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="COMPLETED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="CONCURRENCY_CONFLICT" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="CUSTOMER_ANONYMIZED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="CUSTOMER_EXPORTED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="CUSTOMER_LOGIN_NOT_ALLOWED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="CUSTOMER_LOGIN_SUCCEEDED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="DENY" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="DUPLICATE_SLUG" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="EPAYTEST" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="FAILED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="FIXED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="FORBIDDEN" xml:space="preserve"><value>यो कार्य गर्न अनुमति छैन।</value></data><data name="FREE" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="HEAD" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="HELD" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="HOLD_EXPIRED" xml:space="preserve"><value>होल्ड समाप्त भयो। अर्को समय छान्नुहोस्।</value></data><data name="IDEMPOTENCY_CONFLICT" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="INTERNAL_ERROR" xml:space="preserve"><value>अनपेक्षित त्रुटि भयो।</value></data><data name="INVALID_COORDINATES" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="INVALID_CREDENTIALS" xml:space="preserve"><value>इमेल, फोन वा पासवर्ड मिलेन।</value></data><data name="INVALID_PARENT" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="INVALID_REFRESH_TOKEN" xml:space="preserve"><value>सत्र समाप्त भयो। फेरि साइन इन गर्नुहोस्।</value></data><data name="LOGIN_FAILED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="LOGIN_SUCCEEDED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="NOT_FOUND" xml:space="preserve"><value>विवरण भेटिएन।</value></data><data name="NO_PREVIOUS_BASE" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="NO_SHOW" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="ONLINE_PAYMENT_DISABLED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="OPTIONS" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="ORGANIZATION_REQUIRED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="OTP_INVALID" xml:space="preserve"><value>प्रमाणीकरण कोड अमान्य छ वा म्याद सकियो।</value></data><data name="PAYMENT_FAILED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="PAYMENT_INITIATED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="PAYMENT_NEEDS_REFUND" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="PAYMENT_RECORDED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="PAYMENT_REFUNDED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="PAYMENT_SETTINGS_UPDATED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="PAYMENT_VERIFICATION_FAILED" xml:space="preserve"><value>भुक्तानी पुष्टि भएन। रकम काटिएको भए स्थलमा सम्पर्क गर्नुहोस्।</value></data><data name="PAYMENT_VERIFIED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="PAYMENT_VERIFIED_LATE_CONFIRMED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="QUEUED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="RATE_LIMITED" xml:space="preserve"><value>धेरै अनुरोध भए। पछि प्रयास गर्नुहोस्।</value></data><data name="REFRESH_TOKEN_REUSE" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="REFRESH_TOKEN_REUSED" xml:space="preserve"><value>सत्र पुनः प्रयोग भएको भेटियो। फेरि साइन इन गर्नुहोस्।</value></data><data name="REPORT_EXPORTED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="REQUEST_TIMEOUT" xml:space="preserve"><value>अनुरोधको समय सकियो। फेरि प्रयास गर्नुहोस्।</value></data><data name="ROLE_ASSIGNED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="SLOT_UNAVAILABLE" xml:space="preserve"><value>यो समय अरूले बुक गरे। अर्को समय छान्नुहोस्।</value></data><data name="SUBSCRIPTION_INACTIVE" xml:space="preserve"><value>संस्थामा विवरण हेर्न मात्र मिल्छ। नवीकरणका लागि प्लेटफर्ममा सम्पर्क गर्नुहोस्।</value></data><data name="SUBSCRIPTION_UPDATED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="SUSPENDED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="TOKEN_REVOKED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="TOKEN_ROTATED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="TOO_MANY_HOLDS" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="TWO_FACTOR_ENABLED" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="TWO_FACTOR_INVALID" xml:space="preserve"><value>अमान्य प्रमाणीकरण कोड।</value></data><data name="TWO_FACTOR_REQUIRED" xml:space="preserve"><value>मान्य प्रमाणीकरण वा रिकभरी कोड आवश्यक छ।</value></data><data name="UNAUTHORIZED" xml:space="preserve"><value>जारी राख्न साइन इन गर्नुहोस्।</value></data><data name="UNKNOWN_AMENITY" xml:space="preserve"><value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value></data><data name="VALIDATION_FAILED" xml:space="preserve"><value>पठाइएका विवरण जाँच गर्नुहोस्।</value></data></root>
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="ACCOUNT_LOCKED" xml:space="preserve">
+    <value>खाता केही समयका लागि बन्द छ। पछि प्रयास गर्नुहोस्।</value>
+  </data>
+  <data name="ACTIVE" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BLOCKED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_CANCELLED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_COMPLETED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_CREATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_HELD" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_NO_SHOW" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_RELEASED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_RESCHEDULED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CANCELLED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="COMPLETED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CONCURRENCY_CONFLICT" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CUSTOMER_ANONYMIZED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CUSTOMER_EXPORTED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_NOT_ALLOWED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="DENY" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="DUPLICATE_SLUG" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="EPAYTEST" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="FAILED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="FIXED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="FORBIDDEN" xml:space="preserve">
+    <value>यो कार्य गर्न अनुमति छैन।</value>
+  </data>
+  <data name="FREE" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="HEAD" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="HELD" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="HOLD_EXPIRED" xml:space="preserve">
+    <value>होल्ड समाप्त भयो। अर्को समय छान्नुहोस्।</value>
+  </data>
+  <data name="IDEMPOTENCY_CONFLICT" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="INTERNAL_ERROR" xml:space="preserve">
+    <value>अनपेक्षित त्रुटि भयो।</value>
+  </data>
+  <data name="INVALID_COORDINATES" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="INVALID_CREDENTIALS" xml:space="preserve">
+    <value>इमेल, फोन वा पासवर्ड मिलेन।</value>
+  </data>
+  <data name="INVALID_PARENT" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="INVALID_REFRESH_TOKEN" xml:space="preserve">
+    <value>सत्र समाप्त भयो। फेरि साइन इन गर्नुहोस्।</value>
+  </data>
+  <data name="LOGIN_FAILED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="NOT_FOUND" xml:space="preserve">
+    <value>विवरण भेटिएन।</value>
+  </data>
+  <data name="NO_PREVIOUS_BASE" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="NO_SHOW" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="ONLINE_PAYMENT_DISABLED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="OPTIONS" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="ORGANIZATION_REQUIRED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="OTP_INVALID" xml:space="preserve">
+    <value>प्रमाणीकरण कोड अमान्य छ वा म्याद सकियो।</value>
+  </data>
+  <data name="PAYMENT_FAILED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_INITIATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_NEEDS_REFUND" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_RECORDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_REFUNDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_SETTINGS_UPDATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_VERIFICATION_FAILED" xml:space="preserve">
+    <value>भुक्तानी पुष्टि भएन। रकम काटिएको भए स्थलमा सम्पर्क गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_VERIFIED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_VERIFIED_LATE_CONFIRMED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="QUEUED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="RATE_LIMITED" xml:space="preserve">
+    <value>धेरै अनुरोध भए। पछि प्रयास गर्नुहोस्।</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSE" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSED" xml:space="preserve">
+    <value>सत्र पुनः प्रयोग भएको भेटियो। फेरि साइन इन गर्नुहोस्।</value>
+  </data>
+  <data name="REPORT_EXPORTED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="REQUEST_TIMEOUT" xml:space="preserve">
+    <value>अनुरोधको समय सकियो। फेरि प्रयास गर्नुहोस्।</value>
+  </data>
+  <data name="ROLE_ASSIGNED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="SLOT_UNAVAILABLE" xml:space="preserve">
+    <value>यो समय अरूले बुक गरे। अर्को समय छान्नुहोस्।</value>
+  </data>
+  <data name="SUBSCRIPTION_INACTIVE" xml:space="preserve">
+    <value>संस्थामा विवरण हेर्न मात्र मिल्छ। नवीकरणका लागि प्लेटफर्ममा सम्पर्क गर्नुहोस्।</value>
+  </data>
+  <data name="SUBSCRIPTION_UPDATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="SUSPENDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TOKEN_REVOKED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TOKEN_ROTATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TOO_MANY_HOLDS" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TWO_FACTOR_ENABLED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TWO_FACTOR_INVALID" xml:space="preserve">
+    <value>अमान्य प्रमाणीकरण कोड।</value>
+  </data>
+  <data name="TWO_FACTOR_REQUIRED" xml:space="preserve">
+    <value>मान्य प्रमाणीकरण वा रिकभरी कोड आवश्यक छ।</value>
+  </data>
+  <data name="UNAUTHORIZED" xml:space="preserve">
+    <value>जारी राख्न साइन इन गर्नुहोस्।</value>
+  </data>
+  <data name="UNKNOWN_AMENITY" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="VALIDATION_FAILED" xml:space="preserve">
+    <value>पठाइएका विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="INVALID_PHONE">
+    <value>मान्य नेपाली मोबाइल नम्बर (+९७७९...) प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="DUPLICATE_PHONE">
+    <value>फोन यस फाइल वा संस्थामा पहिल्यै छ।</value>
+  </data>
+  <data name="FORMULA_CELL">
+    <value>स्प्रेडसिट सूत्र भएको कोष अस्वीकार भयो।</value>
+  </data>
+  <data name="INVALID_COLUMNS">
+    <value>स्तम्भ सङ्ख्या मिलेन।</value>
+  </data>
+  <data name="INVALID_NAME">
+    <value>१–१६० अक्षरको नाम चाहिन्छ।</value>
+  </data>
+  <data name="INVALID_TIME">
+    <value>Z वा स्पष्ट समय अन्तरसहित आईएसओ समय प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="FUTURE_BOOKING_REQUIRED">
+    <value>सुरुपछि अन्त्य हुने भविष्यका बुकिङ मात्र आयात हुन्छ।</value>
+  </data>
+  <data name="INVALID_AMOUNT">
+    <value>शून्य वा सकारात्मक र बढीमा दुई दशमलवको रकम प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="COURT_NOT_FOUND">
+    <value>सही र अद्वितीय कोर्ट नाम वा परिचय प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="IMPORT_TOO_LARGE">
+    <value>सीएसभी ४८ केबी, २०० पङ्क्ति वा कोष सीमाभन्दा ठूलो छ।</value>
+  </data>
+  <data name="INVALID_CSV">
+    <value>सीएसभी उद्धरण वा ढाँचा मिलेन।</value>
+  </data>
+  <data name="INVALID_HEADERS">
+    <value>शीर्षक नमुनासँग मिल्नुपर्छ।</value>
+  </data>
+  <data name="INVALID_SCREENSHOT">
+    <value>सीमाभित्रको मान्य आरजीबी/आरजीबीए पीएनजी छान्नुहोस्।</value>
+  </data>
+  <data name="ONBOARDING_COMPLETE">
+    <value>सेटअप पूरा छ। परिवर्तनका लागि स्थल सेटिङ प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="SLUG_TAKEN">
+    <value>यो सार्वजनिक नाम प्रयोग भइसकेको छ।</value>
+  </data>
+  <data name="INVITE_INVALID">
+    <value>निमन्त्रणा अमान्य, प्रयोग भइसकेको वा म्याद सकिएको छ।</value>
+  </data>
+  <data name="INVITE_EXISTING_ACCOUNT">
+    <value>यो इमेलको खाता पहिल्यै छ। पहुँचका लागि प्लेटफर्म प्रशासकसँग सम्पर्क गर्नुहोस्।</value>
+  </data>
+  <data name="DEMO_GATEWAY_DISABLED">
+    <value>डेमो संस्थामा वास्तविक अनलाइन भुक्तानी बन्द छ।</value>
+  </data>
+  <data name="COURT_LIMIT_REACHED">
+    <value>योजनाको कोर्ट सीमा पुग्यो।</value>
+  </data>
+</root>

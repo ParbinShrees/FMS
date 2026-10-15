@@ -1,0 +1,6 @@
+@page "/admin/pilot/weekly/{VenueId:guid}"
+@using Futsal.Contracts
+@inject Futsal.Web.Services.ApiClient Api
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+<h1>@P["Weekly"]</h1>@if(summary!=null){<h2>@summary.VenueName · @summary.Name</h2><PilotDays Summary="summary"/><p>@P["FailedPayments"]: @summary.FailedPayments · @P["SmsSent"]: @summary.SmsSent · @P["SmsFailed"]: @summary.SmsFailed</p>}@if(error){<MudAlert>@P["Failure"]</MudAlert>}
+@code{[Parameter]public Guid VenueId{get;set;}PilotSummary? summary;bool error;protected override async Task OnParametersSetAsync(){try{summary=(await Api.ManagementGetAsync<List<PilotSummary>>($"pilot/weekly/{VenueId}"))?.SingleOrDefault();}catch{error=true;}}}

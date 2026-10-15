@@ -68,6 +68,15 @@ public sealed class BookingService(
         catch{await transaction.RollbackAsync(ct);throw;}
     }
 
+    public async Task<PriceBreakdown> PreviewStaffBookingAsync(StaffBookingRequest request,CancellationToken ct)
+    {
+        var org=current.OrganizationId??throw new UnauthorizedAccessException();
+        var court=await db.Courts.SingleOrDefaultAsync(x=>x.Id==request.CourtId&&x.OrganizationId==org,ct)??throw new ApiException(404,"NOT_FOUND","NOT_FOUND");
+        var venue=await db.Venues.SingleAsync(x=>x.Id==court.VenueId,ct);var times=await ValidateSlot(request.StartAt,request.EndAt,court,venue,ct);
+        var phone=NepaliPhone.Normalize(request.Phone);var customer=await db.Customers.SingleOrDefaultAsync(x=>x.Phone==phone,ct);var amount=await pricing.CalculateAsync(court,times.Start,times.End,venue,customer,ct);
+        if(request.InitialPayment<0||request.InitialPayment>amount.Total)throw new ApiException(400,"INVALID_AMOUNT","INVALID_AMOUNT");return amount;
+    }
+
     public async Task<BookingResponse> CreateStaffBookingAsync(StaffBookingRequest request,string idempotencyKey,IPAddress? ip,CancellationToken ct)
     {
         var userId=current.UserId??throw new UnauthorizedAccessException();var orgId=current.OrganizationId??throw new UnauthorizedAccessException();var endpoint="POST:/api/v1/staff/bookings";var requestHash=Hash(request);

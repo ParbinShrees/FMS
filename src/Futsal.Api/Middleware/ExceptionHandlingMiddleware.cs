@@ -26,7 +26,10 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
                 _ => (StatusCodes.Status500InternalServerError, "INTERNAL_ERROR", "An unexpected error occurred.")
             };
             if (status >= 500)
+            {
                 logger.LogError(exception, "Unhandled request exception. TraceId: {TraceId}", context.TraceIdentifier);
+                await Futsal.Api.Pilot.PilotErrorCapture.RecordAsync(context);
+            }
 
             context.Response.Clear();
             context.Response.StatusCode = status;

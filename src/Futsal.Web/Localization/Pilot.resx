@@ -1,0 +1,699 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="Onboarding">
+    <value>Set up your venue</value>
+  </data>
+  <data name="Import">
+    <value>Import records</value>
+  </data>
+  <data name="Help">
+    <value>Help</value>
+  </data>
+  <data name="Feedback">
+    <value>Feedback</value>
+  </data>
+  <data name="PilotDashboard">
+    <value>Pilot monitoring</value>
+  </data>
+  <data name="Loading">
+    <value>Loading</value>
+  </data>
+  <data name="Progress">
+    <value>Progress</value>
+  </data>
+  <data name="Step">
+    <value>Step</value>
+  </data>
+  <data name="Profile">
+    <value>Venue profile</value>
+  </data>
+  <data name="Courts">
+    <value>Courts</value>
+  </data>
+  <data name="Hours">
+    <value>Weekly hours</value>
+  </data>
+  <data name="Pricing">
+    <value>Pricing rules</value>
+  </data>
+  <data name="Policies">
+    <value>Cancellation and advance</value>
+  </data>
+  <data name="PaymentSettings">
+    <value>Payment settings</value>
+  </data>
+  <data name="Staff">
+    <value>Staff invites</value>
+  </data>
+  <data name="VenueName">
+    <value>Venue name</value>
+  </data>
+  <data name="Slug">
+    <value>Public URL name (lowercase letters, digits, hyphens)</value>
+  </data>
+  <data name="Location">
+    <value>City or area</value>
+  </data>
+  <data name="Address">
+    <value>Street address</value>
+  </data>
+  <data name="Court">
+    <value>Court name</value>
+  </data>
+  <data name="DefaultPrice">
+    <value>Price per slot (NPR)</value>
+  </data>
+  <data name="SlotMinutes">
+    <value>Slot length (minutes)</value>
+  </data>
+  <data name="Remove">
+    <value>Remove</value>
+  </data>
+  <data name="AddCourt">
+    <value>Add court</value>
+  </data>
+  <data name="Open">
+    <value>Opens / starts</value>
+  </data>
+  <data name="Close">
+    <value>Closes / ends</value>
+  </data>
+  <data name="PriceHelp">
+    <value>Default prices apply without rules. Add optional peak or weekend overrides.</value>
+  </data>
+  <data name="CourtIndex">
+    <value>Court number (first court = 0)</value>
+  </data>
+  <data name="RuleName">
+    <value>Rule name</value>
+  </data>
+  <data name="Weekdays">
+    <value>Weekdays: 0 Sunday to 6 Saturday, comma separated</value>
+  </data>
+  <data name="Priority">
+    <value>Priority (higher wins)</value>
+  </data>
+  <data name="AddRule">
+    <value>Add price rule</value>
+  </data>
+  <data name="Cancellation">
+    <value>Free cancellation hours before start</value>
+  </data>
+  <data name="AdvanceType">
+    <value>Advance type</value>
+  </data>
+  <data name="Percent">
+    <value>Percentage</value>
+  </data>
+  <data name="FixedAdvance">
+    <value>Fixed NPR</value>
+  </data>
+  <data name="AdvanceValue">
+    <value>Advance amount / percentage</value>
+  </data>
+  <data name="ConfigurePayment">
+    <value>Enable eSewa after setup</value>
+  </data>
+  <data name="Merchant">
+    <value>eSewa merchant code</value>
+  </data>
+  <data name="Secret">
+    <value>eSewa secret key</value>
+  </data>
+  <data name="SecretNotSaved">
+    <value>Secrets are saved securely only at finish. Re-enter after resuming.</value>
+  </data>
+  <data name="Email">
+    <value>Email</value>
+  </data>
+  <data name="Role">
+    <value>Role</value>
+  </data>
+  <data name="Cashier">
+    <value>Cashier</value>
+  </data>
+  <data name="Manager">
+    <value>Manager</value>
+  </data>
+  <data name="AddStaff">
+    <value>Add staff invite</value>
+  </data>
+  <data name="InviteHelp">
+    <value>Optional. Copy private links after finishing and share directly with staff. Links expire in 7 days.</value>
+  </data>
+  <data name="Back">
+    <value>Back</value>
+  </data>
+  <data name="Next">
+    <value>Next</value>
+  </data>
+  <data name="SaveResume">
+    <value>Save and resume later</value>
+  </data>
+  <data name="Finish">
+    <value>Finish setup</value>
+  </data>
+  <data name="Ready">
+    <value>Ready to take bookings</value>
+  </data>
+  <data name="ProfileReady">
+    <value>Venue profile saved</value>
+  </data>
+  <data name="CourtsReady">
+    <value>Courts configured</value>
+  </data>
+  <data name="HoursReady">
+    <value>Weekly hours configured</value>
+  </data>
+  <data name="PricingReady">
+    <value>Server pricing configured</value>
+  </data>
+  <data name="PolicyReady">
+    <value>Cancellation and advance configured</value>
+  </data>
+  <data name="PaymentOptional">
+    <value>Online payment is optional. Cash bookings work without eSewa.</value>
+  </data>
+  <data name="InvitesReady">
+    <value>Requested staff invites prepared</value>
+  </data>
+  <data name="Schedule">
+    <value>Open schedule</value>
+  </data>
+  <data name="ImportHelp">
+    <value>UTF-8 CSV, maximum 48 KB / 200 rows. Preview first. Future times need Z or +05:45. Paid amount is cash. Server prices apply; conflicts are rechecked on import.</value>
+  </data>
+  <data name="Kind">
+    <value>Record type</value>
+  </data>
+  <data name="Customers">
+    <value>Customers</value>
+  </data>
+  <data name="Bookings">
+    <value>Bookings</value>
+  </data>
+  <data name="EnglishTemplate">
+    <value>English CSV template</value>
+  </data>
+  <data name="NepaliTemplate">
+    <value>Nepali CSV template</value>
+  </data>
+  <data name="CsvFile">
+    <value>Choose CSV file</value>
+  </data>
+  <data name="Preview">
+    <value>Preview</value>
+  </data>
+  <data name="ImportValid">
+    <value>Import valid rows</value>
+  </data>
+  <data name="Row">
+    <value>CSV row</value>
+  </data>
+  <data name="Data">
+    <value>Data</value>
+  </data>
+  <data name="Status">
+    <value>Status</value>
+  </data>
+  <data name="Reason">
+    <value>Reason skipped</value>
+  </data>
+  <data name="VALID">
+    <value>Valid (preview)</value>
+  </data>
+  <data name="IMPORTED">
+    <value>Imported</value>
+  </data>
+  <data name="SKIPPED">
+    <value>Skipped</value>
+  </data>
+  <data name="CustomerHeaderNe">
+    <value>नाम,फोन</value>
+  </data>
+  <data name="BookingHeaderNe">
+    <value>कोर्ट,सुरु,अन्त्य,ग्राहक फोन,तिरेको रकम</value>
+  </data>
+  <data name="Category">
+    <value>Category</value>
+  </data>
+  <data name="bug">
+    <value>Bug</value>
+  </data>
+  <data name="confusing">
+    <value>Confusing</value>
+  </data>
+  <data name="idea">
+    <value>Idea</value>
+  </data>
+  <data name="FeedbackText">
+    <value>What happened? (up to 4,000 characters)</value>
+  </data>
+  <data name="ScreenshotHint">
+    <value>Optional RGB/RGBA PNG: up to 192 KB, 2 megapixels</value>
+  </data>
+  <data name="Send">
+    <value>Send feedback</value>
+  </data>
+  <data name="FeedbackSaved">
+    <value>Feedback saved. Thank you.</value>
+  </data>
+  <data name="DownloadScreenshot">
+    <value>Download private screenshot</value>
+  </data>
+  <data name="NEW">
+    <value>New</value>
+  </data>
+  <data name="SEEN">
+    <value>Seen</value>
+  </data>
+  <data name="DONE">
+    <value>Done</value>
+  </data>
+  <data name="Refresh">
+    <value>Refresh</value>
+  </data>
+  <data name="CreateDemo">
+    <value>Create DEMO organization</value>
+  </data>
+  <data name="ResetDemo">
+    <value>Reset DEMO sample bookings and customers</value>
+  </data>
+  <data name="DEMO">
+    <value>DEMO — fictional data</value>
+  </data>
+  <data name="CriticalOverlap">
+    <value>CRITICAL: overlapping active bookings. Investigate immediately.</value>
+  </data>
+  <data name="WatchPending">
+    <value>Daily watchdog check pending.</value>
+  </data>
+  <data name="WatchClear">
+    <value>Daily watchdog: zero overlaps</value>
+  </data>
+  <data name="FailedPayments">
+    <value>Failed payments (7 days)</value>
+  </data>
+  <data name="SmsSent">
+    <value>SMS sent (7 days)</value>
+  </data>
+  <data name="SmsFailed">
+    <value>SMS failed (7 days)</value>
+  </data>
+  <data name="Errors24">
+    <value>Server errors (24 hours)</value>
+  </data>
+  <data name="LastLogin">
+    <value>Last staff login</value>
+  </data>
+  <data name="Never">
+    <value>No login recorded</value>
+  </data>
+  <data name="Weekly">
+    <value>Weekly venue summary</value>
+  </data>
+  <data name="Day">
+    <value>Nepal date</value>
+  </data>
+  <data name="OnlineShare">
+    <value>Online count / share</value>
+  </data>
+  <data name="StaffShare">
+    <value>Staff count / share</value>
+  </data>
+  <data name="NoShows">
+    <value>No-shows</value>
+  </data>
+  <data name="Cancellations">
+    <value>Cancellations</value>
+  </data>
+  <data name="AcceptInvite">
+    <value>Accept staff invitation</value>
+  </data>
+  <data name="FullName">
+    <value>Full name</value>
+  </data>
+  <data name="Password">
+    <value>Password</value>
+  </data>
+  <data name="PasswordHint">
+    <value>Use at least 10 characters; avoid common passwords.</value>
+  </data>
+  <data name="InviteAccepted">
+    <value>Account created. Sign in with your invited email and password.</value>
+  </data>
+  <data name="Failure">
+    <value>Could not complete the action. Try again.</value>
+  </data>
+  <data name="Day0">
+    <value>Sunday</value>
+  </data>
+  <data name="Day1">
+    <value>Monday</value>
+  </data>
+  <data name="Day2">
+    <value>Tuesday</value>
+  </data>
+  <data name="Day3">
+    <value>Wednesday</value>
+  </data>
+  <data name="Day4">
+    <value>Thursday</value>
+  </data>
+  <data name="Day5">
+    <value>Friday</value>
+  </data>
+  <data name="Day6">
+    <value>Saturday</value>
+  </data>
+  <data name="FORBIDDEN">
+    <value>You do not have permission.</value>
+  </data>
+  <data name="VALIDATION_FAILED">
+    <value>Review the required fields and values.</value>
+  </data>
+  <data name="INVALID_PHONE">
+    <value>Use a valid Nepali mobile number (+9779...).</value>
+  </data>
+  <data name="DUPLICATE_PHONE">
+    <value>Phone already exists in this file or organization.</value>
+  </data>
+  <data name="FORMULA_CELL">
+    <value>Spreadsheet formula cell rejected.</value>
+  </data>
+  <data name="INVALID_COLUMNS">
+    <value>Wrong number of columns.</value>
+  </data>
+  <data name="INVALID_NAME">
+    <value>A name of 1–160 characters is required.</value>
+  </data>
+  <data name="INVALID_TIME">
+    <value>Use an ISO time with Z or an explicit offset.</value>
+  </data>
+  <data name="FUTURE_BOOKING_REQUIRED">
+    <value>Only future bookings with end after start can be imported.</value>
+  </data>
+  <data name="INVALID_AMOUNT">
+    <value>Use nonnegative NPR with at most two decimals.</value>
+  </data>
+  <data name="COURT_NOT_FOUND">
+    <value>Use an exact, unique court name or court ID.</value>
+  </data>
+  <data name="SLOT_UNAVAILABLE">
+    <value>Slot conflicts with a booking or closure.</value>
+  </data>
+  <data name="IMPORT_TOO_LARGE">
+    <value>CSV exceeds 48 KB, 200 rows, or a cell limit.</value>
+  </data>
+  <data name="INVALID_CSV">
+    <value>Invalid CSV quotes or format.</value>
+  </data>
+  <data name="INVALID_HEADERS">
+    <value>Headers must match a supplied template.</value>
+  </data>
+  <data name="INVALID_SCREENSHOT">
+    <value>Choose a valid RGB/RGBA PNG within the size limits.</value>
+  </data>
+  <data name="ONBOARDING_COMPLETE">
+    <value>Setup is complete. Use venue settings for changes.</value>
+  </data>
+  <data name="SLUG_TAKEN">
+    <value>This public address name is already in use.</value>
+  </data>
+  <data name="INVITE_INVALID">
+    <value>Invitation is invalid, used, or expired.</value>
+  </data>
+  <data name="INVITE_EXISTING_ACCOUNT">
+    <value>Email already has an account. Ask the platform administrator for access.</value>
+  </data>
+  <data name="DEMO_GATEWAY_DISABLED">
+    <value>Real online payments are disabled for DEMO organizations.</value>
+  </data>
+  <data name="COURT_LIMIT_REACHED">
+    <value>The plan court limit has been reached.</value>
+  </data>
+  <data name="WalkIn">
+    <value>Book a walk-in</value>
+  </data>
+  <data name="WalkInGuide">
+    <value>Open Schedule and choose a free court slot. Enter name, phone and duration. Review the server price and save. If the slot was taken, choose another.</value>
+  </data>
+  <data name="TakePayment">
+    <value>Take a payment</value>
+  </data>
+  <data name="TakePaymentGuide">
+    <value>Open the booking. Choose Record payment, enter the amount received and method, then save. Check the receipt and remaining due. Record refunds separately; never edit received payments.</value>
+  </data>
+  <data name="CancelBooking">
+    <value>Cancel a booking</value>
+  </data>
+  <data name="CancelBookingGuide">
+    <value>Open the booking, choose Cancel, and enter a reason. Check the policy: late cancellation may forfeit the advance. Record an agreed refund separately. Check the live schedule updates.</value>
+  </data>
+  <data name="BlockCourt">
+    <value>Block a court</value>
+  </data>
+  <data name="BlockCourtGuide">
+    <value>In Courts / hours choose a court and create a blocked period with a reason and start/end time. Resolve existing active bookings first; overlapping closures are rejected.</value>
+  </data>
+  <data name="DailyReport">
+    <value>Read the daily report</value>
+  </data>
+  <data name="DailyReportGuide">
+    <value>Open Reports, select a venue and Nepal date, then load Daily. Compare income by payment method with cash and dues. Refunds are negative entries. Export CSV or PDF. Owner or Manager access is required.</value>
+  </data>
+  <data name="DemoAccessHint">
+    <value>Private DEMO owner login, shown once. Use a private browser window. Keep these credentials private.</value>
+  </data>
+  <data name="DemoPublic">
+    <value>Open DEMO booking page</value>
+  </data>
+  <data name="DemoBanner">
+    <value>DEMO — fictional data. Real SMS and online payments are disabled.</value>
+  </data>
+  <data name="CustomerHeaderEn">
+    <value>name,phone</value>
+  </data>
+  <data name="BookingHeaderEn">
+    <value>court,start,end,customer phone,amount paid</value>
+  </data>
+  <data name="ACCOUNT_LOCKED" xml:space="preserve">
+    <value>Account is temporarily locked. Try again later.</value>
+  </data>
+  <data name="ACTIVE" xml:space="preserve">
+    <value>Active.</value>
+  </data>
+  <data name="BLOCKED" xml:space="preserve">
+    <value>Blocked.</value>
+  </data>
+  <data name="BOOKED" xml:space="preserve">
+    <value>Booked.</value>
+  </data>
+  <data name="BOOKING_CANCELLED" xml:space="preserve">
+    <value>Booking cancelled.</value>
+  </data>
+  <data name="BOOKING_COMPLETED" xml:space="preserve">
+    <value>Booking completed.</value>
+  </data>
+  <data name="BOOKING_CREATED" xml:space="preserve">
+    <value>Booking created.</value>
+  </data>
+  <data name="BOOKING_HELD" xml:space="preserve">
+    <value>Booking held.</value>
+  </data>
+  <data name="BOOKING_NO_SHOW" xml:space="preserve">
+    <value>Booking no show.</value>
+  </data>
+  <data name="BOOKING_RELEASED" xml:space="preserve">
+    <value>Booking released.</value>
+  </data>
+  <data name="BOOKING_RESCHEDULED" xml:space="preserve">
+    <value>Booking rescheduled.</value>
+  </data>
+  <data name="CANCELLED" xml:space="preserve">
+    <value>Cancelled.</value>
+  </data>
+  <data name="COMPLETED" xml:space="preserve">
+    <value>Completed.</value>
+  </data>
+  <data name="CONCURRENCY_CONFLICT" xml:space="preserve">
+    <value>Concurrency conflict.</value>
+  </data>
+  <data name="CUSTOMER_ANONYMIZED" xml:space="preserve">
+    <value>Customer anonymized.</value>
+  </data>
+  <data name="CUSTOMER_EXPORTED" xml:space="preserve">
+    <value>Customer exported.</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_NOT_ALLOWED" xml:space="preserve">
+    <value>Customer login not allowed.</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>Customer login succeeded.</value>
+  </data>
+  <data name="DENY" xml:space="preserve">
+    <value>Deny.</value>
+  </data>
+  <data name="DUPLICATE_SLUG" xml:space="preserve">
+    <value>Duplicate slug.</value>
+  </data>
+  <data name="EPAYTEST" xml:space="preserve">
+    <value>Epaytest.</value>
+  </data>
+  <data name="FAILED" xml:space="preserve">
+    <value>Failed.</value>
+  </data>
+  <data name="FIXED" xml:space="preserve">
+    <value>Fixed.</value>
+  </data>
+  <data name="FREE" xml:space="preserve">
+    <value>Free.</value>
+  </data>
+  <data name="HEAD" xml:space="preserve">
+    <value>Head.</value>
+  </data>
+  <data name="HELD" xml:space="preserve">
+    <value>Held.</value>
+  </data>
+  <data name="HOLD_EXPIRED" xml:space="preserve">
+    <value>The hold has expired. Choose another slot.</value>
+  </data>
+  <data name="IDEMPOTENCY_CONFLICT" xml:space="preserve">
+    <value>Idempotency conflict.</value>
+  </data>
+  <data name="INTERNAL_ERROR" xml:space="preserve">
+    <value>An unexpected error occurred.</value>
+  </data>
+  <data name="INVALID_COORDINATES" xml:space="preserve">
+    <value>Invalid coordinates.</value>
+  </data>
+  <data name="INVALID_CREDENTIALS" xml:space="preserve">
+    <value>Email/phone or password is incorrect.</value>
+  </data>
+  <data name="INVALID_PARENT" xml:space="preserve">
+    <value>Invalid parent.</value>
+  </data>
+  <data name="INVALID_REFRESH_TOKEN" xml:space="preserve">
+    <value>Session expired. Sign in again.</value>
+  </data>
+  <data name="LOGIN_FAILED" xml:space="preserve">
+    <value>Login failed.</value>
+  </data>
+  <data name="LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>Login succeeded.</value>
+  </data>
+  <data name="NOT_FOUND" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="NO_PREVIOUS_BASE" xml:space="preserve">
+    <value>No previous base.</value>
+  </data>
+  <data name="NO_SHOW" xml:space="preserve">
+    <value>No show.</value>
+  </data>
+  <data name="ONLINE_PAYMENT_DISABLED" xml:space="preserve">
+    <value>Online payment disabled.</value>
+  </data>
+  <data name="OPTIONS" xml:space="preserve">
+    <value>Options.</value>
+  </data>
+  <data name="ORGANIZATION_REQUIRED" xml:space="preserve">
+    <value>Organization required.</value>
+  </data>
+  <data name="OTP_INVALID" xml:space="preserve">
+    <value>The verification code is invalid or expired.</value>
+  </data>
+  <data name="PAYMENT_FAILED" xml:space="preserve">
+    <value>Payment failed.</value>
+  </data>
+  <data name="PAYMENT_INITIATED" xml:space="preserve">
+    <value>Payment initiated.</value>
+  </data>
+  <data name="PAYMENT_NEEDS_REFUND" xml:space="preserve">
+    <value>Payment needs refund.</value>
+  </data>
+  <data name="PAYMENT_RECORDED" xml:space="preserve">
+    <value>Payment recorded.</value>
+  </data>
+  <data name="PAYMENT_REFUNDED" xml:space="preserve">
+    <value>Payment refunded.</value>
+  </data>
+  <data name="PAYMENT_SETTINGS_UPDATED" xml:space="preserve">
+    <value>Payment settings updated.</value>
+  </data>
+  <data name="PAYMENT_VERIFICATION_FAILED" xml:space="preserve">
+    <value>Payment could not be verified. Contact the venue if money was deducted.</value>
+  </data>
+  <data name="PAYMENT_VERIFIED" xml:space="preserve">
+    <value>Payment verified.</value>
+  </data>
+  <data name="PAYMENT_VERIFIED_LATE_CONFIRMED" xml:space="preserve">
+    <value>Payment verified late confirmed.</value>
+  </data>
+  <data name="QUEUED" xml:space="preserve">
+    <value>Queued.</value>
+  </data>
+  <data name="RATE_LIMITED" xml:space="preserve">
+    <value>Too many requests. Try again later.</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSE" xml:space="preserve">
+    <value>Refresh token reuse.</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSED" xml:space="preserve">
+    <value>Session reuse detected. Sign in again.</value>
+  </data>
+  <data name="REPORT_EXPORTED" xml:space="preserve">
+    <value>Report exported.</value>
+  </data>
+  <data name="REQUEST_TIMEOUT" xml:space="preserve">
+    <value>Request timed out. Please retry.</value>
+  </data>
+  <data name="ROLE_ASSIGNED" xml:space="preserve">
+    <value>Role assigned.</value>
+  </data>
+  <data name="SUBSCRIPTION_INACTIVE" xml:space="preserve">
+    <value>The organization is read-only. Contact the platform to renew.</value>
+  </data>
+  <data name="SUBSCRIPTION_UPDATED" xml:space="preserve">
+    <value>Subscription updated.</value>
+  </data>
+  <data name="SUSPENDED" xml:space="preserve">
+    <value>Suspended.</value>
+  </data>
+  <data name="TOKEN_REVOKED" xml:space="preserve">
+    <value>Token revoked.</value>
+  </data>
+  <data name="TOKEN_ROTATED" xml:space="preserve">
+    <value>Token rotated.</value>
+  </data>
+  <data name="TOO_MANY_HOLDS" xml:space="preserve">
+    <value>Too many holds.</value>
+  </data>
+  <data name="TWO_FACTOR_ENABLED" xml:space="preserve">
+    <value>Two factor enabled.</value>
+  </data>
+  <data name="TWO_FACTOR_INVALID" xml:space="preserve">
+    <value>Invalid verification code.</value>
+  </data>
+  <data name="TWO_FACTOR_REQUIRED" xml:space="preserve">
+    <value>A valid authenticator or recovery code is required.</value>
+  </data>
+  <data name="UNAUTHORIZED" xml:space="preserve">
+    <value>Sign in to continue.</value>
+  </data>
+  <data name="UNKNOWN_AMENITY" xml:space="preserve">
+    <value>Unknown amenity.</value>
+  </data>
+</root>

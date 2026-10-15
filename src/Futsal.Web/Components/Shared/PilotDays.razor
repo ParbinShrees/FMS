@@ -1,0 +1,4 @@
+@using Futsal.Contracts
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+<MudTable Items="Summary.Days"><HeaderContent><MudTh>@P["Day"]</MudTh><MudTh>@P["Bookings"]</MudTh><MudTh>@P["OnlineShare"]</MudTh><MudTh>@P["StaffShare"]</MudTh><MudTh>@P["NoShows"]</MudTh><MudTh>@P["Cancellations"]</MudTh></HeaderContent><RowTemplate><MudTd>@Futsal.Web.Services.BsDate.Display(context.Day)</MudTd><MudTd>@context.Bookings</MudTd><MudTd>@context.Online (@(context.Bookings==0?0:decimal.Round(context.Online*100m/context.Bookings,1))%)</MudTd><MudTd>@context.Staff (@(context.Bookings==0?0:decimal.Round(context.Staff*100m/context.Bookings,1))%)</MudTd><MudTd>@context.NoShows</MudTd><MudTd>@context.Cancellations</MudTd></RowTemplate></MudTable>
+@code{[Parameter,EditorRequired]public PilotSummary Summary{get;set;}=null!;}

@@ -1,0 +1,12 @@
+@using Futsal.Contracts
+@using Microsoft.AspNetCore.Components.Forms
+@inject Futsal.Web.Services.ApiClient Api
+@inject Futsal.Web.Services.BffAuthState Auth
+@inject NavigationManager Nav
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+@if(Auth.Token?.OrganizationId!=null){
+<MudButton OnClick="()=>open=!open">@P["Feedback"]</MudButton>
+@if(open){<MudPaper Class="pa-4"><MudSelect T="string" @bind-Value="category" Label="@P["Category"]">@foreach(var c in new[]{"bug","confusing","idea"}){<MudSelectItem T="string" Value="@c">@P[c]</MudSelectItem>}</MudSelect><MudTextField T="string" @bind-Value="text" Lines="4" Label="@P["FeedbackText"]" MaxLength="4000"/><label>@P["ScreenshotHint"]<InputFile OnChange="FileChanged" accept="image/png"/></label><MudButton Disabled="busy" OnClick="Submit">@P["Send"]</MudButton>@if(message!=null){<MudAlert>@P[message]</MudAlert>}</MudPaper>}}
+@code{bool open,busy;string category="bug",text="";string? screenshot,message;
+async Task FileChanged(InputFileChangeEventArgs e){try{using var memory=new MemoryStream();await e.File.OpenReadStream(192*1024).CopyToAsync(memory);screenshot=Convert.ToBase64String(memory.ToArray());message=null;}catch{message="INVALID_SCREENSHOT";screenshot=null;}}
+async Task Submit(){busy=true;try{var url="/"+Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0];await Api.ManagementSendAsync<object>("pilot/feedback",new FeedbackWrite(category,text,url,screenshot));message="FeedbackSaved";text="";screenshot=null;}catch(Futsal.Web.Services.ApiProblemException ex){message=ex.Code;}catch{message="Failure";}finally{busy=false;}}}

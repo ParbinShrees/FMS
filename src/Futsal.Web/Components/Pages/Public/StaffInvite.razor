@@ -1,0 +1,8 @@
+@page "/staff-invite"
+@layout Futsal.Web.Components.Layout.PlayerLayout
+@using Futsal.Contracts
+@inject Futsal.Web.Services.ApiClient Api
+@inject IJSRuntime JS
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+<h1>@P["AcceptInvite"]</h1><MudTextField T="string" @bind-Value="name" Label="@P["FullName"]"/><MudTextField T="string" @bind-Value="password" InputType="InputType.Password" Label="@P["Password"]"/><p>@P["PasswordHint"]</p><MudButton Disabled="busy" OnClick="Accept">@P["AcceptInvite"]</MudButton>@if(message!=null){<MudAlert>@P[message]</MudAlert>}
+@code{string name="",password="",token="";string? message;bool busy;protected override async Task OnAfterRenderAsync(bool first){if(first)token=await JS.InvokeAsync<string>("futsalInviteToken");}async Task Accept(){busy=true;try{await Api.ManagementSendAsync<object>("auth/invites/accept",new InviteAccept(token,name,password));message="InviteAccepted";password="";}catch(Futsal.Web.Services.ApiProblemException ex){message=ex.Code;}catch{message="Failure";}finally{busy=false;}}}

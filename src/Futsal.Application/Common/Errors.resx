@@ -1,1 +1,282 @@
-<root><resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader><data name="ACCOUNT_LOCKED" xml:space="preserve"><value>Account is temporarily locked. Try again later.</value></data><data name="ACTIVE" xml:space="preserve"><value>Active.</value></data><data name="BLOCKED" xml:space="preserve"><value>Blocked.</value></data><data name="BOOKED" xml:space="preserve"><value>Booked.</value></data><data name="BOOKING_CANCELLED" xml:space="preserve"><value>Booking cancelled.</value></data><data name="BOOKING_COMPLETED" xml:space="preserve"><value>Booking completed.</value></data><data name="BOOKING_CREATED" xml:space="preserve"><value>Booking created.</value></data><data name="BOOKING_HELD" xml:space="preserve"><value>Booking held.</value></data><data name="BOOKING_NO_SHOW" xml:space="preserve"><value>Booking no show.</value></data><data name="BOOKING_RELEASED" xml:space="preserve"><value>Booking released.</value></data><data name="BOOKING_RESCHEDULED" xml:space="preserve"><value>Booking rescheduled.</value></data><data name="CANCELLED" xml:space="preserve"><value>Cancelled.</value></data><data name="COMPLETED" xml:space="preserve"><value>Completed.</value></data><data name="CONCURRENCY_CONFLICT" xml:space="preserve"><value>Concurrency conflict.</value></data><data name="CUSTOMER_ANONYMIZED" xml:space="preserve"><value>Customer anonymized.</value></data><data name="CUSTOMER_EXPORTED" xml:space="preserve"><value>Customer exported.</value></data><data name="CUSTOMER_LOGIN_NOT_ALLOWED" xml:space="preserve"><value>Customer login not allowed.</value></data><data name="CUSTOMER_LOGIN_SUCCEEDED" xml:space="preserve"><value>Customer login succeeded.</value></data><data name="DENY" xml:space="preserve"><value>Deny.</value></data><data name="DUPLICATE_SLUG" xml:space="preserve"><value>Duplicate slug.</value></data><data name="EPAYTEST" xml:space="preserve"><value>Epaytest.</value></data><data name="FAILED" xml:space="preserve"><value>Failed.</value></data><data name="FIXED" xml:space="preserve"><value>Fixed.</value></data><data name="FORBIDDEN" xml:space="preserve"><value>You are not allowed to perform this action.</value></data><data name="FREE" xml:space="preserve"><value>Free.</value></data><data name="HEAD" xml:space="preserve"><value>Head.</value></data><data name="HELD" xml:space="preserve"><value>Held.</value></data><data name="HOLD_EXPIRED" xml:space="preserve"><value>The hold has expired. Choose another slot.</value></data><data name="IDEMPOTENCY_CONFLICT" xml:space="preserve"><value>Idempotency conflict.</value></data><data name="INTERNAL_ERROR" xml:space="preserve"><value>An unexpected error occurred.</value></data><data name="INVALID_COORDINATES" xml:space="preserve"><value>Invalid coordinates.</value></data><data name="INVALID_CREDENTIALS" xml:space="preserve"><value>Email/phone or password is incorrect.</value></data><data name="INVALID_PARENT" xml:space="preserve"><value>Invalid parent.</value></data><data name="INVALID_REFRESH_TOKEN" xml:space="preserve"><value>Session expired. Sign in again.</value></data><data name="LOGIN_FAILED" xml:space="preserve"><value>Login failed.</value></data><data name="LOGIN_SUCCEEDED" xml:space="preserve"><value>Login succeeded.</value></data><data name="NOT_FOUND" xml:space="preserve"><value>Record not found.</value></data><data name="NO_PREVIOUS_BASE" xml:space="preserve"><value>No previous base.</value></data><data name="NO_SHOW" xml:space="preserve"><value>No show.</value></data><data name="ONLINE_PAYMENT_DISABLED" xml:space="preserve"><value>Online payment disabled.</value></data><data name="OPTIONS" xml:space="preserve"><value>Options.</value></data><data name="ORGANIZATION_REQUIRED" xml:space="preserve"><value>Organization required.</value></data><data name="OTP_INVALID" xml:space="preserve"><value>The verification code is invalid or expired.</value></data><data name="PAYMENT_FAILED" xml:space="preserve"><value>Payment failed.</value></data><data name="PAYMENT_INITIATED" xml:space="preserve"><value>Payment initiated.</value></data><data name="PAYMENT_NEEDS_REFUND" xml:space="preserve"><value>Payment needs refund.</value></data><data name="PAYMENT_RECORDED" xml:space="preserve"><value>Payment recorded.</value></data><data name="PAYMENT_REFUNDED" xml:space="preserve"><value>Payment refunded.</value></data><data name="PAYMENT_SETTINGS_UPDATED" xml:space="preserve"><value>Payment settings updated.</value></data><data name="PAYMENT_VERIFICATION_FAILED" xml:space="preserve"><value>Payment could not be verified. Contact the venue if money was deducted.</value></data><data name="PAYMENT_VERIFIED" xml:space="preserve"><value>Payment verified.</value></data><data name="PAYMENT_VERIFIED_LATE_CONFIRMED" xml:space="preserve"><value>Payment verified late confirmed.</value></data><data name="QUEUED" xml:space="preserve"><value>Queued.</value></data><data name="RATE_LIMITED" xml:space="preserve"><value>Too many requests. Try again later.</value></data><data name="REFRESH_TOKEN_REUSE" xml:space="preserve"><value>Refresh token reuse.</value></data><data name="REFRESH_TOKEN_REUSED" xml:space="preserve"><value>Session reuse detected. Sign in again.</value></data><data name="REPORT_EXPORTED" xml:space="preserve"><value>Report exported.</value></data><data name="REQUEST_TIMEOUT" xml:space="preserve"><value>Request timed out. Please retry.</value></data><data name="ROLE_ASSIGNED" xml:space="preserve"><value>Role assigned.</value></data><data name="SLOT_UNAVAILABLE" xml:space="preserve"><value>Someone just booked this slot. Pick another.</value></data><data name="SUBSCRIPTION_INACTIVE" xml:space="preserve"><value>The organization is read-only. Contact the platform to renew.</value></data><data name="SUBSCRIPTION_UPDATED" xml:space="preserve"><value>Subscription updated.</value></data><data name="SUSPENDED" xml:space="preserve"><value>Suspended.</value></data><data name="TOKEN_REVOKED" xml:space="preserve"><value>Token revoked.</value></data><data name="TOKEN_ROTATED" xml:space="preserve"><value>Token rotated.</value></data><data name="TOO_MANY_HOLDS" xml:space="preserve"><value>Too many holds.</value></data><data name="TWO_FACTOR_ENABLED" xml:space="preserve"><value>Two factor enabled.</value></data><data name="TWO_FACTOR_INVALID" xml:space="preserve"><value>Invalid verification code.</value></data><data name="TWO_FACTOR_REQUIRED" xml:space="preserve"><value>A valid authenticator or recovery code is required.</value></data><data name="UNAUTHORIZED" xml:space="preserve"><value>Sign in to continue.</value></data><data name="UNKNOWN_AMENITY" xml:space="preserve"><value>Unknown amenity.</value></data><data name="VALIDATION_FAILED" xml:space="preserve"><value>Check the submitted values.</value></data></root>
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="ACCOUNT_LOCKED" xml:space="preserve">
+    <value>Account is temporarily locked. Try again later.</value>
+  </data>
+  <data name="ACTIVE" xml:space="preserve">
+    <value>Active.</value>
+  </data>
+  <data name="BLOCKED" xml:space="preserve">
+    <value>Blocked.</value>
+  </data>
+  <data name="BOOKED" xml:space="preserve">
+    <value>Booked.</value>
+  </data>
+  <data name="BOOKING_CANCELLED" xml:space="preserve">
+    <value>Booking cancelled.</value>
+  </data>
+  <data name="BOOKING_COMPLETED" xml:space="preserve">
+    <value>Booking completed.</value>
+  </data>
+  <data name="BOOKING_CREATED" xml:space="preserve">
+    <value>Booking created.</value>
+  </data>
+  <data name="BOOKING_HELD" xml:space="preserve">
+    <value>Booking held.</value>
+  </data>
+  <data name="BOOKING_NO_SHOW" xml:space="preserve">
+    <value>Booking no show.</value>
+  </data>
+  <data name="BOOKING_RELEASED" xml:space="preserve">
+    <value>Booking released.</value>
+  </data>
+  <data name="BOOKING_RESCHEDULED" xml:space="preserve">
+    <value>Booking rescheduled.</value>
+  </data>
+  <data name="CANCELLED" xml:space="preserve">
+    <value>Cancelled.</value>
+  </data>
+  <data name="COMPLETED" xml:space="preserve">
+    <value>Completed.</value>
+  </data>
+  <data name="CONCURRENCY_CONFLICT" xml:space="preserve">
+    <value>Concurrency conflict.</value>
+  </data>
+  <data name="CUSTOMER_ANONYMIZED" xml:space="preserve">
+    <value>Customer anonymized.</value>
+  </data>
+  <data name="CUSTOMER_EXPORTED" xml:space="preserve">
+    <value>Customer exported.</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_NOT_ALLOWED" xml:space="preserve">
+    <value>Customer login not allowed.</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>Customer login succeeded.</value>
+  </data>
+  <data name="DENY" xml:space="preserve">
+    <value>Deny.</value>
+  </data>
+  <data name="DUPLICATE_SLUG" xml:space="preserve">
+    <value>Duplicate slug.</value>
+  </data>
+  <data name="EPAYTEST" xml:space="preserve">
+    <value>Epaytest.</value>
+  </data>
+  <data name="FAILED" xml:space="preserve">
+    <value>Failed.</value>
+  </data>
+  <data name="FIXED" xml:space="preserve">
+    <value>Fixed.</value>
+  </data>
+  <data name="FORBIDDEN" xml:space="preserve">
+    <value>You are not allowed to perform this action.</value>
+  </data>
+  <data name="FREE" xml:space="preserve">
+    <value>Free.</value>
+  </data>
+  <data name="HEAD" xml:space="preserve">
+    <value>Head.</value>
+  </data>
+  <data name="HELD" xml:space="preserve">
+    <value>Held.</value>
+  </data>
+  <data name="HOLD_EXPIRED" xml:space="preserve">
+    <value>The hold has expired. Choose another slot.</value>
+  </data>
+  <data name="IDEMPOTENCY_CONFLICT" xml:space="preserve">
+    <value>Idempotency conflict.</value>
+  </data>
+  <data name="INTERNAL_ERROR" xml:space="preserve">
+    <value>An unexpected error occurred.</value>
+  </data>
+  <data name="INVALID_COORDINATES" xml:space="preserve">
+    <value>Invalid coordinates.</value>
+  </data>
+  <data name="INVALID_CREDENTIALS" xml:space="preserve">
+    <value>Email/phone or password is incorrect.</value>
+  </data>
+  <data name="INVALID_PARENT" xml:space="preserve">
+    <value>Invalid parent.</value>
+  </data>
+  <data name="INVALID_REFRESH_TOKEN" xml:space="preserve">
+    <value>Session expired. Sign in again.</value>
+  </data>
+  <data name="LOGIN_FAILED" xml:space="preserve">
+    <value>Login failed.</value>
+  </data>
+  <data name="LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>Login succeeded.</value>
+  </data>
+  <data name="NOT_FOUND" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="NO_PREVIOUS_BASE" xml:space="preserve">
+    <value>No previous base.</value>
+  </data>
+  <data name="NO_SHOW" xml:space="preserve">
+    <value>No show.</value>
+  </data>
+  <data name="ONLINE_PAYMENT_DISABLED" xml:space="preserve">
+    <value>Online payment disabled.</value>
+  </data>
+  <data name="OPTIONS" xml:space="preserve">
+    <value>Options.</value>
+  </data>
+  <data name="ORGANIZATION_REQUIRED" xml:space="preserve">
+    <value>Organization required.</value>
+  </data>
+  <data name="OTP_INVALID" xml:space="preserve">
+    <value>The verification code is invalid or expired.</value>
+  </data>
+  <data name="PAYMENT_FAILED" xml:space="preserve">
+    <value>Payment failed.</value>
+  </data>
+  <data name="PAYMENT_INITIATED" xml:space="preserve">
+    <value>Payment initiated.</value>
+  </data>
+  <data name="PAYMENT_NEEDS_REFUND" xml:space="preserve">
+    <value>Payment needs refund.</value>
+  </data>
+  <data name="PAYMENT_RECORDED" xml:space="preserve">
+    <value>Payment recorded.</value>
+  </data>
+  <data name="PAYMENT_REFUNDED" xml:space="preserve">
+    <value>Payment refunded.</value>
+  </data>
+  <data name="PAYMENT_SETTINGS_UPDATED" xml:space="preserve">
+    <value>Payment settings updated.</value>
+  </data>
+  <data name="PAYMENT_VERIFICATION_FAILED" xml:space="preserve">
+    <value>Payment could not be verified. Contact the venue if money was deducted.</value>
+  </data>
+  <data name="PAYMENT_VERIFIED" xml:space="preserve">
+    <value>Payment verified.</value>
+  </data>
+  <data name="PAYMENT_VERIFIED_LATE_CONFIRMED" xml:space="preserve">
+    <value>Payment verified late confirmed.</value>
+  </data>
+  <data name="QUEUED" xml:space="preserve">
+    <value>Queued.</value>
+  </data>
+  <data name="RATE_LIMITED" xml:space="preserve">
+    <value>Too many requests. Try again later.</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSE" xml:space="preserve">
+    <value>Refresh token reuse.</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSED" xml:space="preserve">
+    <value>Session reuse detected. Sign in again.</value>
+  </data>
+  <data name="REPORT_EXPORTED" xml:space="preserve">
+    <value>Report exported.</value>
+  </data>
+  <data name="REQUEST_TIMEOUT" xml:space="preserve">
+    <value>Request timed out. Please retry.</value>
+  </data>
+  <data name="ROLE_ASSIGNED" xml:space="preserve">
+    <value>Role assigned.</value>
+  </data>
+  <data name="SLOT_UNAVAILABLE" xml:space="preserve">
+    <value>Someone just booked this slot. Pick another.</value>
+  </data>
+  <data name="SUBSCRIPTION_INACTIVE" xml:space="preserve">
+    <value>The organization is read-only. Contact the platform to renew.</value>
+  </data>
+  <data name="SUBSCRIPTION_UPDATED" xml:space="preserve">
+    <value>Subscription updated.</value>
+  </data>
+  <data name="SUSPENDED" xml:space="preserve">
+    <value>Suspended.</value>
+  </data>
+  <data name="TOKEN_REVOKED" xml:space="preserve">
+    <value>Token revoked.</value>
+  </data>
+  <data name="TOKEN_ROTATED" xml:space="preserve">
+    <value>Token rotated.</value>
+  </data>
+  <data name="TOO_MANY_HOLDS" xml:space="preserve">
+    <value>Too many holds.</value>
+  </data>
+  <data name="TWO_FACTOR_ENABLED" xml:space="preserve">
+    <value>Two factor enabled.</value>
+  </data>
+  <data name="TWO_FACTOR_INVALID" xml:space="preserve">
+    <value>Invalid verification code.</value>
+  </data>
+  <data name="TWO_FACTOR_REQUIRED" xml:space="preserve">
+    <value>A valid authenticator or recovery code is required.</value>
+  </data>
+  <data name="UNAUTHORIZED" xml:space="preserve">
+    <value>Sign in to continue.</value>
+  </data>
+  <data name="UNKNOWN_AMENITY" xml:space="preserve">
+    <value>Unknown amenity.</value>
+  </data>
+  <data name="VALIDATION_FAILED" xml:space="preserve">
+    <value>Check the submitted values.</value>
+  </data>
+  <data name="INVALID_PHONE">
+    <value>Use a valid Nepali mobile number (+9779...).</value>
+  </data>
+  <data name="DUPLICATE_PHONE">
+    <value>Phone already exists in this file or organization.</value>
+  </data>
+  <data name="FORMULA_CELL">
+    <value>Spreadsheet formula cell rejected.</value>
+  </data>
+  <data name="INVALID_COLUMNS">
+    <value>Wrong number of columns.</value>
+  </data>
+  <data name="INVALID_NAME">
+    <value>A name of 1–160 characters is required.</value>
+  </data>
+  <data name="INVALID_TIME">
+    <value>Use an ISO time with Z or an explicit offset.</value>
+  </data>
+  <data name="FUTURE_BOOKING_REQUIRED">
+    <value>Only future bookings with end after start can be imported.</value>
+  </data>
+  <data name="INVALID_AMOUNT">
+    <value>Use nonnegative NPR with at most two decimals.</value>
+  </data>
+  <data name="COURT_NOT_FOUND">
+    <value>Use an exact, unique court name or court ID.</value>
+  </data>
+  <data name="IMPORT_TOO_LARGE">
+    <value>CSV exceeds 48 KB, 200 rows, or a cell limit.</value>
+  </data>
+  <data name="INVALID_CSV">
+    <value>Invalid CSV quotes or format.</value>
+  </data>
+  <data name="INVALID_HEADERS">
+    <value>Headers must match a supplied template.</value>
+  </data>
+  <data name="INVALID_SCREENSHOT">
+    <value>Choose a valid RGB/RGBA PNG within the size limits.</value>
+  </data>
+  <data name="ONBOARDING_COMPLETE">
+    <value>Setup is complete. Use venue settings for changes.</value>
+  </data>
+  <data name="SLUG_TAKEN">
+    <value>This public address name is already in use.</value>
+  </data>
+  <data name="INVITE_INVALID">
+    <value>Invitation is invalid, used, or expired.</value>
+  </data>
+  <data name="INVITE_EXISTING_ACCOUNT">
+    <value>Email already has an account. Ask the platform administrator for access.</value>
+  </data>
+  <data name="DEMO_GATEWAY_DISABLED">
+    <value>Real online payments are disabled for DEMO organizations.</value>
+  </data>
+  <data name="COURT_LIMIT_REACHED">
+    <value>The plan court limit has been reached.</value>
+  </data>
+</root>

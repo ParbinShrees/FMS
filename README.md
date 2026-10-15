@@ -89,3 +89,6 @@ Public results include the venue name, materialized location path, distance when
 Added persistent transactional SMS queue, console/HTTP provider selection, venue templates/settings/log/usage UI, reminders/retries/caps/opt-out, and tenant-scoped daily/monthly/dues/utilization/customer/shift reports with CSV/PDF exports. Open `/admin/notifications` and `/admin/reports`.
 
 See [setup and provider confirmation instructions](docs/notifications-reports.md) and [accounting/notification assumptions](docs/DECISIONS.md). Development defaults to the console sender. PostgreSQL acceptance tests use Docker/Testcontainers. Milestone 9 has not been started.
+
+
+Pilot tooling: see [docs/pilot.md](docs/pilot.md) for onboarding, safe imports, demo accounts, feedback and monitoring.

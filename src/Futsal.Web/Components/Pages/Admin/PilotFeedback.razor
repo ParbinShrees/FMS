@@ -1,0 +1,11 @@
+@page "/admin/feedback"
+@using Futsal.Contracts
+@inject Futsal.Web.Services.ApiClient Api
+@inject Futsal.Web.Services.BffAuthState Auth
+@inject IJSRuntime JS
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+<h1>@P["Feedback"]</h1><MudButton OnClick="Load">@P["Refresh"]</MudButton>@if(error){<MudAlert>@P["Failure"]</MudAlert>}
+@foreach(var row in rows){<MudPaper Class="pa-4 my-2"><h2>@row.Organization ? @P[row.Category]</h2><p>@row.Text</p><p>@row.PageUrl ? @P[row.Status]</p>@if(row.HasScreenshot){<MudButton OnClick="()=>Screenshot(row.Id)">@P["DownloadScreenshot"]</MudButton>}@if(Auth.Token?.Role=="SuperAdmin"){@foreach(var status in new[]{"NEW","SEEN","DONE"}){<MudButton OnClick="()=>Status(row.Id,status)">@P[status]</MudButton>}}</MudPaper>}
+@code{List<FeedbackView> rows=[];bool error;public sealed record ImageData(string Base64);protected override async Task OnInitializedAsync()=>await Load();async Task Load(){try{rows=await Api.ManagementGetAsync<List<FeedbackView>>("pilot/feedback")??[];}catch{error=true;}}
+async Task Status(Guid id,string status){try{await Api.ManagementSendAsync<object>($"pilot/feedback/{id}/status",status,true);await Load();}catch{error=true;}}
+async Task Screenshot(Guid id){try{var data=await Api.ManagementGetAsync<ImageData>($"pilot/feedback/{id}/screenshot");if(data!=null)await JS.InvokeVoidAsync("futsalDownload","feedback.png","image/png",data.Base64);}catch{error=true;}}}

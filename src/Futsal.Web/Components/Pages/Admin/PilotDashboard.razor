@@ -1,0 +1,16 @@
+@page "/admin/pilot"
+@using Futsal.Contracts
+@inject Futsal.Web.Services.ApiClient Api
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+<h1>@P["PilotDashboard"]</h1><MudButton OnClick="Load">@P["Refresh"]</MudButton><MudButton Disabled="busy" OnClick="CreateDemo">@P["CreateDemo"]</MudButton>
+@if(message!=null){<MudAlert>@P[message]</MudAlert>}
+@if(access!=null){<MudAlert Severity="Severity.Warning">@P["DemoAccessHint"]</MudAlert><p>@P["Email"]: @access.Login</p><p>@P["Password"]: <code>@access.Password</code></p><MudButton Href="@($"/v/{access.VenueSlug}")">@P["DemoPublic"]</MudButton>}
+@foreach(var org in summaries){<MudPaper Class="pa-4 my-4"><h2>@org.Name @if(org.Demo){<strong>@P["DEMO"]</strong>}</h2>@if(org.Overlaps>0){<MudAlert Severity="Severity.Error">@P["CriticalOverlap"] @org.Overlaps</MudAlert>}else if(org.WatchCheckedAt==null){<MudAlert Severity="Severity.Warning">@P["WatchPending"]</MudAlert>}else{<p>@P["WatchClear"] · @Futsal.Web.Services.BsDate.Display(DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeBySystemTimeZoneId(org.WatchCheckedAt.Value,"Asia/Kathmandu").DateTime))</p>}
+<p>@P["FailedPayments"]: @org.FailedPayments · @P["SmsSent"]: @org.SmsSent · @P["SmsFailed"]: @org.SmsFailed · @P["Errors24"]: @org.Errors24Hours</p><p>@P["LastLogin"]: @(org.LastLogin==null?P["Never"].Value:Futsal.Web.Services.BsDate.Display(DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeBySystemTimeZoneId(org.LastLogin.Value,"Asia/Kathmandu").DateTime)))</p>
+<PilotDays Summary="org"/>
+@foreach(var v in venues.Where(x=>x.OrganizationId==org.OrganizationId)){<MudButton Href="@($"/admin/pilot/weekly/{v.Id}")">@P["Weekly"] · @v.Name</MudButton>}
+@if(org.Demo){<MudButton Disabled="busy" OnClick="()=>Reset(org.OrganizationId)">@P["ResetDemo"]</MudButton>}</MudPaper>}
+@code{DemoAccess? access;List<PilotSummary> summaries=[];List<VenueChoice> venues=[];bool busy;string? message;public sealed record VenueChoice(Guid Id,Guid OrganizationId,string Name);
+protected override async Task OnInitializedAsync()=>await Load();async Task Load(){try{summaries=await Api.ManagementGetAsync<List<PilotSummary>>("pilot/monitoring")??[];venues=await Api.ManagementGetAsync<List<VenueChoice>>("pilot/monitoring/venues")??[];message=null;}catch{message="FORBIDDEN";}}
+async Task CreateDemo(){busy=true;try{access=await Api.ManagementSendAsync<DemoAccess>("pilot/demo",new{});await Load();}catch{message="Failure";}finally{busy=false;}}
+async Task Reset(Guid id){busy=true;try{await Api.ManagementSendAsync<object>($"pilot/demo/{id}/reset",new{});await Load();}catch{message="Failure";}finally{busy=false;}}}

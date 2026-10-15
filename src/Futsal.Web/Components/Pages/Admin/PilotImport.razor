@@ -1,0 +1,17 @@
+@page "/admin/import"
+@using Futsal.Contracts
+@using Microsoft.AspNetCore.Components.Forms
+@inject Futsal.Web.Services.ApiClient Api
+@inject IJSRuntime JS
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+<h1>@P["Import"]</h1><p>@P["ImportHelp"]</p>
+<MudSelect T="string" Value="kind" ValueChanged="KindChanged" Label="@P["Kind"]"><MudSelectItem T="string" Value='@("customers")'>@P["Customers"]</MudSelectItem><MudSelectItem T="string" Value='@("bookings")'>@P["Bookings"]</MudSelectItem></MudSelect>
+<MudButton OnClick='()=>Template("en")'>@P["EnglishTemplate"]</MudButton><MudButton OnClick='()=>Template("ne")'>@P["NepaliTemplate"]</MudButton><label>@P["CsvFile"]<InputFile OnChange="Read" accept=".csv,text/csv"/></label>
+<MudButton Disabled="@(busy||csv==null)" OnClick="Preview">@P["Preview"]</MudButton><MudButton Disabled="@(busy||!previewed)" OnClick="Commit">@P["ImportValid"]</MudButton>@if(message!=null){<MudAlert>@P[message]</MudAlert>}
+@if(report!=null){<MudTable Items="report.Rows"><HeaderContent><MudTh>@P["Row"]</MudTh><MudTh>@P["Data"]</MudTh><MudTh>@P["Status"]</MudTh><MudTh>@P["Reason"]</MudTh></HeaderContent><RowTemplate><MudTd>@context.Row</MudTd><MudTd>@string.Join(" | ",context.Cells)</MudTd><MudTd>@P[context.Status]</MudTd><MudTd>@P[context.Code]</MudTd></RowTemplate></MudTable>}
+@code{string kind="customers";string? csv,message;bool busy,previewed;Guid run=Guid.NewGuid();ImportReport? report;
+void KindChanged(string value){kind=value;previewed=false;report=null;run=Guid.NewGuid();}
+async Task Read(InputFileChangeEventArgs e){previewed=false;report=null;run=Guid.NewGuid();try{using var reader=new StreamReader(e.File.OpenReadStream(48*1024),System.Text.Encoding.UTF8,true);csv=await reader.ReadToEndAsync();message=null;}catch{csv=null;message="IMPORT_TOO_LARGE";}}
+async Task Preview()=>await Run(true);async Task Commit()=>await Run(false);
+async Task Run(bool preview){busy=true;try{report=await Api.ManagementSendAsync<ImportReport>("pilot/imports/"+kind,new ImportRequest(csv!,preview,run));previewed=preview;message=null;}catch(Futsal.Web.Services.ApiProblemException ex){message=ex.Code;}catch{message="Failure";}finally{busy=false;}}
+async Task Template(string language){var header=kind=="customers"?(language=="ne"?P["CustomerHeaderNe"].Value:P["CustomerHeaderEn"].Value):(language=="ne"?P["BookingHeaderNe"].Value:P["BookingHeaderEn"].Value);await JS.InvokeVoidAsync("futsalDownload",kind+"-"+language+".csv","text/csv",Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("\uFEFF"+header+"\r\n")));}}

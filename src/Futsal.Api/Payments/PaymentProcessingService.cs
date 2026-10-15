@@ -23,6 +23,7 @@ public sealed class PaymentProcessingService(
     IBookingNotifier notifier,
     ILogger<PaymentProcessingService> logger)
 {
+    private async Task RequireRealOrganization(Guid organizationId,CancellationToken ct){if(await DemoSafety.IsDemoAsync(db,organizationId,ct))throw new ApiException(409,"DEMO_GATEWAY_DISABLED","DEMO_GATEWAY_DISABLED");}
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public async Task<InitiatePaymentResponse> InitiateEsewaAsync(InitiatePaymentRequest request, IPAddress? ip, CancellationToken ct)
@@ -32,6 +33,7 @@ public sealed class PaymentProcessingService(
             .SingleOrDefaultAsync(b => b.Id == request.BookingId, ct)
             ?? throw new ApiException(404, "NOT_FOUND", "Booking was not found.");
 
+        await RequireRealOrganization(booking.OrganizationId,ct);
         var customer = await db.Customers.IgnoreQueryFilters()
             .SingleOrDefaultAsync(c => c.Id == booking.CustomerId && c.UserId == userId, ct)
             ?? throw new ApiException(403, "FORBIDDEN", "You do not own this booking.");
@@ -109,6 +111,7 @@ public sealed class PaymentProcessingService(
             .SingleOrDefaultAsync(b => b.Id == payment.BookingId, ct)
             ?? throw new ApiException(404, "NOT_FOUND", "Booking was not found.");
 
+        await RequireRealOrganization(booking.OrganizationId,ct);
         // Idempotency: verifying the same transaction twice must never double-credit or double-confirm
         if (payment.Status == PaymentStatus.COMPLETED)
         {
@@ -178,6 +181,7 @@ public sealed class PaymentProcessingService(
             {
                 var booking = await db.Bookings.IgnoreQueryFilters().SingleOrDefaultAsync(b => b.Id == payment.BookingId, ct);
                 if (booking == null) continue;
+                if(await DemoSafety.IsDemoAsync(db,booking.OrganizationId,ct))continue;
 
                 var venue = await db.Venues.IgnoreQueryFilters().SingleOrDefaultAsync(v => v.Id == booking.VenueId, ct);
                 if (venue == null) continue;

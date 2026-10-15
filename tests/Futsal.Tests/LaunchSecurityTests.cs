@@ -14,7 +14,7 @@ public sealed class LaunchSecurityTests
  private sealed class Sink(TextWriter output):Serilog.Core.ILogEventSink{public void Emit(Serilog.Events.LogEvent message)=>new SafeLogFormatter().Format(message,output);}
  [Fact]public void Every_API_action_is_authorized_or_explicitly_public()
  {
-  var allow=new HashSet<string>{"PublicLocationsController.Locations","PublicLocationsController.Search","PublicLocationsController.Venues","PublicLocationsController.SearchVenues","PublicLocationsController.VenueDetails","PaymentsController.VerifyEsewa","PublicLocationsController.Availability","PublicLocationsController.AvailabilityVersion","AuthController.StaffLogin","AuthController.RequestOtp","AuthController.VerifyOtp","AuthController.Refresh","AuthController.Logout"};
+  var allow=new HashSet<string>{"PublicLocationsController.Locations","PublicLocationsController.Search","PublicLocationsController.Venues","PublicLocationsController.SearchVenues","PublicLocationsController.VenueDetails","PaymentsController.VerifyEsewa","PublicLocationsController.Availability","PublicLocationsController.AvailabilityVersion","AuthController.StaffLogin","AuthController.RequestOtp","AuthController.VerifyOtp","AuthController.Refresh","AuthController.Logout","PilotInviteController.Accept"};
   var uncovered=new List<string>();
   foreach(var type in typeof(AuthController).Assembly.GetTypes().Where(t=>t.IsSubclassOf(typeof(ControllerBase))))foreach(var method in type.GetMethods(BindingFlags.Public|BindingFlags.Instance|BindingFlags.DeclaredOnly).Where(m=>m.GetCustomAttributes<Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute>().Any()))
   {

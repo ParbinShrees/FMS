@@ -7,7 +7,7 @@ public sealed class SubscriptionWriteFilter(FutsalDbContext db,ICurrentUser curr
  public async Task OnActionExecutionAsync(ActionExecutingContext context,ActionExecutionDelegate next)
  {
   var path=context.HttpContext.Request.Path.Value??"";
-  if(current.OrganizationId is Guid org&&!current.IsSuperAdmin&&context.HttpContext.Request.Method is not ("GET" or "HEAD" or "OPTIONS") && !path.Contains("/auth/")&&!path.Contains("/privacy/")&&!path.Contains("/payments")&&!path.Contains("/release")&&!path.Contains("/cancel"))await SubscriptionGuard.RequireWritableAsync(db,clock,org,context.HttpContext.RequestAborted);
+  if(current.OrganizationId is Guid org&&!current.IsSuperAdmin&&context.HttpContext.Request.Method is not ("GET" or "HEAD" or "OPTIONS") && !path.Contains("/pilot/feedback") && !path.Contains("/auth/")&&!path.Contains("/privacy/")&&!path.Contains("/payments")&&!path.Contains("/release")&&!path.Contains("/cancel"))await SubscriptionGuard.RequireWritableAsync(db,clock,org,context.HttpContext.RequestAborted);
   await next();
  }
 }

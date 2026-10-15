@@ -1,0 +1,3 @@
+@page "/admin/help"
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Pilot> P
+<h1>@P["Help"]</h1>@foreach(var guide in new[]{"WalkIn","TakePayment","CancelBooking","BlockCourt","DailyReport"}){<MudPaper Class="pa-4 my-3"><h2>@P[guide]</h2><p>@P[guide+"Guide"]</p></MudPaper>}

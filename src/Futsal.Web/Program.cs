@@ -39,7 +39,7 @@ app.MapPost("/bff/login", async (HttpContext context, TokenEndpointClient api, T
     if (token is null) return Results.Redirect("/login?error=INVALID_CREDENTIALS");
     var sessionId = sessions.Put(token);
     context.Response.Cookies.Append(BffAuthState.CookieName, sessionId, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict, Path = "/", MaxAge = token.RefreshExpiresAt - DateTimeOffset.UtcNow });
-    return Results.Redirect("/admin");
+    return Results.Redirect(await api.NeedsOnboardingAsync(token,ct)?"/admin/onboarding":"/admin");
 });
 app.MapPost("/bff/logout", async (HttpContext context, TokenEndpointClient api, TokenSessionStore sessions, CancellationToken ct) =>
 {
