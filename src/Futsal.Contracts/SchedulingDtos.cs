@@ -1,0 +1,23 @@
+namespace Futsal.Contracts;
+public sealed record SeriesWrite(Guid CourtId,Guid CustomerId,short Weekday,TimeOnly StartTimeLocal,int DurationSlots,DateOnly StartDate,DateOnly? EndDate,string PriceMode,bool ApplyRegularDiscount=true,string? Notes=null);
+public sealed record SeriesDatePreview(DateOnly Date,DateTimeOffset StartUtc,DateTimeOffset EndUtc,string Result,decimal Price);
+public sealed record SeriesCreate(SeriesWrite Series,bool FreeDatesOnly);
+public sealed record SeriesCreateResult(Guid? Id,List<SeriesDatePreview> Dates);
+public sealed record SeriesChange(DateOnly FromDate,Guid CourtId,TimeOnly StartTimeLocal,int DurationSlots);
+public sealed record SeriesDateAction(DateOnly Date,string? Reason=null,DateTimeOffset? MovedToStartUtc=null);
+public sealed record SeriesFromDate(DateOnly Date,string? Reason=null);
+public sealed record SeriesPrepay(int Weeks,decimal Amount,string Method);
+public sealed record SeriesListItem(Guid Id,Guid VenueId,Guid CourtId,Guid CustomerId,string Customer,string Court,short Weekday,TimeOnly StartTimeLocal,int DurationSlots,DateOnly StartDate,DateOnly? EndDate,string Status,string PriceMode,decimal? LockedPricePerOccurrence,int Conflicts,bool ApplyRegularDiscount=true,string? Notes=null);
+public sealed record SeriesOccurrence(Guid? BookingId,DateOnly Date,DateTimeOffset? StartUtc,DateTimeOffset? EndUtc,string Status,decimal Total,decimal Paid,string? Reason);
+public sealed record PrepaymentAllocation(Guid BlockId,Guid PaymentId,Guid BookingId,DateTimeOffset StartUtc,decimal Amount,string Status);
+public sealed record SeriesDetail(SeriesListItem Series,List<SeriesOccurrence> Occurrences,List<PrepaymentAllocation> Allocations);
+public sealed record SchedulingSettings(int HorizonWeeks,int OfferMinutes,int NoShowThreshold,bool WeeklySummary);
+public sealed record WaitlistJoin(Guid VenueId,Guid? CourtId,DateOnly Date,TimeOnly FromTimeLocal,TimeOnly ToTimeLocal,int SlotsNeeded,Guid? CustomerId=null);
+public sealed record WaitlistView(Guid Id,Guid VenueId,string Venue,string Slug,Guid? CourtId,string? Court,DateOnly Date,TimeOnly FromTimeLocal,TimeOnly ToTimeLocal,int SlotsNeeded,string Status,long Position,bool RequiresApproval,Guid? OfferedBookingId,DateTimeOffset? OfferExpiresAt,Guid? CustomerId=null,string? Customer=null,string? Phone=null);
+public sealed record WaitlistBadge(Guid CourtId,DateOnly Date,TimeOnly From,TimeOnly To,int Waiting);
+public sealed record WaitlistConfirm(decimal Amount,string Method);
+public sealed record SchedulingAlert(Guid SeriesId,DateOnly Date,string Reason);
+
+public sealed record SchedulingCourt(Guid Id,string Name,int SlotMinutes);
+public sealed record SchedulingCustomer(Guid Id,string Name,string Phone);
+public sealed record SchedulingOptions(List<SchedulingCourt> Courts,List<SchedulingCustomer> Customers);

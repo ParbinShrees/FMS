@@ -14,7 +14,7 @@ public sealed class SignalRBookingNotifier(
     IHubContext<AvailabilityHub> hub,
     FutsalDbContext db,
     ILogger<SignalRBookingNotifier> logger,
-    Futsal.Api.Notifications.NotificationEvents? notifications = null) : IBookingNotifier
+    Futsal.Api.Notifications.NotificationEvents? notifications = null, Futsal.Api.Scheduling.SchedulingRuntime? scheduling = null) : IBookingNotifier
 {
     public async Task PublishAsync(BookingEvent message, CancellationToken cancellationToken)
     {
@@ -55,6 +55,7 @@ public sealed class SignalRBookingNotifier(
         {
             logger.LogWarning(ex, "Realtime availability publish failed for venue {VenueId} and court {CourtId}; the committed booking remains successful.", message.VenueId, message.CourtId);
         }
+        if(scheduling!=null&&message.Name is "SlotReleased" or "SlotCancelled" or "SlotBooked")await scheduling.ReleasedAsync(message,cancellationToken);
         if (message.BookingId is Guid notificationBookingId && notifications != null && message.Name is "SlotBooked" or "SlotCancelled")
             await notifications.PublishAsync(notificationBookingId, cancellationToken);
     }

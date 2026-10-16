@@ -1,5 +1,6 @@
 using Futsal.Domain.Notifications;
 using Futsal.Domain.Pilot;
+using Futsal.Domain.Scheduling;
 using Futsal.Application.Abstractions;
 using Futsal.Domain.Identity;
 using Futsal.Domain.Locations;
@@ -22,6 +23,12 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
         options.MapEnum<PaymentMethod>("payment_method", nameTranslator: translator);
         options.MapEnum<PaymentStatus>("payment_status", nameTranslator: translator);
     }
+    public DbSet<RecurringBookingSeries> RecurringSeries=>Set<RecurringBookingSeries>();
+    public DbSet<RecurringSeriesException> SeriesExceptions=>Set<RecurringSeriesException>();
+    public DbSet<RecurringSeriesRevision> SeriesRevisions=>Set<RecurringSeriesRevision>();
+    public DbSet<SeriesConflict> SeriesConflicts=>Set<SeriesConflict>();
+    public DbSet<SeriesPrepayment> SeriesPrepayments=>Set<SeriesPrepayment>();
+    public DbSet<WaitlistEntry> WaitlistEntries=>Set<WaitlistEntry>();
     public DbSet<OnboardingState> OnboardingStates=>Set<OnboardingState>();
     public DbSet<StaffInvite> StaffInvites=>Set<StaffInvite>();
     public DbSet<PilotFeedback> PilotFeedback=>Set<PilotFeedback>();
@@ -55,6 +62,7 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ConfigurePilot(modelBuilder);
+        ConfigureScheduling(modelBuilder);
         modelBuilder.Entity<Subscription>(e=>{e.ToTable("subscriptions");e.HasKey(x=>x.Id);e.HasIndex(x=>x.OrganizationId).IsUnique();e.HasQueryFilter(x=>currentUser.IsSuperAdmin||(currentUser.OrganizationId!=null&&x.OrganizationId==currentUser.OrganizationId));foreach(var prop in e.Metadata.GetProperties())prop.SetColumnName(new NpgsqlSnakeCaseNameTranslator().TranslateMemberName(prop.Name));});
         modelBuilder.Entity<RefreshToken>().Property(x=>x.FamilyId).HasColumnName("family_id");
         modelBuilder.Entity<AppUser>().Property(x=>x.TotpEnabled).HasColumnName("totp_enabled");
@@ -405,6 +413,7 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
                 throw new InvalidOperationException("Payment entries are immutable; record corrections as a new payment.");
         }
 
+        if(ChangeTracker.Entries<SeriesPrepayment>().Any(e=>e.State is EntityState.Modified or EntityState.Deleted))throw new InvalidOperationException("Prepayment receipts are immutable.");
         if (currentUser.IsSuperAdmin) return;
 
         foreach (var entry in ChangeTracker.Entries<Location>().Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted))
@@ -424,6 +433,7 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
                 var ownedCustomers=ChangeTracker.Entries<Customer>().Where(x=>x.Entity.UserId==customerUserId).Select(x=>x.Entity.Id).ToHashSet();
                 if(entry.Entity is Customer customer && customer.UserId==customerUserId)continue;
                 if(entry.Entity is Booking booking && booking.CustomerId is Guid bookingCustomerId && ownedCustomers.Contains(bookingCustomerId))continue;
+                if(entry.Entity is WaitlistEntry wait&&ownedCustomers.Contains(wait.CustomerId))continue;
                 if(entry.Entity is Payment)continue;
             }
             throw new UnauthorizedAccessException("The current user cannot change data outside their organization.");
@@ -467,6 +477,29 @@ public sealed class FutsalDbContext(DbContextOptions<FutsalDbContext> options, I
         model.Entity<SmsUsage>(e => { e.ToTable("sms_usage"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.VenueId, x.Day }).IsUnique(); e.HasQueryFilter(x => currentUser.IsSuperAdmin || (currentUser.OrganizationId != null && x.OrganizationId == currentUser.OrganizationId)); });
         foreach (var type in new[] { typeof(Notification), typeof(NotificationSettings), typeof(NotificationTemplate), typeof(SmsUsage) })
             foreach (var property in model.Entity(type).Metadata.GetProperties()) property.SetColumnName(new NpgsqlSnakeCaseNameTranslator().TranslateMemberName(property.Name));
+    }
+
+    private void ConfigureScheduling(ModelBuilder m)
+    {
+        SchedulingTable<RecurringBookingSeries>(m,"recurring_booking_series");SchedulingTable<RecurringSeriesException>(m,"recurring_series_exceptions");SchedulingTable<RecurringSeriesRevision>(m,"recurring_series_revisions");SchedulingTable<SeriesConflict>(m,"series_conflicts");SchedulingTable<SeriesPrepayment>(m,"series_prepayments");SchedulingTable<WaitlistEntry>(m,"waitlist_entries");
+        m.Entity<RecurringBookingSeries>().HasOne<Court>().WithMany().HasForeignKey(x=>x.CourtId).OnDelete(DeleteBehavior.Restrict);m.Entity<RecurringBookingSeries>().HasOne<Customer>().WithMany().HasForeignKey(x=>x.CustomerId).OnDelete(DeleteBehavior.Restrict);
+        m.Entity<RecurringBookingSeries>().Property(x=>x.LockedPricePerOccurrence).HasPrecision(12,2);
+        m.Entity<RecurringBookingSeries>().Property<uint>("xmin").IsRowVersion();m.Entity<WaitlistEntry>().Property<uint>("xmin").IsRowVersion();
+        m.Entity<RecurringSeriesException>().HasOne<RecurringBookingSeries>().WithMany().HasForeignKey(x=>x.SeriesId).OnDelete(DeleteBehavior.Cascade);m.Entity<RecurringSeriesException>().HasIndex(x=>new{x.SeriesId,x.Date}).IsUnique();
+        m.Entity<RecurringSeriesRevision>().HasOne<RecurringBookingSeries>().WithMany().HasForeignKey(x=>x.SeriesId).OnDelete(DeleteBehavior.Cascade);m.Entity<RecurringSeriesRevision>().HasIndex(x=>new{x.SeriesId,x.FromDate}).IsUnique();
+        m.Entity<SeriesConflict>().HasOne<RecurringBookingSeries>().WithMany().HasForeignKey(x=>x.SeriesId).OnDelete(DeleteBehavior.Cascade);m.Entity<SeriesConflict>().HasIndex(x=>new{x.SeriesId,x.Date}).IsUnique();
+        m.Entity<SeriesPrepayment>().HasOne<RecurringBookingSeries>().WithMany().HasForeignKey(x=>x.SeriesId).OnDelete(DeleteBehavior.Restrict);m.Entity<SeriesPrepayment>().Property(x=>x.Amount).HasPrecision(12,2);
+        m.Entity<WaitlistEntry>().HasOne<Customer>().WithMany().HasForeignKey(x=>x.CustomerId).OnDelete(DeleteBehavior.Restrict);m.Entity<WaitlistEntry>().HasOne<Court>().WithMany().HasForeignKey(x=>x.CourtId).OnDelete(DeleteBehavior.Restrict);m.Entity<WaitlistEntry>().HasOne<Booking>().WithMany().HasForeignKey(x=>x.OfferedBookingId).OnDelete(DeleteBehavior.SetNull);
+        m.Entity<WaitlistEntry>().Property(x=>x.Position).UseIdentityAlwaysColumn();m.Entity<WaitlistEntry>().HasIndex(x=>new{x.VenueId,x.Date,x.Status,x.Position});
+        m.Entity<Booking>().Property(x=>x.SeriesId).HasColumnName("series_id");m.Entity<Booking>().Property(x=>x.SeriesDate).HasColumnName("series_date");m.Entity<Booking>().HasOne<RecurringBookingSeries>().WithMany().HasForeignKey(x=>x.SeriesId).OnDelete(DeleteBehavior.Restrict);
+        m.Entity<Booking>().HasIndex(x=>new{x.SeriesId,x.SeriesDate}).IsUnique().HasFilter("series_id IS NOT NULL AND status NOT IN ('CANCELLED','EXPIRED')");
+        m.Entity<Payment>().Property(x=>x.PrepaymentBlockId).HasColumnName("prepayment_block_id");m.Entity<Payment>().HasOne<SeriesPrepayment>().WithMany().HasForeignKey(x=>x.PrepaymentBlockId).OnDelete(DeleteBehavior.Restrict);
+        m.Entity<Venue>().Property(x=>x.RecurringHorizonWeeks).HasColumnName("recurring_horizon_weeks").HasDefaultValue(8);m.Entity<Venue>().Property(x=>x.WaitlistOfferMinutes).HasColumnName("waitlist_offer_minutes").HasDefaultValue(15);m.Entity<Venue>().Property(x=>x.WaitlistNoShowThreshold).HasColumnName("waitlist_no_show_threshold").HasDefaultValue(3).HasSentinel(-1);m.Entity<Venue>().Property(x=>x.WeeklySeriesSummary).HasColumnName("weekly_series_summary");
+    }
+    private void SchedulingTable<T>(ModelBuilder m,string table)where T:SchedulingRecord
+    {
+        var e=m.Entity<T>();e.HasBaseType((Type?)null);e.ToTable(table);e.HasKey(x=>x.Id);e.HasOne<Organization>().WithMany().HasForeignKey(x=>x.OrganizationId).OnDelete(DeleteBehavior.Restrict);e.HasOne<Venue>().WithMany().HasForeignKey(x=>x.VenueId).OnDelete(DeleteBehavior.Restrict);
+        e.HasQueryFilter(x=>currentUser.IsSuperAdmin||(currentUser.OrganizationId!=null&&x.OrganizationId==currentUser.OrganizationId&&Memberships.Any(a=>a.OrganizationId==x.OrganizationId&&a.UserId==currentUser.UserId&&(a.VenueId==null||a.VenueId==x.VenueId))));foreach(var p in e.Metadata.GetProperties())p.SetColumnName(new NpgsqlSnakeCaseNameTranslator().TranslateMemberName(p.Name));
     }
 
     private void ConfigurePilot(ModelBuilder model)

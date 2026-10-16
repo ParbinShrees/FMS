@@ -20,10 +20,12 @@ public sealed class BlockedPeriodsController(FutsalDbContext db,ICurrentUser cur
         if(request.EndAt<=request.StartAt)throw new ApiException(400,"VALIDATION_FAILED","endAt must be after startAt.");
         var organizationId=current.OrganizationId??throw new ApiException(403,"FORBIDDEN","An organization staff login is required.");
         var court=await db.Courts.SingleOrDefaultAsync(c=>c.Id==courtId&&c.OrganizationId==organizationId,ct)??throw new ApiException(404,"NOT_FOUND","Court was not found.");
+        await using var tx=await db.Database.BeginTransactionAsync(ct);
+        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({"court:"+court.Id},0))",ct);
         if(await db.Bookings.IgnoreQueryFilters().AnyAsync(b=>b.CourtId==court.Id&&b.Status!=BookingStatus.CANCELLED&&b.Status!=BookingStatus.EXPIRED&&b.StartAt<request.EndAt&&b.EndAt>request.StartAt,ct))
             throw new ApiException(409,"SLOT_UNAVAILABLE","A booking already occupies part of this period.");
         var block=new BlockedPeriod{OrganizationId=organizationId,CourtId=court.Id,StartAt=request.StartAt.ToUniversalTime(),EndAt=request.EndAt.ToUniversalTime(),Reason=request.Reason};
-        db.BlockedPeriods.Add(block);await db.SaveChangesAsync(ct);
+        db.BlockedPeriods.Add(block);await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);
         await notifier.PublishAsync(new BookingEvent("SlotBlocked",court.VenueId,court.Id,block.StartAt,block.EndAt),ct);
         return Created($"/api/v1/staff/courts/{court.Id}/blocked-periods/{block.Id}",new{id=block.Id,block.StartAt,block.EndAt,block.Reason});
     }

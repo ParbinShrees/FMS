@@ -4,6 +4,10 @@ namespace Futsal.Domain.Locations;
 
 public sealed class Venue : IOrganizationScoped
 {
+    public int RecurringHorizonWeeks{get;set;}=8;
+    public int WaitlistOfferMinutes{get;set;}=15;
+    public int WaitlistNoShowThreshold{get;set;}=3;
+    public bool WeeklySeriesSummary{get;set;}
     public bool BsFirst{get;set;}
     public bool NepaliNumerals{get;set;}
     public Guid Id { get; set; } = Guid.NewGuid();

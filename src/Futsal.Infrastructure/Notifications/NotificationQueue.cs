@@ -12,7 +12,7 @@ namespace Futsal.Infrastructure.Notifications;
 public sealed class NotificationQueue(FutsalDbContext db, IClock clock, IDataProtectionProvider protection, INotificationSender sender)
 {
     private readonly IDataProtector protector = protection.CreateProtector("FutsalPro.NotificationPayload.v1");
-    public static readonly string[] Names = ["confirmation", "payment", "reminder", "cancellation", "due", "otp"];
+    public static readonly string[] Names = ["confirmation", "payment", "reminder", "cancellation", "due", "otp", "waitlist_offer", "weekly_summary"];
     private static readonly ResourceManager Resources = new("Futsal.Application.Notifications.Templates", typeof(SmsText).Assembly);
     public static string DefaultText(string name, string language) => Resources.GetString(name, CultureInfo.GetCultureInfo(language)) ?? throw new ArgumentException("Unknown template");
     public async Task<NotificationSettings> SettingsAsync(Guid venueId, Guid orgId, CancellationToken ct)
@@ -67,6 +67,7 @@ public sealed class NotificationQueue(FutsalDbContext db, IClock clock, IDataPro
         var customer = await db.Customers.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.Id == booking.CustomerId && x.OrganizationId == booking.OrganizationId, ct);
         if (customer == null || customer.OptOut) return;
         var venue = await db.Venues.IgnoreQueryFilters().SingleAsync(x => x.Id == booking.VenueId && x.OrganizationId == booking.OrganizationId, ct);
+        if(name=="reminder"&&booking.SeriesId!=null&&venue.WeeklySeriesSummary)return;
         var settings = await SettingsAsync(venue.Id, venue.OrganizationId, ct);
         bool enabled = name switch { "confirmation" => settings.ConfirmationEnabled, "payment" => settings.PaymentEnabled, "reminder" => settings.ReminderEnabled, "cancellation" => settings.CancellationEnabled, "due" => settings.DueEnabled, _ => false };
         if (!enabled) return;
@@ -89,11 +90,32 @@ public sealed class NotificationQueue(FutsalDbContext db, IClock clock, IDataPro
             var settings = await SettingsAsync(b.VenueId, b.OrganizationId, ct);
             if (b.StartAt.AddHours(-settings.ReminderHours) <= now) await QueueBookingAsync(b, "reminder", $"booking:{b.Id}:reminder", null, ct);
         }
+        if(reminders)await QueueWeeklySummariesAsync(ct);
         var payments = await db.Payments.IgnoreQueryFilters().Where(x => x.Status == PaymentStatus.COMPLETED && x.Amount > 0 && x.BookingId != null).ToListAsync(ct);
         foreach (var p in payments)
         {
             var b = await db.Bookings.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.Id == p.BookingId && x.OrganizationId == p.OrganizationId, ct);
             if (b != null && (p.VerifiedAt ?? p.CreatedAt) >= (await SettingsAsync(b.VenueId, b.OrganizationId, ct)).EnabledAt) await QueueBookingAsync(b, "payment", $"payment:{p.Id}", p.Amount, ct);
+        }
+    }
+    private async Task<string> SchedulingTemplateAsync(Guid venue,string name,string language,CancellationToken ct)=>await db.NotificationTemplates.IgnoreQueryFilters().Where(x=>x.VenueId==venue&&x.Name==name&&x.Language==language).Select(x=>x.Text).SingleOrDefaultAsync(ct)??DefaultText(name,language);
+    public async Task QueueWaitlistOfferAsync(Booking booking,Guid entryId,string? baseUrl,CancellationToken ct)
+    {
+        var customer=await db.Customers.IgnoreQueryFilters().SingleAsync(x=>x.Id==booking.CustomerId&&x.OrganizationId==booking.OrganizationId,ct);if(customer.OptOut)return;
+        if(!Uri.TryCreate(baseUrl,UriKind.Absolute,out var root)||root.Scheme is not ("https" or "http"))throw new InvalidOperationException("Configure PublicBooking:BaseUrl or an explicit CORS origin for waitlist links.");
+        var venue=await db.Venues.IgnoreQueryFilters().SingleAsync(x=>x.Id==booking.VenueId,ct);var settings=await SettingsAsync(venue.Id,venue.OrganizationId,ct);var local=TimeZoneInfo.ConvertTimeBySystemTimeZoneId(booking.StartAt,venue.Timezone);var text=SmsText.Render(await SchedulingTemplateAsync(venue.Id,"waitlist_offer",settings.Language,ct),new Dictionary<string,string>{{"venue",venue.Name},{"date",local.ToString("yyyy-MM-dd")+" / "+NepalDate.Bs(DateOnly.FromDateTime(local.DateTime))},{"time",local.ToString("h:mm tt")},{"link",new Uri(root,"/v/waitlist/"+entryId).ToString()},{"expires",TimeZoneInfo.ConvertTimeBySystemTimeZoneId(booking.HoldExpiresAt!.Value,venue.Timezone).ToString("h:mm tt")}});await QueueAsync(venue.OrganizationId,venue.Id,booking.Id,customer.Id,customer.Phone,"waitlist_offer",text,"waitlist-offer:"+entryId,ct);
+    }
+    public async Task QueueWeeklySummariesAsync(CancellationToken ct)
+    {
+        var now=clock.UtcNow;var venues=await db.Venues.IgnoreQueryFilters().Where(x=>x.WeeklySeriesSummary&&x.IsActive).ToListAsync(ct);
+        foreach(var venue in venues)
+        {
+            var settings=await SettingsAsync(venue.Id,venue.OrganizationId,ct);if(!settings.ReminderEnabled)continue;var day=Futsal.Application.Scheduling.SeriesCalendar.Today(now,venue.Timezone);var monday=day.AddDays(-(((int)day.DayOfWeek+6)%7));var from=Futsal.Application.Scheduling.SeriesCalendar.Utc(monday,TimeOnly.MinValue,venue.Timezone);var to=from.AddDays(7);
+            var bookings=await db.Bookings.IgnoreQueryFilters().Where(x=>x.VenueId==venue.Id&&x.SeriesId!=null&&x.Status==BookingStatus.CONFIRMED&&x.StartAt>now&&x.StartAt>=from&&x.StartAt<to).OrderBy(x=>x.StartAt).ToListAsync(ct);
+            foreach(var group in bookings.GroupBy(x=>new{x.SeriesId,x.CustomerId}))
+            {
+                var first=group.First();if(first.StartAt.AddHours(-settings.ReminderHours)>now)continue;var customer=await db.Customers.IgnoreQueryFilters().SingleAsync(x=>x.Id==group.Key.CustomerId&&x.OrganizationId==venue.OrganizationId,ct);if(customer.OptOut)continue;var games=string.Join("; ",group.Select(b=>{var local=TimeZoneInfo.ConvertTimeBySystemTimeZoneId(b.StartAt,venue.Timezone);return local.ToString("yyyy-MM-dd h:mm tt")+" / "+NepalDate.Bs(DateOnly.FromDateTime(local.DateTime));}));var text=SmsText.Render(await SchedulingTemplateAsync(venue.Id,"weekly_summary",settings.Language,ct),new Dictionary<string,string>{{"venue",venue.Name},{"games",games}});await QueueAsync(venue.OrganizationId,venue.Id,first.Id,customer.Id,customer.Phone,"weekly_summary",text,$"series-summary:{group.Key.SeriesId}:{monday:yyyyMMdd}",ct);
+            }
         }
     }
     public async Task DueRemindersAsync(CancellationToken ct)
@@ -118,6 +140,7 @@ public sealed class NotificationQueue(FutsalDbContext db, IClock clock, IDataPro
         foreach (var n in pending)
         {
             if(await Futsal.Infrastructure.Payments.DemoSafety.IsDemoAsync(db,n.OrganizationId,ct)){n.Status="FAILED";n.Error="DEMO_SUPPRESSED";n.Payload="";continue;}
+            if(n.Template=="waitlist_offer"&&!await db.Bookings.IgnoreQueryFilters().AnyAsync(b=>b.Id==n.BookingId&&b.Status==BookingStatus.HELD&&b.HoldExpiresAt>now,ct)){n.Status="FAILED";n.Error="OFFER_EXPIRED";continue;}
             if (n.CustomerId != null && await db.Customers.IgnoreQueryFilters().AnyAsync(x => x.Id == n.CustomerId && x.OrganizationId == n.OrganizationId && x.OptOut, ct)) { n.Status = "FAILED"; n.Error = "OPTED_OUT"; continue; }
             if (n.Template == "reminder" && !await db.Bookings.IgnoreQueryFilters().AnyAsync(x => x.Id == n.BookingId && x.OrganizationId == n.OrganizationId && x.Status == BookingStatus.CONFIRMED && x.StartAt > now, ct)) { n.Status = "FAILED"; n.Error = "BOOKING_INACTIVE"; continue; }
             if (!SmsText.ValidPhone(n.Recipient)) { n.Status = "FAILED"; n.Error = "INVALID_PHONE"; continue; }

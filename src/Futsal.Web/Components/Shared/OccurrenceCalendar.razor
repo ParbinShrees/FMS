@@ -1,0 +1,9 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Scheduling> N
+@foreach(var month in Occurrences.GroupBy(x=>new{x.Date.Year,x.Date.Month}).OrderBy(g=>g.Key.Year).ThenBy(g=>g.Key.Month)){
+<h3>@(new DateTime(month.Key.Year,month.Key.Month,1).ToString("Y",System.Globalization.CultureInfo.CurrentUICulture))</h3>
+<div class="occurrence-calendar" style="display:grid;grid-template-columns:repeat(7,minmax(100px,1fr));gap:6px;overflow-x:auto" aria-label="@N["OccurrenceCalendar"]">
+@for(var i=0;i<7;i++){<strong>@N["Day"+i]</strong>}
+@for(var i=0;i<(int)new DateOnly(month.Key.Year,month.Key.Month,1).DayOfWeek;i++){<div></div>}
+@for(var day=1;day<=DateTime.DaysInMonth(month.Key.Year,month.Key.Month);day++){var current=new DateOnly(month.Key.Year,month.Key.Month,day);var item=month.FirstOrDefault(x=>x.Date==current);<div class="pa-2" style="border:1px solid #aaa">@if(item==null){<span>@day</span>}else{<button type="button" class="pa-2" @onclick="()=>Selected.InvokeAsync(item)">@BsDate.Display(current)<br/>@N[item.Status]</button>}</div>}
+</div>}
+@code{[Parameter]public List<SeriesOccurrence> Occurrences{get;set;}=[];[Parameter]public EventCallback<SeriesOccurrence> Selected{get;set;}}

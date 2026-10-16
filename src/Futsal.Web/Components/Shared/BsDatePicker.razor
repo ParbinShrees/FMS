@@ -1,4 +1,5 @@
 @using Futsal.Web.Services
+@inject Futsal.Application.Abstractions.IClock Clock
 
 <div class="d-flex align-center gap-2">
     <MudDatePicker Date="@SelectedDate"
@@ -15,11 +16,11 @@
 @code {
     [Parameter] public bool BsFirst {get;set;}
     [Parameter] public bool NepaliNumerals {get;set;}
-    [Parameter] public DateTime? Date { get; set; } = DateTime.Today;
+    [Parameter] public DateTime? Date { get; set; } = null;
     [Parameter] public EventCallback<DateTime?> DateChanged { get; set; }
 
-    private DateTime? SelectedDate => Date ?? DateTime.Today;
-    private string BsDisplay => BsDate.Display(DateOnly.FromDateTime(SelectedDate ?? DateTime.Today),BsFirst,NepaliNumerals);
+    private DateTime? SelectedDate => Date ?? BsDate.KathmanduDate(Clock.UtcNow).ToDateTime(TimeOnly.MinValue);
+    private string BsDisplay => BsDate.Display(DateOnly.FromDateTime(SelectedDate ?? BsDate.KathmanduDate(Clock.UtcNow).ToDateTime(TimeOnly.MinValue)),BsFirst,NepaliNumerals);
 
     private async Task OnDateSelected(DateTime? newDate)
     {

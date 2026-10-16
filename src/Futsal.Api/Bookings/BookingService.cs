@@ -30,6 +30,9 @@ public sealed class BookingService(
         {
             await AdvisoryLockAsync($"idempotency:{userId}:{idempotencyKey}",ct);
             var replay=await ReplayAsync(idempotencyKey,userId,endpoint,requestHash,ct);if(replay is not null){await transaction.CommitAsync(ct);return replay;}
+            var user=await db.Users.SingleAsync(x=>x.Id==userId,ct);
+            if(string.IsNullOrWhiteSpace(user.Phone))throw new ApiException(400,"VALIDATION_FAILED","A verified customer phone number is required.");
+            var phone=NepaliPhone.Normalize(user.Phone);await AdvisoryLockAsync("customer-holds:"+phone,ct);
             var court=await db.Courts.IgnoreQueryFilters().Include(x=>x.Venue).SingleOrDefaultAsync(x=>x.Id==request.CourtId,ct)
                 ?? throw new ApiException(404,"NOT_FOUND","Court was not found.");
             var venue=court.Venue;
@@ -40,9 +43,6 @@ public sealed class BookingService(
             await AdvisoryLockAsync("court:"+court.Id,ct);
             var times=await ValidateSlot(request.StartAt,request.EndAt,court,venue,ct);
             var expiredEvents=await ExpireOverlappingHoldsAsync(court.Id,times.Start,times.End,ct);
-            var user=await db.Users.SingleAsync(x=>x.Id==userId,ct);
-            if(string.IsNullOrWhiteSpace(user.Phone))throw new ApiException(400,"VALIDATION_FAILED","A verified customer phone number is required.");
-            var phone=NepaliPhone.Normalize(user.Phone);
             var customer=await db.Customers.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.OrganizationId==venue.OrganizationId&&x.UserId==userId,ct);
             if(customer is null)
             {
@@ -121,7 +121,7 @@ public sealed class BookingService(
 
     public async Task<List<BookingResponse>> MyBookingsAsync(CancellationToken ct)
     {
-        var uid=RequireCustomer();return await db.Bookings.IgnoreQueryFilters().Where(x=>x.CustomerId!=null&&db.Customers.IgnoreQueryFilters().Any(c=>c.Id==x.CustomerId&&c.UserId==uid))
+        var uid=RequireCustomer();var phone=await db.Users.Where(u=>u.Id==uid&&u.IsActive).Select(u=>u.Phone).SingleAsync(ct);return await db.Bookings.IgnoreQueryFilters().Where(x=>x.CustomerId!=null&&db.Customers.IgnoreQueryFilters().Any(c=>c.Id==x.CustomerId&&(c.UserId==uid||(phone!=null&&c.Phone==phone))))
             .OrderByDescending(x=>x.StartAt).Select(x=>new BookingResponse(x.Id,x.BookingCode,x.Status,x.StartAt,x.EndAt,x.HoldExpiresAt,x.TotalAmount,x.DiscountAmount,x.AdvanceRequired,x.PaidAmount)).ToListAsync(ct);
     }
 
@@ -171,6 +171,8 @@ public sealed class BookingService(
 
     public async Task RecordPaymentAsync(Guid id,RecordPaymentRequest request,string idempotencyKey,IPAddress? ip,CancellationToken ct)
     {
+        if(request.Amount<0&&current.Role is not ("Owner" or "Manager")&&!current.IsSuperAdmin)throw new ApiException(403,"FORBIDDEN","FORBIDDEN");
+        if(request.Amount==0||request.Amount is < -9999999999.99m or > 9999999999.99m||decimal.Round(request.Amount,2)!=request.Amount||!Enum.IsDefined(request.Method))throw new ApiException(400,"VALIDATION_FAILED","VALIDATION_FAILED");
         var userId=current.UserId??throw new UnauthorizedAccessException();var endpoint=$"POST:/api/v1/staff/bookings/{id}/payments";var hash=Hash(request);
         await using var transaction=await db.Database.BeginTransactionAsync(ct);
         try
@@ -263,10 +265,12 @@ public sealed class BookingService(
     private Guid RequireCustomer()=>current.IsAuthenticated&&current.Role=="Customer"&&current.UserId is Guid id?id:throw new ApiException(403,"FORBIDDEN","Customer authentication is required.");
     private async Task<(Booking Booking,Customer Customer)> GetOwnedBookingAsync(Guid bookingId,Guid userId,CancellationToken ct)
     {
-        var ids=await db.Customers.IgnoreQueryFilters().Where(c=>c.UserId==userId).Select(c=>c.Id).ToArrayAsync(ct);
+        var phone=await db.Users.Where(u=>u.Id==userId&&u.IsActive).Select(u=>u.Phone).SingleAsync(ct);
+        var ids=await db.Customers.IgnoreQueryFilters().Where(c=>c.UserId==userId||(phone!=null&&c.Phone==phone)).Select(c=>c.Id).ToArrayAsync(ct);
         var booking=await db.Bookings.IgnoreQueryFilters().SingleOrDefaultAsync(b=>b.Id==bookingId&&b.CustomerId!=null&&ids.Contains(b.CustomerId.Value),ct)
             ??throw new ApiException(404,"NOT_FOUND","Booking was not found.");
         var customer=await db.Customers.IgnoreQueryFilters().SingleAsync(c=>c.Id==booking.CustomerId,ct);
+        if(customer.UserId!=userId){customer.UserId=userId;db.AuditLogs.Add(new(){OrganizationId=customer.OrganizationId,UserId=userId,Action="CUSTOMER_PHONE_LINKED",EntityType="Customer",EntityId=customer.Id,CreatedAt=clock.UtcNow});}
         return(booking,customer);
     }
     private async Task<bool> ActiveLocationAsync(Guid locationId,CancellationToken ct)=>await db.Locations.AnyAsync(x=>x.Id==locationId&&x.IsActive,ct);

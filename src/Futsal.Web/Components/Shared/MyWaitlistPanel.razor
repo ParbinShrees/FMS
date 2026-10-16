@@ -1,0 +1,13 @@
+@implements IDisposable
+@inject ApiClient Api
+@inject BffAuthState Auth
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Scheduling> N
+@if(Auth.Token?.Role=="Customer"){
+<MudPaper Class="pa-4 my-4"><h2>@N["MyWaitlist"]</h2><MudButton OnClick="Load">@N["Refresh"]</MudButton>@if(rows.Count==0){<p>@N["NoWaitlist"]</p>}
+@foreach(var entry in rows){<MudPaper Class="pa-3 my-2"><strong>@entry.Venue</strong><p>@BsDate.Display(entry.Date) ? @entry.FromTimeLocal - @entry.ToTimeLocal ? @N[entry.Status]</p>@if(entry.RequiresApproval){<p>@N["NeedsApproval"]</p>}@if(entry.Status=="OFFERED"&&entry.OfferExpiresAt is {} expires){<HoldCountdown @key="entry.Id" ExpiresAt="expires" OnExpired="Load"/><MudButton Href="@($"/v/waitlist/{entry.Id}")">@N["OpenOffer"]</MudButton>}@if(entry.Status is "WAITING" or "OFFERED"){<MudButton OnClick="()=>Cancel(entry.Id)">@N["CancelEntry"]</MudButton>}</MudPaper>}
+@if(message!=null){<MudAlert>@N[message]</MudAlert>}</MudPaper>}
+@code{[Parameter]public Guid? VenueId{get;set;}List<WaitlistView> rows=[];string? message;Guid? loadedUser,loadedVenue;System.Threading.Timer? timer;bool disposed;
+protected override async Task OnParametersSetAsync(){if(Auth.Token?.UserId!=loadedUser||VenueId!=loadedVenue){loadedUser=Auth.Token?.UserId;loadedVenue=VenueId;await Load();}timer??=new System.Threading.Timer(_=>{if(!disposed)_=InvokeAsync(async()=>{await Load();StateHasChanged();});},null,TimeSpan.FromSeconds(30),TimeSpan.FromSeconds(30));}
+async Task Load(){if(Auth.Token?.Role!="Customer"||disposed)return;try{rows=(await Api.ManagementGetAsync<List<WaitlistView>>("waitlist/mine")??[]).Where(x=>VenueId==null||x.VenueId==VenueId).ToList();}catch(ApiProblemException ex){message=ex.Code;}}
+async Task Cancel(Guid id){try{await Api.SchedulingSendAsync<object>($"waitlist/{id}/cancel",new{});await Load();}catch(ApiProblemException ex){message=ex.Code;}}
+public void Dispose(){disposed=true;timer?.Dispose();}}

@@ -1,0 +1,678 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="Recurring">
+    <value>Recurring bookings</value>
+  </data>
+  <data name="Venue">
+    <value>Venue</value>
+  </data>
+  <data name="Status">
+    <value>Status</value>
+  </data>
+  <data name="Refresh">
+    <value>Refresh</value>
+  </data>
+  <data name="Customer">
+    <value>Customer</value>
+  </data>
+  <data name="Court">
+    <value>Court</value>
+  </data>
+  <data name="Conflicts">
+    <value>Conflicts</value>
+  </data>
+  <data name="CreateSeries">
+    <value>Create weekly series</value>
+  </data>
+  <data name="Step">
+    <value>Step</value>
+  </data>
+  <data name="Weekday">
+    <value>Weekday</value>
+  </data>
+  <data name="LocalTime">
+    <value>Nepal time</value>
+  </data>
+  <data name="DurationSlots">
+    <value>Number of consecutive slots</value>
+  </data>
+  <data name="StartDate">
+    <value>Start date</value>
+  </data>
+  <data name="EndDateOptional">
+    <value>End date (optional)</value>
+  </data>
+  <data name="OpenEnded">
+    <value>Open-ended</value>
+  </data>
+  <data name="PriceMode">
+    <value>Pricing mode</value>
+  </data>
+  <data name="CURRENT">
+    <value>Current rules for future games</value>
+  </data>
+  <data name="LOCKED">
+    <value>Price locked at series creation</value>
+  </data>
+  <data name="RegularDiscount">
+    <value>Apply regular-customer discount</value>
+  </data>
+  <data name="Notes">
+    <value>Notes</value>
+  </data>
+  <data name="Preview">
+    <value>Preview dates and conflicts</value>
+  </data>
+  <data name="CreateFreeOnly">
+    <value>Create the free dates only; keep conflicts for staff review</value>
+  </data>
+  <data name="CancelPreview">
+    <value>Cancel / edit preview</value>
+  </data>
+  <data name="SchedulingSettings">
+    <value>Recurring and waitlist settings</value>
+  </data>
+  <data name="HorizonWeeks">
+    <value>Rolling horizon (weeks, 1–26)</value>
+  </data>
+  <data name="OfferMinutes">
+    <value>Waitlist offer window (minutes, 1–60)</value>
+  </data>
+  <data name="NoShowThreshold">
+    <value>Approval required above this no-show count</value>
+  </data>
+  <data name="WeeklySummary">
+    <value>Send one weekly series reminder summary</value>
+  </data>
+  <data name="Save">
+    <value>Save</value>
+  </data>
+  <data name="Saved">
+    <value>Saved</value>
+  </data>
+  <data name="Failure">
+    <value>Could not complete the action. Try again.</value>
+  </data>
+  <data name="Date">
+    <value>AD / BS date</value>
+  </data>
+  <data name="Price">
+    <value>Total (NPR)</value>
+  </data>
+  <data name="ALL">
+    <value>All</value>
+  </data>
+  <data name="ACTIVE">
+    <value>Active</value>
+  </data>
+  <data name="PAUSED">
+    <value>Paused</value>
+  </data>
+  <data name="ENDED">
+    <value>Ended / scheduled to end</value>
+  </data>
+  <data name="FREE">
+    <value>Free</value>
+  </data>
+  <data name="BOOKED">
+    <value>Booked</value>
+  </data>
+  <data name="BLOCKED">
+    <value>Blocked for closure</value>
+  </data>
+  <data name="CLOSED">
+    <value>Closed or outside slot grid</value>
+  </data>
+  <data name="PAST">
+    <value>Past date or time</value>
+  </data>
+  <data name="CONFLICT">
+    <value>Conflict needs attention</value>
+  </data>
+  <data name="SKIPPED">
+    <value>Skipped</value>
+  </data>
+  <data name="MOVED">
+    <value>Moved</value>
+  </data>
+  <data name="CONFIRMED">
+    <value>Confirmed</value>
+  </data>
+  <data name="COMPLETED">
+    <value>Completed</value>
+  </data>
+  <data name="NO_SHOW">
+    <value>No-show</value>
+  </data>
+  <data name="CANCELLED">
+    <value>Cancelled</value>
+  </data>
+  <data name="EXPIRED">
+    <value>Expired</value>
+  </data>
+  <data name="HELD">
+    <value>Held</value>
+  </data>
+  <data name="SeriesDetail">
+    <value>Series details</value>
+  </data>
+  <data name="PauseHelp">
+    <value>Pause stops new generation; already confirmed games stay reserved.</value>
+  </data>
+  <data name="Pause">
+    <value>Pause generation</value>
+  </data>
+  <data name="Resume">
+    <value>Resume generation</value>
+  </data>
+  <data name="ApplyFrom">
+    <value>Apply from this date</value>
+  </data>
+  <data name="EndFrom">
+    <value>End from date</value>
+  </data>
+  <data name="DeleteSeries">
+    <value>Archive series from date</value>
+  </data>
+  <data name="OccurrenceCalendar">
+    <value>Occurrence calendar</value>
+  </data>
+  <data name="Paid">
+    <value>Paid (NPR)</value>
+  </data>
+  <data name="Action">
+    <value>Action</value>
+  </data>
+  <data name="Select">
+    <value>Select date</value>
+  </data>
+  <data name="Reason">
+    <value>Reason</value>
+  </data>
+  <data name="SkipDate">
+    <value>Skip date</value>
+  </data>
+  <data name="CancelOne">
+    <value>Cancel this occurrence</value>
+  </data>
+  <data name="MoveDate">
+    <value>Move to date</value>
+  </data>
+  <data name="MoveOne">
+    <value>Move this occurrence</value>
+  </data>
+  <data name="PaymentAmount">
+    <value>Amount received (NPR)</value>
+  </data>
+  <data name="Method">
+    <value>Payment method</value>
+  </data>
+  <data name="CASH">
+    <value>Cash</value>
+  </data>
+  <data name="BANK">
+    <value>Bank</value>
+  </data>
+  <data name="OTHER">
+    <value>Other recorded payment</value>
+  </data>
+  <data name="RecordPayment">
+    <value>Record payment for selected game</value>
+  </data>
+  <data name="ChangeFuture">
+    <value>Change future time or court</value>
+  </data>
+  <data name="ChangeHelp">
+    <value>Applies from the date above. Every future placement is checked in one transaction; any conflict cancels the entire change. Past games and payment links stay unchanged.</value>
+  </data>
+  <data name="ApplyChange">
+    <value>Apply future change</value>
+  </data>
+  <data name="PrepaidBlock">
+    <value>Prepaid block</value>
+  </data>
+  <data name="PrepaidHelp">
+    <value>Enter weeks and the amount actually received. It is allocated to the earliest confirmed future games in order. Each line below is a separate immutable payment record.</value>
+  </data>
+  <data name="Weeks">
+    <value>Number of weeks</value>
+  </data>
+  <data name="RecordPrepayment">
+    <value>Record and allocate prepayment</value>
+  </data>
+  <data name="RefundAmount">
+    <value>Refund amount (NPR)</value>
+  </data>
+  <data name="Block">
+    <value>Prepayment block</value>
+  </data>
+  <data name="Allocated">
+    <value>Allocated / refunded (NPR)</value>
+  </data>
+  <data name="RecordRefund">
+    <value>Record refund as a new entry</value>
+  </data>
+  <data name="WaitlistSchedule">
+    <value>Schedule and waitlist</value>
+  </data>
+  <data name="QueuePosition">
+    <value>FIFO sequence</value>
+  </data>
+  <data name="Window">
+    <value>Requested Nepal-time window</value>
+  </data>
+  <data name="NeedsApproval">
+    <value>Staff approval required</value>
+  </data>
+  <data name="Approve">
+    <value>Approve this entry</value>
+  </data>
+  <data name="CancelEntry">
+    <value>Leave / cancel waitlist</value>
+  </data>
+  <data name="ConfirmCashOffer">
+    <value>Confirm offer with cash record</value>
+  </data>
+  <data name="CashOfferHelp">
+    <value>Amount above is the cash received for the offer you confirm; zero leaves the booking unpaid.</value>
+  </data>
+  <data name="JoinOnBehalf">
+    <value>Join for a customer</value>
+  </data>
+  <data name="AnyCourt">
+    <value>Any court at this venue</value>
+  </data>
+  <data name="FromTime">
+    <value>From Nepal time</value>
+  </data>
+  <data name="ToTime">
+    <value>Until Nepal time</value>
+  </data>
+  <data name="JoinWaitlist">
+    <value>Join waitlist</value>
+  </data>
+  <data name="SeriesConflictsAlert">
+    <value>{0} recurring dates need staff attention.</value>
+  </data>
+  <data name="NotifyMe">
+    <value>Notify me if this slot opens</value>
+  </data>
+  <data name="WaitingCount">
+    <value>{0} waiting</value>
+  </data>
+  <data name="MyWaitlist">
+    <value>My waitlist</value>
+  </data>
+  <data name="NoWaitlist">
+    <value>No waitlist entries.</value>
+  </data>
+  <data name="OpenOffer">
+    <value>Open offer and pay</value>
+  </data>
+  <data name="WaitlistOffer">
+    <value>Your slot offer</value>
+  </data>
+  <data name="OfferLogin">
+    <value>Sign in with the phone used for your waitlist entry. Only you can open this offer.</value>
+  </data>
+  <data name="Login">
+    <value>Sign in with OTP</value>
+  </data>
+  <data name="BookingCode">
+    <value>Booking code</value>
+  </data>
+  <data name="Advance">
+    <value>Advance required (NPR)</value>
+  </data>
+  <data name="PayEsewa">
+    <value>Pay with eSewa</value>
+  </data>
+  <data name="WaitlistJoined">
+    <value>You joined the waitlist. Watch My waitlist for an offer.</value>
+  </data>
+  <data name="Reconnecting">
+    <value>Reconnecting. The schedule will be refreshed on reconnect and every minute.</value>
+  </data>
+  <data name="Day0">
+    <value>Sunday</value>
+  </data>
+  <data name="Day1">
+    <value>Monday</value>
+  </data>
+  <data name="Day2">
+    <value>Tuesday</value>
+  </data>
+  <data name="Day3">
+    <value>Wednesday</value>
+  </data>
+  <data name="Day4">
+    <value>Thursday</value>
+  </data>
+  <data name="Day5">
+    <value>Friday</value>
+  </data>
+  <data name="Day6">
+    <value>Saturday</value>
+  </data>
+  <data name="ACCOUNT_LOCKED" xml:space="preserve">
+    <value>Account is temporarily locked. Try again later.</value>
+  </data>
+  <data name="BOOKING_CANCELLED" xml:space="preserve">
+    <value>Booking cancelled.</value>
+  </data>
+  <data name="BOOKING_COMPLETED" xml:space="preserve">
+    <value>Booking completed.</value>
+  </data>
+  <data name="BOOKING_CREATED" xml:space="preserve">
+    <value>Booking created.</value>
+  </data>
+  <data name="BOOKING_HELD" xml:space="preserve">
+    <value>Booking held.</value>
+  </data>
+  <data name="BOOKING_NO_SHOW" xml:space="preserve">
+    <value>Booking no show.</value>
+  </data>
+  <data name="BOOKING_RELEASED" xml:space="preserve">
+    <value>Booking released.</value>
+  </data>
+  <data name="BOOKING_RESCHEDULED" xml:space="preserve">
+    <value>Booking rescheduled.</value>
+  </data>
+  <data name="CONCURRENCY_CONFLICT" xml:space="preserve">
+    <value>Concurrency conflict.</value>
+  </data>
+  <data name="CUSTOMER_ANONYMIZED" xml:space="preserve">
+    <value>Customer anonymized.</value>
+  </data>
+  <data name="CUSTOMER_EXPORTED" xml:space="preserve">
+    <value>Customer exported.</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_NOT_ALLOWED" xml:space="preserve">
+    <value>Customer login not allowed.</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>Customer login succeeded.</value>
+  </data>
+  <data name="DENY" xml:space="preserve">
+    <value>Deny.</value>
+  </data>
+  <data name="DUPLICATE_SLUG" xml:space="preserve">
+    <value>Duplicate slug.</value>
+  </data>
+  <data name="EPAYTEST" xml:space="preserve">
+    <value>Epaytest.</value>
+  </data>
+  <data name="FAILED" xml:space="preserve">
+    <value>Failed.</value>
+  </data>
+  <data name="FIXED" xml:space="preserve">
+    <value>Fixed.</value>
+  </data>
+  <data name="FORBIDDEN" xml:space="preserve">
+    <value>You are not allowed to perform this action.</value>
+  </data>
+  <data name="HEAD" xml:space="preserve">
+    <value>Head.</value>
+  </data>
+  <data name="HOLD_EXPIRED" xml:space="preserve">
+    <value>The hold has expired. Choose another slot.</value>
+  </data>
+  <data name="IDEMPOTENCY_CONFLICT" xml:space="preserve">
+    <value>Idempotency conflict.</value>
+  </data>
+  <data name="INTERNAL_ERROR" xml:space="preserve">
+    <value>An unexpected error occurred.</value>
+  </data>
+  <data name="INVALID_COORDINATES" xml:space="preserve">
+    <value>Invalid coordinates.</value>
+  </data>
+  <data name="INVALID_CREDENTIALS" xml:space="preserve">
+    <value>Email/phone or password is incorrect.</value>
+  </data>
+  <data name="INVALID_PARENT" xml:space="preserve">
+    <value>Invalid parent.</value>
+  </data>
+  <data name="INVALID_REFRESH_TOKEN" xml:space="preserve">
+    <value>Session expired. Sign in again.</value>
+  </data>
+  <data name="LOGIN_FAILED" xml:space="preserve">
+    <value>Login failed.</value>
+  </data>
+  <data name="LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>Login succeeded.</value>
+  </data>
+  <data name="NOT_FOUND" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="NO_PREVIOUS_BASE" xml:space="preserve">
+    <value>No previous base.</value>
+  </data>
+  <data name="ONLINE_PAYMENT_DISABLED" xml:space="preserve">
+    <value>Online payment disabled.</value>
+  </data>
+  <data name="OPTIONS" xml:space="preserve">
+    <value>Options.</value>
+  </data>
+  <data name="ORGANIZATION_REQUIRED" xml:space="preserve">
+    <value>Organization required.</value>
+  </data>
+  <data name="OTP_INVALID" xml:space="preserve">
+    <value>The verification code is invalid or expired.</value>
+  </data>
+  <data name="PAYMENT_FAILED" xml:space="preserve">
+    <value>Payment failed.</value>
+  </data>
+  <data name="PAYMENT_INITIATED" xml:space="preserve">
+    <value>Payment initiated.</value>
+  </data>
+  <data name="PAYMENT_NEEDS_REFUND" xml:space="preserve">
+    <value>Payment needs refund.</value>
+  </data>
+  <data name="PAYMENT_RECORDED" xml:space="preserve">
+    <value>Payment recorded.</value>
+  </data>
+  <data name="PAYMENT_REFUNDED" xml:space="preserve">
+    <value>Payment refunded.</value>
+  </data>
+  <data name="PAYMENT_SETTINGS_UPDATED" xml:space="preserve">
+    <value>Payment settings updated.</value>
+  </data>
+  <data name="PAYMENT_VERIFICATION_FAILED" xml:space="preserve">
+    <value>Payment could not be verified. Contact the venue if money was deducted.</value>
+  </data>
+  <data name="PAYMENT_VERIFIED" xml:space="preserve">
+    <value>Payment verified.</value>
+  </data>
+  <data name="PAYMENT_VERIFIED_LATE_CONFIRMED" xml:space="preserve">
+    <value>Payment verified late confirmed.</value>
+  </data>
+  <data name="QUEUED" xml:space="preserve">
+    <value>Queued.</value>
+  </data>
+  <data name="RATE_LIMITED" xml:space="preserve">
+    <value>Too many requests. Try again later.</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSE" xml:space="preserve">
+    <value>Refresh token reuse.</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSED" xml:space="preserve">
+    <value>Session reuse detected. Sign in again.</value>
+  </data>
+  <data name="REPORT_EXPORTED" xml:space="preserve">
+    <value>Report exported.</value>
+  </data>
+  <data name="REQUEST_TIMEOUT" xml:space="preserve">
+    <value>Request timed out. Please retry.</value>
+  </data>
+  <data name="ROLE_ASSIGNED" xml:space="preserve">
+    <value>Role assigned.</value>
+  </data>
+  <data name="SLOT_UNAVAILABLE" xml:space="preserve">
+    <value>Someone just booked this slot. Pick another.</value>
+  </data>
+  <data name="SUBSCRIPTION_INACTIVE" xml:space="preserve">
+    <value>The organization is read-only. Contact the platform to renew.</value>
+  </data>
+  <data name="SUBSCRIPTION_UPDATED" xml:space="preserve">
+    <value>Subscription updated.</value>
+  </data>
+  <data name="SUSPENDED" xml:space="preserve">
+    <value>Suspended.</value>
+  </data>
+  <data name="TOKEN_REVOKED" xml:space="preserve">
+    <value>Token revoked.</value>
+  </data>
+  <data name="TOKEN_ROTATED" xml:space="preserve">
+    <value>Token rotated.</value>
+  </data>
+  <data name="TOO_MANY_HOLDS" xml:space="preserve">
+    <value>Too many holds.</value>
+  </data>
+  <data name="TWO_FACTOR_ENABLED" xml:space="preserve">
+    <value>Two factor enabled.</value>
+  </data>
+  <data name="TWO_FACTOR_INVALID" xml:space="preserve">
+    <value>Invalid verification code.</value>
+  </data>
+  <data name="TWO_FACTOR_REQUIRED" xml:space="preserve">
+    <value>A valid authenticator or recovery code is required.</value>
+  </data>
+  <data name="UNAUTHORIZED" xml:space="preserve">
+    <value>Sign in to continue.</value>
+  </data>
+  <data name="UNKNOWN_AMENITY" xml:space="preserve">
+    <value>Unknown amenity.</value>
+  </data>
+  <data name="VALIDATION_FAILED" xml:space="preserve">
+    <value>Check the submitted values.</value>
+  </data>
+  <data name="INVALID_PHONE">
+    <value>Use a valid Nepali mobile number (+9779...).</value>
+  </data>
+  <data name="DUPLICATE_PHONE">
+    <value>Phone already exists in this file or organization.</value>
+  </data>
+  <data name="FORMULA_CELL">
+    <value>Spreadsheet formula cell rejected.</value>
+  </data>
+  <data name="INVALID_COLUMNS">
+    <value>Wrong number of columns.</value>
+  </data>
+  <data name="INVALID_NAME">
+    <value>A name of 1–160 characters is required.</value>
+  </data>
+  <data name="INVALID_TIME">
+    <value>Use an ISO time with Z or an explicit offset.</value>
+  </data>
+  <data name="FUTURE_BOOKING_REQUIRED">
+    <value>Only future bookings with end after start can be imported.</value>
+  </data>
+  <data name="INVALID_AMOUNT">
+    <value>Use nonnegative NPR with at most two decimals.</value>
+  </data>
+  <data name="COURT_NOT_FOUND">
+    <value>Use an exact, unique court name or court ID.</value>
+  </data>
+  <data name="IMPORT_TOO_LARGE">
+    <value>CSV exceeds 48 KB, 200 rows, or a cell limit.</value>
+  </data>
+  <data name="INVALID_CSV">
+    <value>Invalid CSV quotes or format.</value>
+  </data>
+  <data name="INVALID_HEADERS">
+    <value>Headers must match a supplied template.</value>
+  </data>
+  <data name="INVALID_SCREENSHOT">
+    <value>Choose a valid RGB/RGBA PNG within the size limits.</value>
+  </data>
+  <data name="ONBOARDING_COMPLETE">
+    <value>Setup is complete. Use venue settings for changes.</value>
+  </data>
+  <data name="SLUG_TAKEN">
+    <value>This public address name is already in use.</value>
+  </data>
+  <data name="INVITE_INVALID">
+    <value>Invitation is invalid, used, or expired.</value>
+  </data>
+  <data name="INVITE_EXISTING_ACCOUNT">
+    <value>Email already has an account. Ask the platform administrator for access.</value>
+  </data>
+  <data name="DEMO_GATEWAY_DISABLED">
+    <value>Real online payments are disabled for DEMO organizations.</value>
+  </data>
+  <data name="COURT_LIMIT_REACHED">
+    <value>The plan court limit has been reached.</value>
+  </data>
+  <data name="REVIEW_CONFLICTS">
+    <value>Review the dates. Select free dates only to continue, or cancel.</value>
+  </data>
+  <data name="NO_OCCURRENCES">
+    <value>Choose a start date within the rolling horizon with at least one future game.</value>
+  </data>
+  <data name="INVALID_SERIES_STATE">
+    <value>This action is not valid for the current series or occurrence state.</value>
+  </data>
+  <data name="PAST_OCCURRENCE">
+    <value>Past games cannot be changed.</value>
+  </data>
+  <data name="SERIES_CHANGE_CONFLICT">
+    <value>No changes were saved. Resolve the listed conflicts and try again.</value>
+  </data>
+  <data name="PAID_EXCEEDS_NEW_PRICE">
+    <value>Refund the excess payment before changing to a lower-priced game.</value>
+  </data>
+  <data name="PREPAYMENT_EXCEEDS_DUE">
+    <value>Choose generated future games and an amount within their unpaid balance.</value>
+  </data>
+  <data name="TOO_MANY_WAITLIST_ENTRIES">
+    <value>A customer may have at most three active waitlist entries.</value>
+  </data>
+  <data name="SLOT_ALREADY_AVAILABLE">
+    <value>A fitting slot is already free. Book it from the schedule.</value>
+  </data>
+  <data name="WAITLIST_REQUIRES_TAKEN_SLOT">
+    <value>Join only for a booked or held window within operating hours.</value>
+  </data>
+  <data name="INVALID_WAITLIST_STATE">
+    <value>This waitlist action is no longer available.</value>
+  </data>
+  <data name="OFFER_EXPIRED">
+    <value>This offer expired. Check My waitlist or choose another slot.</value>
+  </data>
+  <data name="OFFER_ALREADY_CONVERTED">
+    <value>The offer became a confirmed booking. Manage it from My bookings.</value>
+  </data>
+  <data name="WAITLIST_DUPLICATE">
+    <value>You already have an active entry for this same window.</value>
+  </data>
+  <data name="WAITING">
+    <value>Waiting in queue</value>
+  </data>
+  <data name="OFFERED">
+    <value>Offer ready</value>
+  </data>
+  <data name="CONVERTED">
+    <value>Converted to booking</value>
+  </data>
+  <data name="LockedPrice">
+    <value>Locked price per game (NPR)</value>
+  </data>
+  <data name="WaitlistDuration">
+    <value>Waitlist duration (consecutive slots)</value>
+  </data>
+  <data name="WaitlistAnyCourt">
+    <value>Accept any court for a waitlist offer</value>
+  </data>
+</root>

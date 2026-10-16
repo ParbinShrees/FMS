@@ -17,7 +17,7 @@ public sealed class PublicAccessibilityTests
   var address=factory.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
   using var playwright=await Playwright.CreateAsync();await using var browser=await playwright.Chromium.LaunchAsync(new(){Headless=true,Channel="chromium"});await using var context=await browser.NewContextAsync(new(){ViewportSize=new(){Width=390,Height=844},ExtraHTTPHeaders=new Dictionary<string,string>{{"X-Forwarded-For","127.0.0.1"},{"X-Forwarded-Proto","https"}}});
   var page=await context.NewPageAsync();var violations=new List<string>();page.Console+=(_,message)=>{if(message.Text.Contains("violates the following Content Security Policy"))violations.Add(message.Text);};
-  foreach(var route in new[]{"/v","/v/my-bookings","/privacy","/terms","/support","/login"})
+  foreach(var route in new[]{"/v","/v/my-bookings","/privacy","/terms","/support","/login","/v/waitlist/11111111-1111-1111-1111-111111111111"})
   {
    var response=await page.GotoAsync(new Uri(new Uri(address),route).ToString());Assert.Equal(200,response!.Status);await page.WaitForTimeoutAsync(500);
    var result=await page.RunAxe();var serious=result.Violations.Where(v=>v.Impact is "serious" or "critical").Select(v=>v.Id+": "+v.Description+" "+string.Join("; ",v.Nodes.Select(n=>System.Text.Json.JsonSerializer.Serialize(n)))).ToList();if(serious.Count>0)Assert.Fail(string.Join("\n",serious));

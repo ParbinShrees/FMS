@@ -1,0 +1,10 @@
+@implements IDisposable
+@inject ApiClient Api
+@inject BffAuthState Auth
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Scheduling> N
+@if(alerts.Count>0){<MudAlert Severity="Severity.Warning">@N["SeriesConflictsAlert",alerts.Count]<ul>@foreach(var alert in alerts.Take(10)){<li><a href="@($"/admin/recurring/{alert.SeriesId}")">@BsDate.Display(alert.Date) - @N[alert.Reason]</a></li>}</ul></MudAlert>}
+@if(Auth.IsAuthenticated){<MudButton Href="/admin/waitlist">@N["WaitlistSchedule"]</MudButton>}
+@code{List<SchedulingAlert> alerts=[];System.Threading.Timer? timer;bool disposed;protected override async Task OnInitializedAsync(){await Load();if(Auth.IsAuthenticated)timer=new System.Threading.Timer(_=>{if(!disposed)_=InvokeAsync(async()=>{await Load();StateHasChanged();});},null,TimeSpan.FromSeconds(60),TimeSpan.FromSeconds(60));}
+async Task Load(){if(Auth.IsAuthenticated)try{alerts=await Api.ManagementGetAsync<List<SchedulingAlert>>("staff/recurring/alerts")??[];}catch{}}
+public void Dispose(){disposed=true;timer?.Dispose();}}
+

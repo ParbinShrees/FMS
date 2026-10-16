@@ -4,11 +4,14 @@
 @using Futsal.Web.Services
 @using Futsal.Web.Components.Shared
 @using Microsoft.AspNetCore.SignalR.Client
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Scheduling> N
+@inject Futsal.Application.Abstractions.IClock Clock
 @inject ApiClient Api
 @inject BffAuthState AuthState
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
+@inject IConfiguration Configuration
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
@@ -120,13 +123,15 @@
             </div>
         </div>
 
+        <MudNumericField T="int" @bind-Value="WaitlistSlots" Min="1" Max="8" Label="@N["WaitlistDuration"]"/><MudCheckBox T="bool" @bind-Value="WaitlistAnyCourt" Label="@N["WaitlistAnyCourt"]"/>
         <!-- Slot Grid -->
         <MudCard Elevation="1" Class="mb-3">
             <SlotGrid Slots="@Slots"
                       SelectedSlots="@SelectedSlots"
-                      SelectedSlotsChanged="OnSelectedSlotsChanged" />
+                      SelectedSlotsChanged="OnSelectedSlotsChanged" OnNotify="JoinWaitlist" />
         </MudCard>
 
+        <MyWaitlistPanel VenueId="Venue?.Id"/>
         <!-- Booking Action Bar -->
         @if (Venue != null && SelectedSlots.Count > 0 && ActiveBooking == null)
         {
@@ -173,10 +178,14 @@
 }
 
 @code {
+    private int WaitlistSlots=1;
+    private bool WaitlistAnyCourt;
+    private System.Threading.Timer? _refreshTimer;
+    private bool _disposed;
     [Parameter] public string Slug { get; set; } = "";
 
     private PublicVenueDetailDto? Venue { get; set; }
-    private DateTime SelectedDate { get; set; } = DateTime.Today;
+    private DateTime SelectedDate { get; set; } = default;
     private List<AvailabilitySlotDto> Slots { get; set; } = [];
     private List<AvailabilitySlotDto> SelectedSlots { get; set; } = [];
     private BookingDto? ActiveBooking { get; set; }
@@ -191,9 +200,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        SelectedDate=BsDate.KathmanduDate(Clock.UtcNow).ToDateTime(TimeOnly.MinValue);
         await LoadVenue();
         await LoadSlots();
         await SetupSignalR();
+        _refreshTimer=new System.Threading.Timer(_=>{if(!_disposed)_=InvokeAsync(async()=>{await LoadSlots();StateHasChanged();});},null,TimeSpan.FromSeconds(60),TimeSpan.FromSeconds(60));
     }
 
     private async Task LoadVenue()
@@ -250,13 +261,14 @@
     {
         try
         {
-            var hubUrl = Navigation.ToAbsoluteUri("/hubs/availability");
+            var hubUrl = Configuration["Realtime:BaseUrl"] is {Length:>0} root ? new Uri(new Uri(root),"hubs/availability") : Navigation.ToAbsoluteUri("/hubs/availability");
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
                 .WithAutomaticReconnect()
                 .Build();
 
             _hubConnection.On<AvailabilityEventDto>("SlotHeld", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "HELD"));
+            _hubConnection.On<AvailabilityEventDto>("SlotCancelled", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "FREE"));
             _hubConnection.On<AvailabilityEventDto>("SlotReleased", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "FREE"));
             _hubConnection.On<AvailabilityEventDto>("SlotBooked", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "BOOKED"));
             _hubConnection.On<AvailabilityEventDto>("SlotBlocked", e => HandleSlotEvent(e.CourtId, e.StartUtc, e.EndUtc, "BLOCKED"));
@@ -281,20 +293,21 @@
     {
         InvokeAsync(() =>
         {
-            var match = Slots.FirstOrDefault(s => s.CourtId == courtId && s.StartAt == start && s.EndAt == end);
-            if (match != null)
+            for(var index=0;index<Slots.Count;index++)
             {
-                var index = Slots.IndexOf(match);
-                Slots[index] = new AvailabilitySlotDto(match.CourtId, match.CourtName, match.StartAt, match.EndAt, status, match.Price);
-
-                // If held or booked by someone else while selected, deselect
-                if (status != "FREE")
-                {
-                    SelectedSlots.RemoveAll(s => s.CourtId == courtId && s.StartAt == start && s.EndAt == end);
-                }
-                StateHasChanged();
+                var match=Slots[index];if(match.CourtId!=courtId||match.StartAt>=end||match.EndAt<=start)continue;
+                Slots[index]=new AvailabilitySlotDto(match.CourtId,match.CourtName,match.StartAt,match.EndAt,status,match.Price);
+                if(status!="FREE")SelectedSlots.RemoveAll(s=>s.CourtId==courtId&&s.StartAt<end&&s.EndAt>start);
             }
+            StateHasChanged();
         });
+    }
+
+    private async Task JoinWaitlist(AvailabilitySlotDto slot)
+    {
+        if(Venue==null)return;
+        if(!AuthState.IsAuthenticated){var dialog=await DialogService.ShowAsync<OtpDialog>(N["Login"].Value,new DialogParameters{[nameof(OtpDialog.VenueId)]=Venue.Id});var result=await dialog.Result;if(result==null||result.Canceled)return;}
+        try{var from=TimeZoneInfo.ConvertTimeBySystemTimeZoneId(slot.StartAt,"Asia/Kathmandu");var to=TimeZoneInfo.ConvertTimeBySystemTimeZoneId(slot.StartAt.AddTicks((slot.EndAt-slot.StartAt).Ticks*WaitlistSlots),"Asia/Kathmandu");if(to.Date!=from.Date){Snackbar.Add(N["CLOSED"].Value,Severity.Warning);return;}await Api.SchedulingSendAsync<WaitlistView>("waitlist",new WaitlistJoin(Venue.Id,WaitlistAnyCourt?null:slot.CourtId,DateOnly.FromDateTime(from.DateTime),TimeOnly.FromDateTime(from.DateTime),TimeOnly.FromDateTime(to.DateTime),WaitlistSlots));Snackbar.Add(N["WaitlistJoined"].Value,Severity.Success);}catch(ApiProblemException ex){Snackbar.Add(N[ex.Code].Value,Severity.Warning);}
     }
 
     private async Task HoldSlots()
@@ -379,6 +392,7 @@
 
     public async ValueTask DisposeAsync()
     {
+        _disposed=true;_refreshTimer?.Dispose();
         if (_hubConnection != null)
         {
             try { await _hubConnection.StopAsync(); } catch { }

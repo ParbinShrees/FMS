@@ -20,6 +20,7 @@ services:
       ConnectionStrings__FutsalPro: Host=postgres;Database=futsalpro;Username=futsal_app;Password=${APP_DB_PASSWORD:?}
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?}
       Cors__WebOrigins__0: https://${SITE_HOST:?}
+      PublicBooking__BaseUrl: ${PUBLIC_BOOKING_BASE_URL:-}
       Security__KnownProxies__0: 172.30.0.10
       Security__KnownProxies__1: 172.30.0.11
       DataProtection__KeyPath: /keys
@@ -48,6 +49,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Api__BaseUrl: http://api:8080/
+      Realtime__BaseUrl: ${REALTIME_BASE_URL:-}
       DataProtection__KeyPath: /keys
       DataProtection__CertificatePath: /run/secrets/payment-keys.pfx
       DataProtection__CertificatePassword: ${PAYMENT_KEY_PASSWORD:?}

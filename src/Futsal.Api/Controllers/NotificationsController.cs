@@ -44,7 +44,7 @@ public sealed class NotificationsController(FutsalDbContext db, ICurrentUser cur
     {
         await Access(venueId, ct);
         if (string.IsNullOrWhiteSpace(input.Text) || input.Text.Length > 1000) throw new ApiException(400, "VALIDATION_FAILED", "Template must contain 1 to 1000 characters.");
-        var supported = new[] { "venue", "court", "date", "time", "code", "amount" };
+        var supported = new[] { "venue", "court", "date", "time", "code", "amount", "link", "expires", "games" };
         if (System.Text.RegularExpressions.Regex.Matches(input.Text, @"\{([^}]+)\}").Any(m => !supported.Contains(m.Groups[1].Value))) throw new ApiException(400, "VALIDATION_FAILED", "Unknown placeholder.");
         var t = await db.NotificationTemplates.SingleOrDefaultAsync(x => x.VenueId == venueId && x.Name == input.Name && x.Language == input.Language, ct) ?? throw new ApiException(404, "NOT_FOUND", "Template not found.");
         t.Text = input.Text; await db.SaveChangesAsync(ct); return NoContent();

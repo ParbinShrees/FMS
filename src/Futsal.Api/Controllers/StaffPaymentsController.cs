@@ -73,7 +73,7 @@ public sealed class StaffPaymentsController(
         var amount=Math.Abs(request.Amount);
         var already=-await db.Payments.Where(x=>x.ReversalOf==id).SumAsync(x=>x.Amount,ct);
         if(originalPayment.Status is not (PaymentStatus.COMPLETED or PaymentStatus.NEEDS_REFUND)||amount<=0||decimal.Round(amount,2)!=amount||amount>originalPayment.Amount-already)throw new ApiException(400,"VALIDATION_FAILED","Refund exceeds the remaining received amount.");
-        var refund=new Payment{OrganizationId=orgId,BookingId=originalPayment.BookingId,ReversalOf=id,Method=request.Method,Status=PaymentStatus.REFUNDED,Amount=-amount,GatewayRef=request.Reference,ReceivedBy=userId,CreatedAt=clock.UtcNow,VerifiedAt=clock.UtcNow};
+        var refund=new Payment{OrganizationId=orgId,BookingId=originalPayment.BookingId,ReversalOf=id,PrepaymentBlockId=originalPayment.PrepaymentBlockId,Method=request.Method,Status=PaymentStatus.REFUNDED,Amount=-amount,GatewayRef=request.Reference,ReceivedBy=userId,CreatedAt=clock.UtcNow,VerifiedAt=clock.UtcNow};
         if(originalPayment.Status==PaymentStatus.COMPLETED&&originalPayment.BookingId is Guid bookingId){var booking=await db.Bookings.SingleAsync(x=>x.Id==bookingId,ct);if(booking.PaidAmount<amount)throw new ApiException(409,"VALIDATION_FAILED","Booking balance changed. Reload before refunding.");booking.PaidAmount-=amount;}
         db.Payments.Add(refund);
         db.IdempotencyKeys.Add(new(){Key=key!,UserId=userId,Endpoint=endpoint,RequestHash=hash,ResponseStatus=204,ResponseBody=JsonSerializer.Serialize(new{refund.Id},JsonOptions),CreatedAt=clock.UtcNow});

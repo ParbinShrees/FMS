@@ -1,0 +1,678 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="Recurring">
+    <value>नियमित बुकिङ</value>
+  </data>
+  <data name="Venue">
+    <value>स्थल</value>
+  </data>
+  <data name="Status">
+    <value>अवस्था</value>
+  </data>
+  <data name="Refresh">
+    <value>ताजा गर्नुहोस्</value>
+  </data>
+  <data name="Customer">
+    <value>ग्राहक</value>
+  </data>
+  <data name="Court">
+    <value>कोर्ट</value>
+  </data>
+  <data name="Conflicts">
+    <value>जुधेका मिति</value>
+  </data>
+  <data name="CreateSeries">
+    <value>साप्ताहिक शृङ्खला बनाउनुहोस्</value>
+  </data>
+  <data name="Step">
+    <value>चरण</value>
+  </data>
+  <data name="Weekday">
+    <value>बार</value>
+  </data>
+  <data name="LocalTime">
+    <value>नेपालको समय</value>
+  </data>
+  <data name="DurationSlots">
+    <value>लगातार समयखण्ड सङ्ख्या</value>
+  </data>
+  <data name="StartDate">
+    <value>सुरु मिति</value>
+  </data>
+  <data name="EndDateOptional">
+    <value>अन्त्य मिति (वैकल्पिक)</value>
+  </data>
+  <data name="OpenEnded">
+    <value>अन्त्य मिति छैन</value>
+  </data>
+  <data name="PriceMode">
+    <value>मूल्य विधि</value>
+  </data>
+  <data name="CURRENT">
+    <value>आगामी खेलका लागि हालको मूल्य नियम</value>
+  </data>
+  <data name="LOCKED">
+    <value>शृङ्खला बनाउँदा कायम मूल्य</value>
+  </data>
+  <data name="RegularDiscount">
+    <value>नियमित ग्राहक छुट लागू गर्नुहोस्</value>
+  </data>
+  <data name="Notes">
+    <value>टिप्पणी</value>
+  </data>
+  <data name="Preview">
+    <value>मिति र द्वन्द्व पूर्वावलोकन</value>
+  </data>
+  <data name="CreateFreeOnly">
+    <value>खाली मिति मात्र बनाउनुहोस्; जुधेका मिति कर्मचारीले हेर्नेछन्</value>
+  </data>
+  <data name="CancelPreview">
+    <value>पूर्वावलोकन रद्द / सम्पादन</value>
+  </data>
+  <data name="SchedulingSettings">
+    <value>नियमित बुकिङ र प्रतीक्षा सूची सेटिङ</value>
+  </data>
+  <data name="HorizonWeeks">
+    <value>आगामी अवधि (हप्ता, १–२६)</value>
+  </data>
+  <data name="OfferMinutes">
+    <value>प्रतीक्षा प्रस्ताव अवधि (मिनेट, १–६०)</value>
+  </data>
+  <data name="NoShowThreshold">
+    <value>यसभन्दा बढी नआएको सङ्ख्यामा स्वीकृति चाहिन्छ</value>
+  </data>
+  <data name="WeeklySummary">
+    <value>शृङ्खलाको साप्ताहिक सम्झना सारांश पठाउनुहोस्</value>
+  </data>
+  <data name="Save">
+    <value>सुरक्षित गर्नुहोस्</value>
+  </data>
+  <data name="Saved">
+    <value>सुरक्षित भयो</value>
+  </data>
+  <data name="Failure">
+    <value>कार्य पूरा भएन। फेरि प्रयास गर्नुहोस्।</value>
+  </data>
+  <data name="Date">
+    <value>ईस्वी / विक्रम संवत् मिति</value>
+  </data>
+  <data name="Price">
+    <value>जम्मा (रुपैयाँ)</value>
+  </data>
+  <data name="ALL">
+    <value>सबै</value>
+  </data>
+  <data name="ACTIVE">
+    <value>सक्रिय</value>
+  </data>
+  <data name="PAUSED">
+    <value>रोकिएको</value>
+  </data>
+  <data name="ENDED">
+    <value>समाप्त / अन्त्य तय गरिएको</value>
+  </data>
+  <data name="FREE">
+    <value>खाली</value>
+  </data>
+  <data name="BOOKED">
+    <value>बुक भएको</value>
+  </data>
+  <data name="BLOCKED">
+    <value>प्रयोगका लागि बन्द</value>
+  </data>
+  <data name="CLOSED">
+    <value>बन्द वा समयखण्ड नमिलेको</value>
+  </data>
+  <data name="PAST">
+    <value>बितेको मिति वा समय</value>
+  </data>
+  <data name="CONFLICT">
+    <value>जुधेको मिति समाधान चाहिन्छ</value>
+  </data>
+  <data name="SKIPPED">
+    <value>छोडिएको</value>
+  </data>
+  <data name="MOVED">
+    <value>सारिएको</value>
+  </data>
+  <data name="CONFIRMED">
+    <value>पुष्टि भएको</value>
+  </data>
+  <data name="COMPLETED">
+    <value>सम्पन्न</value>
+  </data>
+  <data name="NO_SHOW">
+    <value>नआएको</value>
+  </data>
+  <data name="CANCELLED">
+    <value>रद्द</value>
+  </data>
+  <data name="EXPIRED">
+    <value>म्याद सकिएको</value>
+  </data>
+  <data name="HELD">
+    <value>अस्थायी रोकिएको</value>
+  </data>
+  <data name="SeriesDetail">
+    <value>शृङ्खला विवरण</value>
+  </data>
+  <data name="PauseHelp">
+    <value>रोक्दा नयाँ बुकिङ बन्द हुन्छ; पुष्टि भएका खेल आरक्षित रहन्छन्।</value>
+  </data>
+  <data name="Pause">
+    <value>नयाँ बुकिङ रोक्नुहोस्</value>
+  </data>
+  <data name="Resume">
+    <value>नयाँ बुकिङ जारी गर्नुहोस्</value>
+  </data>
+  <data name="ApplyFrom">
+    <value>यस मितिदेखि लागू गर्नुहोस्</value>
+  </data>
+  <data name="EndFrom">
+    <value>यस मितिदेखि अन्त्य गर्नुहोस्</value>
+  </data>
+  <data name="DeleteSeries">
+    <value>यस मितिदेखि शृङ्खला अभिलेखमा राख्नुहोस्</value>
+  </data>
+  <data name="OccurrenceCalendar">
+    <value>खेल मिति पात्रो</value>
+  </data>
+  <data name="Paid">
+    <value>तिरेको (रुपैयाँ)</value>
+  </data>
+  <data name="Action">
+    <value>कार्य</value>
+  </data>
+  <data name="Select">
+    <value>मिति छान्नुहोस्</value>
+  </data>
+  <data name="Reason">
+    <value>कारण</value>
+  </data>
+  <data name="SkipDate">
+    <value>मिति छोड्नुहोस्</value>
+  </data>
+  <data name="CancelOne">
+    <value>यो खेल रद्द गर्नुहोस्</value>
+  </data>
+  <data name="MoveDate">
+    <value>सार्ने मिति</value>
+  </data>
+  <data name="MoveOne">
+    <value>यो खेल सार्नुहोस्</value>
+  </data>
+  <data name="PaymentAmount">
+    <value>प्राप्त रकम (रुपैयाँ)</value>
+  </data>
+  <data name="Method">
+    <value>भुक्तानी विधि</value>
+  </data>
+  <data name="CASH">
+    <value>नगद</value>
+  </data>
+  <data name="BANK">
+    <value>बैंक</value>
+  </data>
+  <data name="OTHER">
+    <value>अन्य अभिलेख भुक्तानी</value>
+  </data>
+  <data name="RecordPayment">
+    <value>छानिएको खेलको भुक्तानी राख्नुहोस्</value>
+  </data>
+  <data name="ChangeFuture">
+    <value>आगामी समय वा कोर्ट बदल्नुहोस्</value>
+  </data>
+  <data name="ChangeHelp">
+    <value>माथिको मितिदेखि लागू हुन्छ। सबै आगामी समय एउटै कारोबारमा जाँचिन्छ; द्वन्द्व भए पूरै परिवर्तन रद्द हुन्छ। बितेका खेल र भुक्तानी सम्बन्ध यथावत् रहन्छन्।</value>
+  </data>
+  <data name="ApplyChange">
+    <value>आगामी परिवर्तन लागू गर्नुहोस्</value>
+  </data>
+  <data name="PrepaidBlock">
+    <value>अग्रिम भुक्तानी समूह</value>
+  </data>
+  <data name="PrepaidHelp">
+    <value>हप्ता र प्राप्त रकम भर्नुहोस्। रकम आगामी पुष्टि भएका खेलमा पालैपालो बाँडिन्छ। तलका प्रत्येक पङ्क्ति छुट्टै अपरिवर्तनीय भुक्तानी हो।</value>
+  </data>
+  <data name="Weeks">
+    <value>हप्ता सङ्ख्या</value>
+  </data>
+  <data name="RecordPrepayment">
+    <value>अग्रिम राखी बाँड्नुहोस्</value>
+  </data>
+  <data name="RefundAmount">
+    <value>फिर्ता रकम (रुपैयाँ)</value>
+  </data>
+  <data name="Block">
+    <value>अग्रिम समूह</value>
+  </data>
+  <data name="Allocated">
+    <value>बाँडिएको / फिर्ता (रुपैयाँ)</value>
+  </data>
+  <data name="RecordRefund">
+    <value>नयाँ अभिलेखमा फिर्ता राख्नुहोस्</value>
+  </data>
+  <data name="WaitlistSchedule">
+    <value>तालिका र प्रतीक्षा सूची</value>
+  </data>
+  <data name="QueuePosition">
+    <value>पालो क्रम</value>
+  </data>
+  <data name="Window">
+    <value>माग गरिएको नेपालको समय</value>
+  </data>
+  <data name="NeedsApproval">
+    <value>कर्मचारी स्वीकृति चाहिन्छ</value>
+  </data>
+  <data name="Approve">
+    <value>यो अनुरोध स्वीकृत गर्नुहोस्</value>
+  </data>
+  <data name="CancelEntry">
+    <value>प्रतीक्षा सूची छोड्नुहोस् / रद्द गर्नुहोस्</value>
+  </data>
+  <data name="ConfirmCashOffer">
+    <value>नगद अभिलेखसहित प्रस्ताव पुष्टि गर्नुहोस्</value>
+  </data>
+  <data name="CashOfferHelp">
+    <value>माथिको रकम पुष्टि गर्ने प्रस्तावका लागि प्राप्त नगद हो; शून्य भए बुकिङको रकम बाँकी रहन्छ।</value>
+  </data>
+  <data name="JoinOnBehalf">
+    <value>ग्राहकका लागि प्रतीक्षा अनुरोध</value>
+  </data>
+  <data name="AnyCourt">
+    <value>यस स्थलको कुनै पनि कोर्ट</value>
+  </data>
+  <data name="FromTime">
+    <value>नेपालको सुरु समय</value>
+  </data>
+  <data name="ToTime">
+    <value>नेपालको अन्त्य समय</value>
+  </data>
+  <data name="JoinWaitlist">
+    <value>प्रतीक्षा सूचीमा बस्नुहोस्</value>
+  </data>
+  <data name="SeriesConflictsAlert">
+    <value>नियमित खेलका {0} मितिमा कर्मचारीको ध्यान चाहिन्छ।</value>
+  </data>
+  <data name="NotifyMe">
+    <value>यो समय खाली भए खबर गर्नुहोस्</value>
+  </data>
+  <data name="WaitingCount">
+    <value>{0} जना प्रतीक्षामा</value>
+  </data>
+  <data name="MyWaitlist">
+    <value>मेरो प्रतीक्षा सूची</value>
+  </data>
+  <data name="NoWaitlist">
+    <value>प्रतीक्षा अनुरोध छैन।</value>
+  </data>
+  <data name="OpenOffer">
+    <value>प्रस्ताव खोली भुक्तानी गर्नुहोस्</value>
+  </data>
+  <data name="WaitlistOffer">
+    <value>तपाईंको समय प्रस्ताव</value>
+  </data>
+  <data name="OfferLogin">
+    <value>प्रतीक्षा अनुरोधमा प्रयोग भएको फोनले लगइन गर्नुहोस्। यो प्रस्ताव तपाईंले मात्र खोल्न सक्नुहुन्छ।</value>
+  </data>
+  <data name="Login">
+    <value>ओटीपीबाट लगइन</value>
+  </data>
+  <data name="BookingCode">
+    <value>बुकिङ कोड</value>
+  </data>
+  <data name="Advance">
+    <value>आवश्यक अग्रिम (रुपैयाँ)</value>
+  </data>
+  <data name="PayEsewa">
+    <value>ईसेवाबाट भुक्तानी गर्नुहोस्</value>
+  </data>
+  <data name="WaitlistJoined">
+    <value>तपाईं प्रतीक्षा सूचीमा बस्नुभयो। प्रस्तावका लागि मेरो प्रतीक्षा सूची हेर्नुहोस्।</value>
+  </data>
+  <data name="Reconnecting">
+    <value>फेरि जोडिँदैछ। जोडिएपछि र हरेक मिनेटमा तालिका ताजा हुन्छ।</value>
+  </data>
+  <data name="Day0">
+    <value>आइतबार</value>
+  </data>
+  <data name="Day1">
+    <value>सोमबार</value>
+  </data>
+  <data name="Day2">
+    <value>मङ्गलबार</value>
+  </data>
+  <data name="Day3">
+    <value>बुधबार</value>
+  </data>
+  <data name="Day4">
+    <value>बिहीबार</value>
+  </data>
+  <data name="Day5">
+    <value>शुक्रबार</value>
+  </data>
+  <data name="Day6">
+    <value>शनिबार</value>
+  </data>
+  <data name="ACCOUNT_LOCKED" xml:space="preserve">
+    <value>खाता केही समयका लागि बन्द छ। पछि प्रयास गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_CANCELLED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_COMPLETED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_CREATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_HELD" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_NO_SHOW" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_RELEASED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="BOOKING_RESCHEDULED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CONCURRENCY_CONFLICT" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CUSTOMER_ANONYMIZED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CUSTOMER_EXPORTED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_NOT_ALLOWED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="CUSTOMER_LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="DENY" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="DUPLICATE_SLUG" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="EPAYTEST" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="FAILED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="FIXED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="FORBIDDEN" xml:space="preserve">
+    <value>यो कार्य गर्न अनुमति छैन।</value>
+  </data>
+  <data name="HEAD" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="HOLD_EXPIRED" xml:space="preserve">
+    <value>होल्ड समाप्त भयो। अर्को समय छान्नुहोस्।</value>
+  </data>
+  <data name="IDEMPOTENCY_CONFLICT" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="INTERNAL_ERROR" xml:space="preserve">
+    <value>अनपेक्षित त्रुटि भयो।</value>
+  </data>
+  <data name="INVALID_COORDINATES" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="INVALID_CREDENTIALS" xml:space="preserve">
+    <value>इमेल, फोन वा पासवर्ड मिलेन।</value>
+  </data>
+  <data name="INVALID_PARENT" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="INVALID_REFRESH_TOKEN" xml:space="preserve">
+    <value>सत्र समाप्त भयो। फेरि साइन इन गर्नुहोस्।</value>
+  </data>
+  <data name="LOGIN_FAILED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="LOGIN_SUCCEEDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="NOT_FOUND" xml:space="preserve">
+    <value>विवरण भेटिएन।</value>
+  </data>
+  <data name="NO_PREVIOUS_BASE" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="ONLINE_PAYMENT_DISABLED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="OPTIONS" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="ORGANIZATION_REQUIRED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="OTP_INVALID" xml:space="preserve">
+    <value>प्रमाणीकरण कोड अमान्य छ वा म्याद सकियो।</value>
+  </data>
+  <data name="PAYMENT_FAILED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_INITIATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_NEEDS_REFUND" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_RECORDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_REFUNDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_SETTINGS_UPDATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_VERIFICATION_FAILED" xml:space="preserve">
+    <value>भुक्तानी पुष्टि भएन। रकम काटिएको भए स्थलमा सम्पर्क गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_VERIFIED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="PAYMENT_VERIFIED_LATE_CONFIRMED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="QUEUED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="RATE_LIMITED" xml:space="preserve">
+    <value>धेरै अनुरोध भए। पछि प्रयास गर्नुहोस्।</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSE" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="REFRESH_TOKEN_REUSED" xml:space="preserve">
+    <value>सत्र पुनः प्रयोग भएको भेटियो। फेरि साइन इन गर्नुहोस्।</value>
+  </data>
+  <data name="REPORT_EXPORTED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="REQUEST_TIMEOUT" xml:space="preserve">
+    <value>अनुरोधको समय सकियो। फेरि प्रयास गर्नुहोस्।</value>
+  </data>
+  <data name="ROLE_ASSIGNED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="SLOT_UNAVAILABLE" xml:space="preserve">
+    <value>यो समय अरूले बुक गरे। अर्को समय छान्नुहोस्।</value>
+  </data>
+  <data name="SUBSCRIPTION_INACTIVE" xml:space="preserve">
+    <value>संस्थामा विवरण हेर्न मात्र मिल्छ। नवीकरणका लागि प्लेटफर्ममा सम्पर्क गर्नुहोस्।</value>
+  </data>
+  <data name="SUBSCRIPTION_UPDATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="SUSPENDED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TOKEN_REVOKED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TOKEN_ROTATED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TOO_MANY_HOLDS" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TWO_FACTOR_ENABLED" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="TWO_FACTOR_INVALID" xml:space="preserve">
+    <value>अमान्य प्रमाणीकरण कोड।</value>
+  </data>
+  <data name="TWO_FACTOR_REQUIRED" xml:space="preserve">
+    <value>मान्य प्रमाणीकरण वा रिकभरी कोड आवश्यक छ।</value>
+  </data>
+  <data name="UNAUTHORIZED" xml:space="preserve">
+    <value>जारी राख्न साइन इन गर्नुहोस्।</value>
+  </data>
+  <data name="UNKNOWN_AMENITY" xml:space="preserve">
+    <value>अनुरोध पूरा हुन सकेन। विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="VALIDATION_FAILED" xml:space="preserve">
+    <value>पठाइएका विवरण जाँच गर्नुहोस्।</value>
+  </data>
+  <data name="INVALID_PHONE">
+    <value>मान्य नेपाली मोबाइल नम्बर (+९७७९...) प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="DUPLICATE_PHONE">
+    <value>फोन यस फाइल वा संस्थामा पहिल्यै छ।</value>
+  </data>
+  <data name="FORMULA_CELL">
+    <value>स्प्रेडसिट सूत्र भएको कोष अस्वीकार भयो।</value>
+  </data>
+  <data name="INVALID_COLUMNS">
+    <value>स्तम्भ सङ्ख्या मिलेन।</value>
+  </data>
+  <data name="INVALID_NAME">
+    <value>१–१६० अक्षरको नाम चाहिन्छ।</value>
+  </data>
+  <data name="INVALID_TIME">
+    <value>Z वा स्पष्ट समय अन्तरसहित आईएसओ समय प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="FUTURE_BOOKING_REQUIRED">
+    <value>सुरुपछि अन्त्य हुने भविष्यका बुकिङ मात्र आयात हुन्छ।</value>
+  </data>
+  <data name="INVALID_AMOUNT">
+    <value>शून्य वा सकारात्मक र बढीमा दुई दशमलवको रकम प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="COURT_NOT_FOUND">
+    <value>सही र अद्वितीय कोर्ट नाम वा परिचय प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="IMPORT_TOO_LARGE">
+    <value>सीएसभी ४८ केबी, २०० पङ्क्ति वा कोष सीमाभन्दा ठूलो छ।</value>
+  </data>
+  <data name="INVALID_CSV">
+    <value>सीएसभी उद्धरण वा ढाँचा मिलेन।</value>
+  </data>
+  <data name="INVALID_HEADERS">
+    <value>शीर्षक नमुनासँग मिल्नुपर्छ।</value>
+  </data>
+  <data name="INVALID_SCREENSHOT">
+    <value>सीमाभित्रको मान्य आरजीबी/आरजीबीए पीएनजी छान्नुहोस्।</value>
+  </data>
+  <data name="ONBOARDING_COMPLETE">
+    <value>सेटअप पूरा छ। परिवर्तनका लागि स्थल सेटिङ प्रयोग गर्नुहोस्।</value>
+  </data>
+  <data name="SLUG_TAKEN">
+    <value>यो सार्वजनिक नाम प्रयोग भइसकेको छ।</value>
+  </data>
+  <data name="INVITE_INVALID">
+    <value>निमन्त्रणा अमान्य, प्रयोग भइसकेको वा म्याद सकिएको छ।</value>
+  </data>
+  <data name="INVITE_EXISTING_ACCOUNT">
+    <value>यो इमेलको खाता पहिल्यै छ। पहुँचका लागि प्लेटफर्म प्रशासकसँग सम्पर्क गर्नुहोस्।</value>
+  </data>
+  <data name="DEMO_GATEWAY_DISABLED">
+    <value>डेमो संस्थामा वास्तविक अनलाइन भुक्तानी बन्द छ।</value>
+  </data>
+  <data name="COURT_LIMIT_REACHED">
+    <value>योजनाको कोर्ट सीमा पुग्यो।</value>
+  </data>
+  <data name="REVIEW_CONFLICTS">
+    <value>मिति जाँच्नुहोस्। जारी राख्न खाली मिति मात्र छान्नुहोस् वा रद्द गर्नुहोस्।</value>
+  </data>
+  <data name="NO_OCCURRENCES">
+    <value>आगामी अवधिभित्र कम्तीमा एउटा भविष्यको खेल हुने सुरु मिति छान्नुहोस्।</value>
+  </data>
+  <data name="INVALID_SERIES_STATE">
+    <value>शृङ्खला वा खेलको हालको अवस्थामा यो कार्य मिल्दैन।</value>
+  </data>
+  <data name="PAST_OCCURRENCE">
+    <value>बितेका खेल परिवर्तन गर्न मिल्दैन।</value>
+  </data>
+  <data name="SERIES_CHANGE_CONFLICT">
+    <value>परिवर्तन सुरक्षित भएन। देखाइएका द्वन्द्व समाधान गरी फेरि प्रयास गर्नुहोस्।</value>
+  </data>
+  <data name="PAID_EXCEEDS_NEW_PRICE">
+    <value>कम मूल्यको खेलमा बदल्नुअघि बढी तिरेको रकम फिर्ता राख्नुहोस्।</value>
+  </data>
+  <data name="PREPAYMENT_EXCEEDS_DUE">
+    <value>बनिसकेका आगामी खेल र तिनको बाँकी रकमभित्रको भुक्तानी छान्नुहोस्।</value>
+  </data>
+  <data name="TOO_MANY_WAITLIST_ENTRIES">
+    <value>ग्राहकका बढीमा तीन सक्रिय प्रतीक्षा अनुरोध हुन सक्छन्।</value>
+  </data>
+  <data name="SLOT_ALREADY_AVAILABLE">
+    <value>मिल्ने समय पहिल्यै खाली छ। तालिकाबाट बुक गर्नुहोस्।</value>
+  </data>
+  <data name="WAITLIST_REQUIRES_TAKEN_SLOT">
+    <value>खुल्ने समयभित्र बुक वा अस्थायी रोकिएको समयका लागि मात्र प्रतीक्षा अनुरोध गर्नुहोस्।</value>
+  </data>
+  <data name="INVALID_WAITLIST_STATE">
+    <value>यो प्रतीक्षा सूची कार्य अब उपलब्ध छैन।</value>
+  </data>
+  <data name="OFFER_EXPIRED">
+    <value>प्रस्तावको म्याद सकियो। मेरो प्रतीक्षा सूची हेर्नुहोस् वा अर्को समय छान्नुहोस्।</value>
+  </data>
+  <data name="OFFER_ALREADY_CONVERTED">
+    <value>प्रस्ताव पुष्टि भएको बुकिङ बनिसक्यो। मेरो बुकिङबाट व्यवस्थापन गर्नुहोस्।</value>
+  </data>
+  <data name="WAITLIST_DUPLICATE">
+    <value>यही समयका लागि तपाईंको सक्रिय अनुरोध पहिल्यै छ।</value>
+  </data>
+  <data name="WAITING">
+    <value>पालो पर्खँदै</value>
+  </data>
+  <data name="OFFERED">
+    <value>प्रस्ताव तयार</value>
+  </data>
+  <data name="CONVERTED">
+    <value>बुकिङ बनेको</value>
+  </data>
+  <data name="LockedPrice">
+    <value>प्रति खेल कायम मूल्य (रुपैयाँ)</value>
+  </data>
+  <data name="WaitlistDuration">
+    <value>प्रतीक्षा अनुरोधको अवधि (लगातार समयखण्ड)</value>
+  </data>
+  <data name="WaitlistAnyCourt">
+    <value>प्रतीक्षा प्रस्तावका लागि कुनै पनि कोर्ट स्वीकार गर्नुहोस्</value>
+  </data>
+</root>

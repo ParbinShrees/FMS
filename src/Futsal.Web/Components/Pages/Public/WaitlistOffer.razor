@@ -1,0 +1,21 @@
+@page "/v/waitlist/{Id:guid}"
+@layout PlayerLayout
+@inject ApiClient Api
+@inject BffAuthState Auth
+@inject IDialogService Dialogs
+@inject IJSRuntime JS
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Scheduling> N
+<PageTitle>@N["WaitlistOffer"]</PageTitle>
+<h1>@N["WaitlistOffer"]</h1>
+@if(Auth.Token?.Role!="Customer"){<p>@N["OfferLogin"]</p><MudButton OnClick="Login">@N["Login"]</MudButton>}
+else if(booking!=null){<p>@BsDate.Display(booking.StartAt) - @TimeZoneInfo.ConvertTimeBySystemTimeZoneId(booking.EndAt,"Asia/Kathmandu").ToString("HH:mm")</p><p>@N["BookingCode"]: <code>@booking.BookingCode</code></p><p>@N["Price"]: Rs @booking.TotalAmount.ToString("N2") / @N["Advance"]: Rs @booking.AdvanceRequired.ToString("N2")</p>@if(booking.Status=="HELD"&&booking.HoldExpiresAt is {} expires&&!expired){<HoldCountdown @key="booking.Id" ExpiresAt="expires" OnExpired="Expired"/><MudButton Disabled="busy" OnClick="Pay">@N["PayEsewa"]</MudButton>}else{<MudAlert>@N[expired?"OFFER_EXPIRED":booking.Status]</MudAlert>}}
+@if(message!=null){<MudAlert Severity="Severity.Warning">@N[message]</MudAlert>}
+@if(initiation!=null){<form id="waitlistEsewaForm" action="@initiation.GatewayUrl" method="POST">@foreach(var field in initiation.FormFields){<input type="hidden" name="@field.Key" value="@field.Value"/>}</form>}
+<MyWaitlistPanel/>
+@code{[Parameter]public Guid Id{get;set;}BookingDto? booking;InitiatePaymentResponseDto? initiation;string? message;bool busy,expired,submit;
+protected override async Task OnParametersSetAsync(){if(Auth.Token?.Role=="Customer")await Load();}
+async Task Login(){var dialog=await Dialogs.ShowAsync<OtpDialog>(N["Login"].Value);var result=await dialog.Result;if(result!=null&&!result.Canceled)await Load();}
+async Task Load(){try{booking=await Api.SchedulingSendAsync<BookingDto>($"waitlist/{Id}/claim",new{});message=null;}catch(ApiProblemException ex){message=ex.Code;}}
+async Task Pay(){busy=true;try{initiation=await Api.InitiateEsewaPaymentAsync(booking!.Id);submit=initiation!=null;}catch(ApiProblemException ex){message=ex.Code;}finally{busy=false;}}
+protected override async Task OnAfterRenderAsync(bool first){if(submit){submit=false;await JS.InvokeVoidAsync("futsalSubmitForm","waitlistEsewaForm");}}
+void Expired(){expired=true;message="OFFER_EXPIRED";}}

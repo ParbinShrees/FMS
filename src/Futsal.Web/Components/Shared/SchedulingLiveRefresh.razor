@@ -1,0 +1,11 @@
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
+@inject NavigationManager Nav
+@inject IConfiguration Configuration
+@inject BffAuthState Auth
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Scheduling> N
+@if(!connected&&!string.IsNullOrWhiteSpace(Slug)){<MudAlert Severity="Severity.Info">@N["Reconnecting"]</MudAlert>}
+@code{[Parameter]public string? Slug{get;set;}[Parameter]public DateOnly Date{get;set;}[Parameter]public EventCallback Refresh{get;set;}HubConnection? hub;string? joined;DateOnly joinedDate;bool connected,disposed;System.Threading.Timer? timer;
+protected override async Task OnAfterRenderAsync(bool first){if(disposed||!Auth.IsAuthenticated||Slug==null)return;if(hub==null){try{hub=new HubConnectionBuilder().WithUrl(Configuration["Realtime:BaseUrl"] is {Length:>0} root?new Uri(new Uri(root),"hubs/availability"):Nav.ToAbsoluteUri("/hubs/availability"),o=>o.AccessTokenProvider=()=>Task.FromResult(Auth.Token?.AccessToken)).WithAutomaticReconnect().Build();foreach(var name in new[]{"SlotHeld","SlotReleased","SlotBooked","SlotBlocked","SlotCancelled"})hub.On<AvailabilityEventDto>(name,_=>InvokeAsync(async()=>{await Refresh.InvokeAsync();StateHasChanged();}));hub.Reconnected+=async _=>{await Refresh.InvokeAsync();joined=null;await Join();await InvokeAsync(StateHasChanged);};hub.Reconnecting+=_=>{connected=false;return InvokeAsync(StateHasChanged);};await hub.StartAsync();connected=true;await Join();await InvokeAsync(StateHasChanged);}catch{connected=false;}timer??=new System.Threading.Timer(_=>{if(!disposed)_=InvokeAsync(async()=>{await Refresh.InvokeAsync();StateHasChanged();});},null,TimeSpan.FromSeconds(60),TimeSpan.FromSeconds(60));}else if(connected&&(joined!=Slug||joinedDate!=Date))await Join();}
+async Task Join(){if(hub==null||Slug==null)return;if(joined!=null)await hub.InvokeAsync("LeaveStaffVenueDate",joined,joinedDate.ToString("yyyy-MM-dd"));await hub.InvokeAsync("JoinStaffVenueDate",Slug,Date.ToString("yyyy-MM-dd"));joined=Slug;joinedDate=Date;connected=true;}
+public async ValueTask DisposeAsync(){disposed=true;timer?.Dispose();if(hub!=null)await hub.DisposeAsync();}}

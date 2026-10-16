@@ -147,6 +147,14 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasDefaultValue(0m)
                         .HasColumnName("paid_amount");
 
+                    b.Property<DateOnly?>("SeriesDate")
+                        .HasColumnType("date")
+                        .HasColumnName("series_date");
+
+                    b.Property<Guid?>("SeriesId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("series_id");
+
                     b.Property<BookingSource>("Source")
                         .HasColumnType("booking_source")
                         .HasColumnName("source");
@@ -195,6 +203,10 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.HasIndex("HoldExpiresAt")
                         .HasDatabaseName("ix_bookings_hold")
                         .HasFilter("status = 'HELD'");
+
+                    b.HasIndex("SeriesId", "SeriesDate")
+                        .IsUnique()
+                        .HasFilter("series_id IS NOT NULL AND status NOT IN ('CANCELLED','EXPIRED')");
 
                     b.HasIndex("VenueId", "StartAt")
                         .HasDatabaseName("ix_bookings_venue_start");
@@ -388,6 +400,10 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("organization_id");
 
+                    b.Property<Guid?>("PrepaymentBlockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("prepayment_block_id");
+
                     b.Property<string>("RawResponse")
                         .HasColumnType("jsonb")
                         .HasColumnName("raw_response");
@@ -420,6 +436,8 @@ namespace Futsal.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("GatewayTxnUuid")
                         .IsUnique();
+
+                    b.HasIndex("PrepaymentBlockId");
 
                     b.HasIndex("ReceivedBy");
 
@@ -1081,6 +1099,12 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("photo_placeholder");
 
+                    b.Property<int>("RecurringHorizonWeeks")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(8)
+                        .HasColumnName("recurring_horizon_weeks");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1092,6 +1116,22 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("Asia/Kathmandu")
                         .HasColumnName("timezone");
+
+                    b.Property<int>("WaitlistNoShowThreshold")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(3)
+                        .HasColumnName("waitlist_no_show_threshold");
+
+                    b.Property<int>("WaitlistOfferMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(15)
+                        .HasColumnName("waitlist_offer_minutes");
+
+                    b.Property<bool>("WeeklySeriesSummary")
+                        .HasColumnType("boolean")
+                        .HasColumnName("weekly_series_summary");
 
                     b.HasKey("Id");
 
@@ -1624,6 +1664,377 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                     b.ToTable("staff_invites", (string)null);
                 });
 
+            modelBuilder.Entity("Futsal.Domain.Scheduling.RecurringBookingSeries", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("ApplyRegularDiscount")
+                        .HasColumnType("boolean")
+                        .HasColumnName("apply_regular_discount");
+
+                    b.Property<Guid>("CourtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("court_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<int>("DurationSlots")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration_slots");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<decimal?>("LockedPricePerOccurrence")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("locked_price_per_occurrence");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("PriceMode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("price_mode");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<TimeOnly>("StartTimeLocal")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("start_time_local");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.Property<short>("Weekday")
+                        .HasColumnType("smallint")
+                        .HasColumnName("weekday");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourtId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("VenueId");
+
+                    b.ToTable("recurring_booking_series", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.RecurringSeriesException", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<DateTimeOffset?>("MovedToStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("moved_to_start_utc");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("series_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("VenueId");
+
+                    b.HasIndex("SeriesId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("recurring_series_exceptions", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.RecurringSeriesRevision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CourtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("court_id");
+
+                    b.Property<int>("DurationSlots")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration_slots");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date")
+                        .HasColumnName("from_date");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("series_id");
+
+                    b.Property<TimeOnly>("StartTimeLocal")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("start_time_local");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("VenueId");
+
+                    b.HasIndex("SeriesId", "FromDate")
+                        .IsUnique();
+
+                    b.ToTable("recurring_series_revisions", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.SeriesConflict", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("series_id");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("VenueId");
+
+                    b.HasIndex("SeriesId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("series_conflicts", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.SeriesPrepayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("series_id");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.Property<int>("Weeks")
+                        .HasColumnType("integer")
+                        .HasColumnName("weeks");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.HasIndex("VenueId");
+
+                    b.ToTable("series_prepayments", (string)null);
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.WaitlistEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("CourtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("court_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<TimeOnly>("FromTimeLocal")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("from_time_local");
+
+                    b.Property<DateTimeOffset?>("OfferExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("offer_expires_at");
+
+                    b.Property<Guid?>("OfferedBookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("offered_booking_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<long>("Position")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("position");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Position"));
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_approval");
+
+                    b.Property<int>("SlotsNeeded")
+                        .HasColumnType("integer")
+                        .HasColumnName("slots_needed");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<TimeOnly>("ToTimeLocal")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("to_time_local");
+
+                    b.Property<Guid>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourtId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("OfferedBookingId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("VenueId", "Date", "Status", "Position");
+
+                    b.ToTable("waitlist_entries", (string)null);
+                });
+
             modelBuilder.Entity("Futsal.Domain.Bookings.BlockedPeriod", b =>
                 {
                     b.HasOne("Futsal.Domain.Locations.Court", null)
@@ -1656,6 +2067,11 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Scheduling.RecurringBookingSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Futsal.Domain.Locations.Venue", null)
                         .WithMany()
@@ -1699,6 +2115,11 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Scheduling.SeriesPrepayment", null)
+                        .WithMany()
+                        .HasForeignKey("PrepaymentBlockId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Futsal.Domain.Identity.AppUser", null)
                         .WithMany()
@@ -1872,6 +2293,148 @@ namespace Futsal.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.RecurringBookingSeries", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Court", null)
+                        .WithMany()
+                        .HasForeignKey("CourtId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Bookings.Customer", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", null)
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.RecurringSeriesException", b =>
+                {
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Scheduling.RecurringBookingSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", null)
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.RecurringSeriesRevision", b =>
+                {
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Scheduling.RecurringBookingSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", null)
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.SeriesConflict", b =>
+                {
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Scheduling.RecurringBookingSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", null)
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.SeriesPrepayment", b =>
+                {
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Scheduling.RecurringBookingSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", null)
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Futsal.Domain.Scheduling.WaitlistEntry", b =>
+                {
+                    b.HasOne("Futsal.Domain.Locations.Court", null)
+                        .WithMany()
+                        .HasForeignKey("CourtId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Futsal.Domain.Bookings.Customer", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Bookings.Booking", null)
+                        .WithMany()
+                        .HasForeignKey("OfferedBookingId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Futsal.Domain.Identity.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Futsal.Domain.Locations.Venue", null)
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

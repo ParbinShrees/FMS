@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Futsal.Web.Scheduling> N
 @using Futsal.Contracts
 
 <div class="slot-grid-container pa-2">
@@ -66,6 +67,8 @@
                                             <div>@Text["Uifd1331d7a6cd"]</div>
                                         </div>
                                     }
+                                    @if(slot!=null&&slot.Status is "HELD" or "BOOKED"&&OnNotify.HasDelegate){<MudButton Size="Size.Small" OnClick="()=>OnNotify.InvokeAsync(slot)">@N["NotifyMe"]</MudButton>}
+                                    @if(slot!=null&&WaitingCount(slot)>0){<MudChip T="string" Size="Size.Small">@N["WaitingCount",WaitingCount(slot)]</MudChip>}
                                 </td>
                             }
                         </tr>
@@ -90,6 +93,9 @@
 </style>
 
 @code {
+    [Parameter] public EventCallback<AvailabilitySlotDto> OnNotify{get;set;}
+    [Parameter] public List<WaitlistView> Waitlist{get;set;}=[];
+    private int WaitingCount(AvailabilitySlotDto slot){var local=TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeBySystemTimeZoneId(slot.StartAt,"Asia/Kathmandu").DateTime);return Waitlist.Count(x=>x.Status is "WAITING" or "OFFERED"&&(x.CourtId==null||x.CourtId==slot.CourtId)&&x.FromTimeLocal<=local&&x.ToTimeLocal>local);}
     [Parameter] public IReadOnlyList<AvailabilitySlotDto> Slots { get; set; } = [];
     [Parameter] public List<AvailabilitySlotDto> SelectedSlots { get; set; } = [];
     [Parameter] public EventCallback<List<AvailabilitySlotDto>> SelectedSlotsChanged { get; set; }

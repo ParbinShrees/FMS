@@ -4,6 +4,8 @@ namespace Futsal.Domain.Bookings;
 
 public sealed class Booking : IOrganizationScoped
 {
+    public Guid? SeriesId{get;set;}
+    public DateOnly? SeriesDate{get;set;}
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid OrganizationId { get; set; }
     public Guid VenueId { get; set; }
