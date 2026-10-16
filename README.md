@@ -92,3 +92,5 @@ See [setup and provider confirmation instructions](docs/notifications-reports.md
 
 
 Pilot tooling: see [docs/pilot.md](docs/pilot.md) for onboarding, safe imports, demo accounts, feedback and monitoring.
+
+Milestone 11 operations: [Recurring bookings and waitlist](docs/recurring-and-waitlist.md).

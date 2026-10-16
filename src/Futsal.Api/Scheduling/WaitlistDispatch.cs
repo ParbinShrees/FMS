@@ -10,6 +10,10 @@ public sealed partial class WaitlistService
  public async Task DispatchAsync(Guid venueId,DateOnly date,CancellationToken ct)
  {
   var events=new List<BookingEvent>();await using var tx=await db.Database.BeginTransactionAsync(ct);await writer.LockAsync("waitlist-venue:"+venueId,ct);var venue=await db.Venues.SingleOrDefaultAsync(x=>x.Id==venueId,ct);if(venue==null||!venue.IsActive){await tx.CommitAsync(ct);return;}await Security.SubscriptionGuard.RequireWritableAsync(db,clock,venue.OrganizationId,ct);
+  // Acquire every participant's phone before any court/booking row. This matches
+  // normal holds and prevents expiry + next-offer dispatch from reversing lock order.
+  var phones=await db.Customers.Where(c=>db.WaitlistEntries.Any(e=>e.VenueId==venueId&&e.Date==date&&(e.Status=="WAITING"||e.Status=="OFFERED")&&e.CustomerId==c.Id)).Select(c=>c.Phone).Distinct().ToListAsync(ct);foreach(var phone in phones.OrderBy(x=>x,StringComparer.Ordinal))await writer.LockAsync("customer-holds:"+phone,ct);
+  foreach(var court in (await db.Courts.Where(x=>x.VenueId==venueId).Select(x=>x.Id).ToListAsync(ct)).Order())await writer.LockAsync("court:"+court,ct);
   var offered=await db.WaitlistEntries.Where(x=>x.VenueId==venueId&&x.Date==date&&x.Status=="OFFERED").ToListAsync(ct);
   foreach(var entry in offered)
   {

@@ -178,4 +178,9 @@ public sealed class SchedulingTests(Milestone8PostgresFixture fixture):IClassFix
   var seed=await Seed();var id=await Create(seed);var user=new User(seed.Owner,seed.Org);await using var db=Db(user);(await db.Venues.SingleAsync(x=>x.Id==seed.Venue.Id)).RecurringHorizonWeeks=2;await db.SaveChangesAsync();var report=await Series(db,user).ChangeAsync(id,new(Day.AddDays(7),seed.Court.Id,new(20,0),1),Guid.NewGuid().ToString(),default);Assert.Equal(7,report.Count);Assert.All(report,x=>Assert.Equal("FREE",x.Result));Assert.Equal(8,await db.Bookings.CountAsync(x=>x.SeriesId==id&&x.Status==BookingStatus.CONFIRMED));Assert.Equal(Start.AddDays(49).AddHours(1),(await db.Bookings.SingleAsync(x=>x.SeriesId==id&&x.SeriesDate==Day.AddDays(49))).StartAt);
  }
 
+ [Fact]public async Task Offer_expiry_racing_normal_holds_has_consistent_lock_order_and_no_overlaps()
+ {
+  var seed=await Seed();var booked=await Book(seed);await Join(seed,0);await Join(seed,1);await Cancel(seed,booked);await using(var db=Db())await Wait(db,new SuperAdminUser()).DispatchAsync(seed.Venue.Id,Day,default);var clock=new Clock{UtcNow=Now.AddMinutes(16)};var customer=new User(seed.Players[1].Id,null,"Customer");await Task.WhenAll(Enumerable.Range(0,12).Select(async i=>{if(i%2==0){await using var db=Db(clock:clock);await Wait(db,new SuperAdminUser(),clock).DispatchAsync(seed.Venue.Id,Day,default);}else{await using var db=Db(customer,clock);try{await Books(db,customer,clock).CreateHoldAsync(new(seed.Court.Id,Start,Start.AddHours(1)),Guid.NewGuid().ToString(),null,default);}catch(ApiException ex){Assert.Equal("SLOT_UNAVAILABLE",ex.Code);}}}));await using var verify=Db(clock:clock);Assert.Equal(1,await verify.Bookings.CountAsync(x=>x.CourtId==seed.Court.Id&&x.Status==BookingStatus.HELD));
+ }
+
 }

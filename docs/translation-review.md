@@ -135,3 +135,5 @@ All Nepali resource translations added in Milestones 8 and 9 require human revie
 - `Uif9800275b179`: Invalid verification code. Please try again. → अमान्य प्रमाणीकरण कोड। फेरि प्रयास गर्नुहोस्।
 - `Uifd1331d7a6cd`: Booked → बुक गरिएको
 - `Uiffee9c06e5dc`: NEEDS REFUND → रकम फिर्ता आवश्यक
+
+Milestone 11 review: Scheduling.ne.resx and the waitlist_offer/weekly_summary notification templates require native-speaker review, especially conflict reasons, cancellation/advance wording, prepaid allocations, approval fairness and offer expiry. Check AD/BS pairs and narrow mobile layouts.

@@ -18,7 +18,7 @@ public sealed partial class WaitlistService(FutsalDbContext db,ICurrentUser curr
  public async Task<WaitlistView> JoinAsync(WaitlistJoin input,string key,bool staff,CancellationToken ct)
  {
   await using var tx=await db.Database.BeginTransactionAsync(ct);var endpoint="POST:/waitlist/"+(staff?"staff":"customer");var replay=await writer.ReplayAsync<WaitlistView>(Actor,key,endpoint,input,ct);if(replay!=null){await tx.CommitAsync(ct);return replay;}
-  var venue=staff?await db.Venues.SingleOrDefaultAsync(x=>x.Id==input.VenueId,ct):await db.Venues.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==input.VenueId&&x.IsPublic&&x.IsActive,ct);if(venue==null)throw new ApiException(404,"NOT_FOUND","NOT_FOUND");await Security.SubscriptionGuard.RequireWritableAsync(db,clock,venue.OrganizationId,ct);
+  var venue=staff?await db.Venues.SingleOrDefaultAsync(x=>x.Id==input.VenueId,ct):await db.Venues.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==input.VenueId&&x.IsPublic&&x.IsActive,ct);if(venue==null)throw new ApiException(404,"NOT_FOUND","NOT_FOUND");await writer.LockAsync("waitlist-venue:"+venue.Id,ct);await Security.SubscriptionGuard.RequireWritableAsync(db,clock,venue.OrganizationId,ct);
   var today=SeriesCalendar.Today(clock.UtcNow,venue.Timezone);if(input.Date<today||input.Date>today.AddDays(365)||input.SlotsNeeded is <1 or >8||input.FromTimeLocal>=input.ToTimeLocal)throw new ApiException(400,"VALIDATION_FAILED","VALIDATION_FAILED");
   Customer customer;
   if(staff){customer=await db.Customers.SingleOrDefaultAsync(x=>x.Id==input.CustomerId&&x.OrganizationId==venue.OrganizationId,ct)??throw new ApiException(404,"NOT_FOUND","NOT_FOUND");}
